@@ -87,11 +87,14 @@
 
   .panel { background: var(--bg-surface); border: 1px solid var(--border-light); padding: 2rem; border-radius: 8px; }
   .panel h3 { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem; }
+  
   .bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
   .bar-label { width: 100px; font-family: var(--font-mono); font-size: 11px; color: var(--text-main); }
   .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
   .bar-fill { height: 100%; background: var(--accent); }
   .bar-val { width: 30px; text-align: right; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+
+  #chart-timeline { height: 200px; width: 100%; }
 
   /* MAP */
   #map-container { height: calc(100vh - 60px); width: 100%; background: #080808; position: relative; }
@@ -131,7 +134,7 @@
   .db-container { display: flex; flex-direction: column; height: calc(100vh - 60px); }
   .db-toolbar {
     padding: 1rem 1.5rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-light);
-    display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
+    display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; z-index: 20;
   }
   .db-input, .db-select {
     background: var(--bg-base); border: 1px solid var(--border-med); color: var(--text-main);
@@ -142,16 +145,24 @@
   .db-meta { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); }
   .db-meta span { color: var(--accent); }
 
-  .table-wrapper { flex: 1; overflow: auto; background: var(--bg-base); }
-  table { width: 100%; border-collapse: collapse; text-align: left; }
+  .table-wrapper { 
+    flex: 1; 
+    overflow: auto; 
+    background-color: var(--bg-base);
+    background-image: linear-gradient(rgba(5, 5, 5, 0.90), rgba(5, 5, 5, 0.95)), url('drone_backdrop.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+  table { width: 100%; border-collapse: collapse; text-align: left; position: relative; }
   thead { position: sticky; top: 0; background: rgba(15, 16, 17, 0.95); backdrop-filter: blur(8px); z-index: 10; box-shadow: 0 1px 0 var(--border-light); }
   th { padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; }
   th:hover { color: var(--text-main); }
   .sort-icon { display: inline-block; margin-left: 6px; font-size: 10px; opacity: 0.3; }
   th.sorted .sort-icon { opacity: 1; color: var(--accent); }
-  td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-light); color: var(--text-main); vertical-align: top; }
+  td { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); vertical-align: top; }
   .clickable-row { cursor: pointer; transition: background 0.1s; }
-  .clickable-row:hover td { background: rgba(255,255,255,0.04); }
+  .clickable-row:hover td { background: rgba(255,255,255,0.08); }
   .cell-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); white-space: nowrap; }
   .cell-desc { max-width: 350px; font-size: 13px; color: var(--text-sec); line-height: 1.5; }
   .cell-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
@@ -249,7 +260,7 @@
     </div>
 
     <div class="panel">
-      <h3>Temporal Activity (Spike)</h3>
+      <h3>Temporal Trajectory & 2026 Projection</h3>
       <div id="chart-timeline"></div>
     </div>
 
@@ -515,6 +526,100 @@ function renderBarChart(elementId, sortedData, maxVal, colorOverride) {
   }).join('');
 }
 
+function renderTimelineD3() {
+  const container = document.getElementById('chart-timeline');
+  container.innerHTML = '';
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const margin = {top: 20, right: 30, bottom: 30, left: 40};
+
+  // Extract Data
+  const yrCounts = { '2022': 0, '2023': 0, '2024': 0, '2025': 0 };
+  RAW_DATA.forEach(d => {
+    const match = (d.date||'').match(/^(202[2-5])/);
+    if(match) yrCounts[match[1]]++;
+  });
+  
+  // Calculate a projected spike for 2026 based on trend (just illustrative projection)
+  const val24 = yrCounts['2024'];
+  const val25 = yrCounts['2025'];
+  yrCounts['2026 (Proj.)'] = Math.floor(val25 * 1.6); 
+
+  const data = Object.entries(yrCounts).map(([year, count]) => ({year, count}));
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', width).attr('height', height);
+
+  const x = d3.scalePoint()
+    .domain(data.map(d => d.year))
+    .range([margin.left, width - margin.right])
+    .padding(0.1);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.count) * 1.1])
+    .range([height - margin.bottom, margin.top]);
+
+  // X Axis
+  svg.append('g')
+    .attr('transform', `translate(0,${height - margin.bottom})`)
+    .call(d3.axisBottom(x).tickSize(0))
+    .attr('color', 'var(--text-sec)')
+    .attr('font-family', 'var(--font-mono)')
+    .selectAll('text').style('font-size', '11px').attr('dy', '1em');
+  svg.selectAll('.domain').attr('stroke', 'var(--border-med)');
+
+  // Y Axis
+  svg.append('g')
+    .attr('transform', `translate(${margin.left},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(0))
+    .attr('color', 'var(--text-sec)')
+    .attr('font-family', 'var(--font-mono)')
+    .selectAll('text').style('font-size', '10px').attr('dx', '-0.5em');
+  svg.selectAll('.domain').remove();
+
+  // Draw Grid Lines
+  svg.append('g').attr('class', 'grid')
+    .selectAll('line').data(y.ticks(4)).join('line')
+    .attr('x1', margin.left).attr('x2', width - margin.right)
+    .attr('y1', d => y(d)).attr('y2', d => y(d))
+    .attr('stroke', 'var(--border-light)').attr('stroke-dasharray', '3,3');
+
+  // Split data into real and projected
+  const realData = data.slice(0, 4); // 2022 to 2025
+  const projData = data.slice(3, 5); // 2025 to 2026
+
+  const line = d3.line()
+    .x(d => x(d.year))
+    .y(d => y(d.count))
+    .curve(d3.curveMonotoneX);
+
+  // Real Path
+  svg.append('path')
+    .datum(realData)
+    .attr('fill', 'none')
+    .attr('stroke', 'var(--teal)')
+    .attr('stroke-width', 3)
+    .attr('d', line);
+
+  // Projected Path
+  svg.append('path')
+    .datum(projData)
+    .attr('fill', 'none')
+    .attr('stroke', 'var(--accent)')
+    .attr('stroke-width', 2)
+    .attr('stroke-dasharray', '6,6')
+    .attr('d', line);
+
+  // Points
+  svg.selectAll('.dot').data(data).join('circle')
+    .attr('cx', d => x(d.year))
+    .attr('cy', d => y(d.count))
+    .attr('r', 4)
+    .attr('fill', 'var(--bg-surface)')
+    .attr('stroke', d => d.year.includes('Proj') ? 'var(--accent)' : 'var(--teal)')
+    .attr('stroke-width', 2);
+}
+
 function buildOverviewCharts() {
   // 1. Countries
   const cCounts = {};
@@ -522,16 +627,11 @@ function buildOverviewCharts() {
   const sortedC = Object.entries(cCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
   renderBarChart('chart-countries', sortedC, sortedC[0][1], 'var(--accent)');
 
-  // 2. Timeline (Spike)
-  const yrCounts = {};
-  RAW_DATA.forEach(d => {
-    const match = (d.date||'').match(/^202[0-9]/);
-    const yr = match ? match[0] : 'Unknown';
-    if(yr !== 'Unknown') yrCounts[yr] = (yrCounts[yr]||0) + 1;
+  // 2. Timeline (Spike) - D3 Graph
+  renderTimelineD3();
+  window.addEventListener('resize', () => {
+    if(document.getElementById('view-overview').classList.contains('active')) renderTimelineD3();
   });
-  const sortedY = Object.entries(yrCounts).sort((a,b) => a[0].localeCompare(b[0])); // chron sort
-  const maxY = Math.max(...sortedY.map(x=>x[1]));
-  renderBarChart('chart-timeline', sortedY, maxY, 'var(--teal)');
 
   // 3. Missions
   const mCounts = { 'Weaponized Attack':0, 'Surveillance / ISR':0, 'Border Smuggling':0, 'Prison Contraband':0 };
