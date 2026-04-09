@@ -287,6 +287,7 @@ let FILTERED_DATA = [];
 let sortCol = 'date';
 let sortAsc = false;
 let leafletMap = null;
+let markerLayer = null;
 let networkRendered = false;
 
 // Initialization / Upload
@@ -385,7 +386,7 @@ function switchTab(tabId) {
 
   if (tabId === 'map') {
     if (!leafletMap) initMap();
-    else leafletMap.invalidateSize();
+    setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 100);
   }
   if (tabId === 'network' && !networkRendered) {
     setTimeout(buildNetwork, 50);
@@ -487,9 +488,16 @@ function getCoords(row) {
 
 function initMap() {
   leafletMap = L.map('map', { zoomControl: true, attributionControl: false }).setView([12, -85], 4);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(leafletMap);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+  markerLayer = L.layerGroup().addTo(leafletMap);
+  updateMapMarkers();
+}
+
+function updateMapMarkers() {
+  if (!markerLayer) return;
+  markerLayer.clearLayers();
   
-  RAW_DATA.forEach(row => {
+  FILTERED_DATA.forEach(row => {
     const coords = getCoords(row);
     if (!coords) return;
     
@@ -501,7 +509,7 @@ function initMap() {
     else if(m.includes('prison') || m.includes('contraband')) col = 'var(--teal)';
 
     L.circleMarker(coords, { radius: 6, fillColor: col, color: '#000', weight: 1, fillOpacity: 0.85 })
-     .addTo(leafletMap)
+     .addTo(markerLayer)
      .bindPopup(`
        <div class="popup-date">${row.date || 'Unknown Date'}</div>
        <div class="popup-loc">${row.location || row.country}</div>
@@ -535,8 +543,8 @@ function applyFilters() {
   });
 
   renderTable();
+  updateMapMarkers();
 }
-
 function sortTable(col) {
   if (sortCol === col) sortAsc = !sortAsc;
   else { sortCol = col; sortAsc = true; }
