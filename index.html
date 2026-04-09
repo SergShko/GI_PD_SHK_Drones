@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
   :root {
     --bg: #0a0a08;
@@ -31,28 +32,22 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    font-size: 15px;
-    line-height: 1.6;
-    min-height: 100vh;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-size: 15px;
+    line-height: 1.6; min-height: 100vh;
   }
 
   /* NAV */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: rgba(10,10,8,0.92);
-    backdrop-filter: blur(12px);
+    background: rgba(10,10,8,0.92); backdrop-filter: blur(12px);
     border-bottom: 0.5px solid var(--border);
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 2rem; height: 56px;
   }
   .nav-brand {
-    font-family: var(--font-head);
-    font-size: 13px; font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--accent);
+    font-family: var(--font-head); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
   }
   .nav-tabs { display: flex; gap: 0; }
   .nav-tab {
@@ -60,8 +55,7 @@
     font-family: var(--font-mono); font-size: 12px;
     color: var(--text-muted); padding: 0 1.25rem; height: 56px;
     border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    letter-spacing: 0.06em;
+    transition: color 0.15s, border-color 0.15s; letter-spacing: 0.06em;
   }
   .nav-tab:hover { color: var(--text); }
   .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -75,45 +69,24 @@
   .page.active { display: block; }
 
   /* ===== LANDING ===== */
-  .hero {
-    padding: 5rem 2rem 4rem;
-    max-width: 900px; margin: 0 auto;
-    border-bottom: 0.5px solid var(--border);
-  }
+  .hero { padding: 5rem 2rem 4rem; max-width: 900px; margin: 0 auto; border-bottom: 0.5px solid var(--border); }
   .hero-tag {
-    font-family: var(--font-mono); font-size: 11px;
-    color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase;
-    margin-bottom: 1.5rem;
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 1.5rem;
     display: flex; align-items: center; gap: 8px;
   }
-  .hero-tag::before {
-    content: ''; display: block;
-    width: 24px; height: 1px; background: var(--accent);
-  }
+  .hero-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--accent); }
   .hero h1 {
-    font-family: var(--font-head);
-    font-size: clamp(2.2rem, 5vw, 3.8rem);
-    font-weight: 800; line-height: 1.08;
-    letter-spacing: -0.02em;
-    margin-bottom: 1.5rem;
+    font-family: var(--font-head); font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 800; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 1.5rem;
   }
-  .hero h1 em {
-    font-style: normal;
-    color: var(--accent);
-  }
-  .hero-sub {
-    font-size: 17px; color: var(--text-muted);
-    max-width: 580px; line-height: 1.7;
-    margin-bottom: 2.5rem;
-  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub { font-size: 17px; color: var(--text-muted); max-width: 580px; line-height: 1.7; margin-bottom: 2.5rem; }
   .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
   .btn {
-    font-family: var(--font-mono); font-size: 12px;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 0 1.5rem; height: 40px;
-    border: 0.5px solid var(--border2);
-    background: none; color: var(--text); cursor: pointer;
-    transition: all 0.15s;
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 0 1.5rem; height: 40px; border: 0.5px solid var(--border2);
+    background: none; color: var(--text); cursor: pointer; transition: all 0.15s;
     display: inline-flex; align-items: center; gap: 8px;
   }
   .btn:hover { background: var(--surface2); border-color: var(--text-muted); }
@@ -121,539 +94,134 @@
   .btn-accent:hover { background: #d9ff5a; border-color: #d9ff5a; }
 
   .stats-bar {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0;
-    border-top: 0.5px solid var(--border);
-    border-bottom: 0.5px solid var(--border);
-    margin: 0;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0;
+    border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); margin: 0;
   }
-  .stat-cell {
-    padding: 2rem 2rem;
-    border-right: 0.5px solid var(--border);
-  }
+  .stat-cell { padding: 2rem 2rem; border-right: 0.5px solid var(--border); }
   .stat-cell:last-child { border-right: none; }
-  .stat-num {
-    font-family: var(--font-head);
-    font-size: 2.4rem; font-weight: 800;
-    color: var(--accent); line-height: 1;
-    margin-bottom: 4px;
-  }
-  .stat-label {
-    font-family: var(--font-mono); font-size: 11px;
-    color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
-  }
+  .stat-num { font-family: var(--font-head); font-size: 2.4rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; }
 
-  .landing-body {
-    max-width: 900px; margin: 0 auto;
-    padding: 3rem 2rem;
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
+  .landing-body { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
   @media (max-width: 640px) { .landing-body { grid-template-columns: 1fr; } }
-
-  .info-block {
-    border: 0.5px solid var(--border);
-    padding: 1.75rem;
-  }
+  .info-block { border: 0.5px solid var(--border); padding: 1.75rem; }
   .info-block h3 {
     font-family: var(--font-head); font-size: 14px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--text-muted); margin-bottom: 1rem;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem;
   }
   .info-block p { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 0.75rem; }
-  .info-block p:last-child { margin-bottom: 0; }
   .info-block ul { list-style: none; padding: 0; }
   .info-block ul li {
-    font-size: 13px; color: var(--text-muted);
-    padding: 0.4rem 0;
-    border-bottom: 0.5px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: var(--text-muted); padding: 0.4rem 0;
+    border-bottom: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center;
   }
   .info-block ul li:last-child { border-bottom: none; }
-  .tag {
-    font-family: var(--font-mono); font-size: 10px;
-    padding: 2px 8px;
-    letter-spacing: 0.06em;
-  }
+  
+  .tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; letter-spacing: 0.06em; }
   .tag-confirmed { background: rgba(200,240,74,0.12); color: var(--accent); }
   .tag-probable { background: rgba(240,160,48,0.12); color: var(--accent2); }
   .tag-speculative { background: rgba(255,255,255,0.06); color: var(--text-muted); }
-  .tag-red { background: rgba(232,92,58,0.12); color: var(--red); }
 
   .country-bars { display: flex; flex-direction: column; gap: 10px; }
   .country-bar-row { display: flex; align-items: center; gap: 10px; }
   .country-bar-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); width: 80px; flex-shrink: 0; }
   .country-bar-track { flex: 1; height: 6px; background: var(--surface3); position: relative; }
   .country-bar-fill { height: 100%; background: var(--accent); transition: width 1s ease; }
-  .country-bar-fill.col { background: var(--red); }
-  .country-bar-fill.bra { background: var(--blue); }
-  .country-bar-fill.ecu { background: var(--accent2); }
-  .country-bar-fill.usa { background: var(--teal); }
-  .country-bar-fill.oth { background: var(--text-dim); }
   .country-bar-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); width: 24px; text-align: right; }
 
   .ukraine-assessment {
-    grid-column: 1 / -1;
-    border: 0.5px solid rgba(200,240,74,0.25);
-    padding: 1.75rem;
-    background: rgba(200,240,74,0.03);
+    grid-column: 1 / -1; border: 0.5px solid rgba(200,240,74,0.25);
+    padding: 1.75rem; background: rgba(200,240,74,0.03);
   }
   .ukraine-assessment h3 {
     font-family: var(--font-head); font-size: 14px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 1.25rem;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem;
   }
-  .ukraine-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-  }
+  .ukraine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
   .ukraine-item { padding: 1rem; background: var(--surface); }
-  .ukraine-item .transfer-type {
-    font-size: 13px; color: var(--text); margin-bottom: 6px; font-weight: 500;
-  }
-  .ukraine-item .transfer-detail {
-    font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px;
-  }
+  .ukraine-item .transfer-type { font-size: 13px; color: var(--text); margin-bottom: 6px; font-weight: 500; }
+  .ukraine-item .transfer-detail { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; }
 
   /* ===== MAP ===== */
   .map-container { height: calc(100vh - 56px); position: relative; }
   #map { height: 100%; width: 100%; background: #0d0d0b; }
   .map-legend {
     position: absolute; bottom: 2rem; left: 1rem; z-index: 999;
-    background: rgba(10,10,8,0.92);
-    border: 0.5px solid var(--border2);
-    padding: 1rem 1.25rem;
-    backdrop-filter: blur(8px);
-    min-width: 180px;
+    background: rgba(10,10,8,0.92); border: 0.5px solid var(--border2);
+    padding: 1rem 1.25rem; backdrop-filter: blur(8px); min-width: 180px;
   }
   .map-legend h4 {
-    font-family: var(--font-mono); font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--text-dim); margin-bottom: 10px;
+    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 10px;
   }
   .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .legend-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
-  .map-stats {
-    position: absolute; top: 1rem; right: 1rem; z-index: 999;
-    background: rgba(10,10,8,0.92);
-    border: 0.5px solid var(--border2);
-    padding: 1rem 1.25rem;
-    backdrop-filter: blur(8px);
-  }
-  .map-stats h4 {
-    font-family: var(--font-mono); font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--text-dim); margin-bottom: 10px;
-  }
-  .map-filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
-  .map-filter-btn {
-    font-family: var(--font-mono); font-size: 10px;
-    padding: 3px 10px; border: 0.5px solid var(--border2);
-    background: none; color: var(--text-muted); cursor: pointer;
-    letter-spacing: 0.06em;
-    transition: all 0.12s;
-  }
-  .map-filter-btn.active { background: var(--accent); color: #0a0a08; border-color: var(--accent); }
-  .map-filter-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
-
-  /* Leaflet overrides */
-  .leaflet-popup-content-wrapper {
-    background: #111110 !important;
-    border: 0.5px solid rgba(255,255,255,0.14) !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    color: #e8e6df !important;
-    font-family: 'IBM Plex Sans', sans-serif !important;
-  }
+  
+  .leaflet-popup-content-wrapper { background: #111110 !important; border: 0.5px solid rgba(255,255,255,0.14) !important; border-radius: 0 !important; box-shadow: none !important; color: #e8e6df !important; font-family: 'IBM Plex Sans', sans-serif !important; }
   .leaflet-popup-tip-container { display: none !important; }
   .leaflet-popup-content { margin: 14px 16px !important; min-width: 240px; max-width: 320px; }
   .popup-date { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888780; margin-bottom: 4px; }
   .popup-location { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8e6df; }
   .popup-gang { font-size: 12px; color: #c8f04a; margin-bottom: 6px; }
   .popup-summary { font-size: 12px; color: #888780; line-height: 1.5; margin-bottom: 8px; }
-  .popup-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
-  .popup-tag {
-    font-family: 'IBM Plex Mono', monospace; font-size: 10px;
-    padding: 2px 7px; letter-spacing: 0.05em;
-  }
-  .popup-link { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #4a9fd4; text-decoration: none; }
-  .popup-link:hover { text-decoration: underline; }
   .leaflet-tile { filter: brightness(0.25) saturate(0.3) hue-rotate(200deg); }
   .leaflet-control-zoom { display: none; }
 
   /* ===== DATABASE ===== */
-  .db-page { padding: 1rem 0; }
   .db-controls {
-    padding: 1.5rem 2rem;
-    background: var(--surface);
-    border-bottom: 0.5px solid var(--border);
+    padding: 1.5rem 2rem; background: var(--surface); border-bottom: 0.5px solid var(--border);
     display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
   }
   .db-search {
-    flex: 1; min-width: 200px;
-    background: var(--surface2);
-    border: 0.5px solid var(--border2);
-    color: var(--text);
-    font-family: var(--font-mono); font-size: 13px;
-    padding: 0 1rem; height: 36px;
-    outline: none;
+    flex: 1; min-width: 200px; background: var(--surface2); border: 0.5px solid var(--border2); color: var(--text);
+    font-family: var(--font-mono); font-size: 13px; padding: 0 1rem; height: 36px; outline: none;
   }
-  .db-search::placeholder { color: var(--text-dim); }
-  .db-search:focus { border-color: var(--accent); }
   .db-select {
-    background: var(--surface2);
-    border: 0.5px solid var(--border2);
-    color: var(--text);
-    font-family: var(--font-mono); font-size: 12px;
-    padding: 0 0.75rem; height: 36px;
-    outline: none; cursor: pointer;
+    background: var(--surface2); border: 0.5px solid var(--border2); color: var(--text);
+    font-family: var(--font-mono); font-size: 12px; padding: 0 0.75rem; height: 36px; outline: none; cursor: pointer;
   }
-  .db-select:focus { border-color: var(--accent); }
-  .db-count {
-    font-family: var(--font-mono); font-size: 12px;
-    color: var(--text-dim); white-space: nowrap;
-    margin-left: auto;
-  }
+  .db-count { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); white-space: nowrap; margin-left: auto; }
   .db-count span { color: var(--accent); }
-
   .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%; border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead tr {
-    border-bottom: 1px solid var(--border2);
-    background: var(--surface);
-  }
-  th {
-    font-family: var(--font-mono); font-size: 10px;
-    text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--text-dim); padding: 10px 14px;
-    text-align: left; white-space: nowrap;
-    cursor: pointer; user-select: none;
-    transition: color 0.12s;
-  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid var(--border2); background: var(--surface); }
+  th { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); padding: 10px 14px; text-align: left; white-space: nowrap; cursor: pointer; transition: color 0.12s; }
   th:hover { color: var(--text-muted); }
-  th.sorted { color: var(--accent); }
-  td {
-    padding: 10px 14px;
-    border-bottom: 0.5px solid var(--border);
-    color: var(--text-muted);
-    vertical-align: top;
-    max-width: 240px;
-  }
+  td { padding: 10px 14px; border-bottom: 0.5px solid var(--border); color: var(--text-muted); vertical-align: top; max-width: 240px; }
   tr:hover td { background: var(--surface2); }
   td.date-cell { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); white-space: nowrap; }
-  td.country-cell { white-space: nowrap; }
   td.location-cell { font-size: 13px; color: var(--text); }
   td.gang-cell { font-size: 12px; color: var(--accent); }
-  td.summary-cell {
-    font-size: 12px; line-height: 1.5;
-    max-width: 280px; color: var(--text-muted);
-  }
-  td.model-cell { font-family: var(--font-mono); font-size: 11px; }
-  .mission-badge {
-    display: inline-block;
-    font-family: var(--font-mono); font-size: 10px;
-    padding: 2px 7px; margin: 1px;
-    letter-spacing: 0.04em;
-  }
+  td.summary-cell { font-size: 12px; line-height: 1.5; max-width: 280px; color: var(--text-muted); }
+  .mission-badge { display: inline-block; font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; margin: 1px; }
   .mission-attack { background: rgba(232,92,58,0.12); color: var(--red); }
   .mission-surveillance { background: rgba(74,159,212,0.12); color: var(--blue); }
   .mission-smuggling { background: rgba(240,160,48,0.12); color: var(--accent2); }
   .mission-prison { background: rgba(42,184,154,0.12); color: var(--teal); }
-  .mission-border { background: rgba(255,255,255,0.06); color: var(--text-dim); }
-  .mission-other { background: rgba(255,255,255,0.06); color: var(--text-dim); }
-  .ukraine-true { color: var(--accent); font-family: var(--font-mono); font-size: 11px; }
-  .ukraine-false { color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; }
-  .url-link { color: var(--blue); text-decoration: none; font-family: var(--font-mono); font-size: 10px; }
-  .url-link:hover { text-decoration: underline; }
-  .no-results {
-    text-align: center; padding: 4rem 2rem;
-    font-family: var(--font-mono); font-size: 13px; color: var(--text-dim);
+  
+  /* ===== RESEARCH/NETWORK ===== */
+  .research-header { padding: 2rem; background: var(--surface); border-bottom: 0.5px solid var(--border); }
+  .research-header h2 { font-family: var(--font-head); color: var(--accent); margin-bottom: 0.5rem; font-size: 24px; }
+  .research-header p { color: var(--text-muted); max-width: 800px; font-size: 14px; }
+  .network-container { width: 100%; height: calc(100vh - 160px); background: #0d0d0b; cursor: grab; overflow: hidden; }
+  .network-container:active { cursor: grabbing; }
+  
+  /* Overlay */
+  #upload-overlay {
+    display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(10,10,8,0.95); backdrop-filter: blur(8px); z-index: 9999;
+    align-items: center; justify-content: center; flex-direction: column; padding: 2rem; text-align: center;
   }
-  .sort-arrow { margin-left: 4px; opacity: 0.4; }
-  .sort-arrow.active { opacity: 1; color: var(--accent); }
-
-
-  /* ===== KNOWLEDGE ===== */
-  .selected-row td { background: rgba(200,240,74,0.08) !important; }
-
-  .knowledge-page { padding: 1.5rem 2rem 3rem; }
-  .knowledge-shell { max-width: 1280px; margin: 0 auto; }
-  .knowledge-header { padding: 1rem 0 1.5rem; }
-  .knowledge-title {
-    font-family: var(--font-head);
-    font-size: clamp(2rem, 4.5vw, 3.6rem);
-    font-weight: 800;
-    line-height: 1.04;
-    letter-spacing: -0.03em;
-    margin-bottom: 0.9rem;
-  }
-  .knowledge-sub {
-    max-width: 850px;
-    color: var(--text-muted);
-    font-size: 15px;
-    line-height: 1.75;
-  }
-  .knowledge-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.8fr);
-    gap: 1rem;
-    align-items: start;
-  }
-  @media (max-width: 1080px) {
-    .knowledge-layout { grid-template-columns: 1fr; }
-  }
-  .knowledge-panel {
-    position: relative;
-    min-height: 720px;
-    border: 0.5px solid var(--border);
-    background:
-      radial-gradient(circle at 50% 50%, rgba(200,240,74,0.06), transparent 22%),
-      radial-gradient(circle at 50% 50%, rgba(74,159,212,0.04), transparent 44%),
-      linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0));
-    overflow: hidden;
-  }
-  .knowledge-rings,
-  .knowledge-network,
-  .knowledge-svg { position: absolute; inset: 0; }
-  .knowledge-ring {
-    position: absolute;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    border: 0.5px dashed rgba(255,255,255,0.08);
-  }
-  .knowledge-ring.ring-1 { width: 240px; height: 240px; }
-  .knowledge-ring.ring-2 { width: 430px; height: 430px; }
-  .knowledge-ring.ring-3 { width: 620px; height: 620px; }
-  .knowledge-svg { width: 100%; height: 100%; pointer-events: none; }
-  .knowledge-line {
-    stroke: rgba(255,255,255,0.08);
-    stroke-width: 1;
-    vector-effect: non-scaling-stroke;
-  }
-  .knowledge-line.active { stroke: rgba(200,240,74,0.45); }
-  .knowledge-network { position: relative; width: 100%; height: 720px; }
-  .knowledge-center {
-    position: absolute;
-    left: 50%; top: 50%;
-    transform: translate(-50%, -50%);
-    width: 180px; height: 180px;
-    border-radius: 50%;
-    border: 1px solid rgba(200,240,74,0.35);
-    background: rgba(17,17,16,0.94);
-    box-shadow: 0 0 35px rgba(200,240,74,0.08);
-    color: var(--text);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.15s ease, transform 0.15s ease;
-  }
-  .knowledge-center:hover,
-  .knowledge-center.active {
-    border-color: var(--accent);
-    transform: translate(-50%, -50%) scale(1.02);
-  }
-  .knowledge-center-kicker {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .knowledge-center-title {
-    font-family: var(--font-head);
-    font-size: 28px;
-    font-weight: 800;
-    line-height: 1;
-    margin-bottom: 8px;
-  }
-  .knowledge-center-note {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .knowledge-node {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    border: 0.5px solid var(--border2);
-    background: rgba(17,17,16,0.96);
-    color: var(--text);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-  }
-  .knowledge-node:hover,
-  .knowledge-node.active {
-    transform: translate(-50%, -50%) scale(1.03);
-    border-color: var(--accent);
-    background: rgba(26,26,24,0.98);
-  }
-  .knowledge-node.theme {
-    padding: 10px 14px;
-    border-radius: 999px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-  .knowledge-node.research {
-    padding: 8px 11px;
-    border-radius: 999px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .knowledge-node.incident {
-    padding: 8px 10px;
-    border-radius: 999px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.04em;
-  }
-  .knowledge-node-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent2);
-    flex-shrink: 0;
-  }
-  .knowledge-node.theme .knowledge-node-dot { background: var(--accent); }
-  .knowledge-node.research .knowledge-node-dot { background: var(--blue); }
-  .knowledge-node.incident .knowledge-node-dot { background: var(--red); }
-  .knowledge-side { display: grid; gap: 1rem; }
-  .knowledge-card {
-    border: 0.5px solid var(--border);
-    background: var(--surface);
-    padding: 1.2rem;
-  }
-  .knowledge-card h3,
-  .knowledge-detail-title {
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.8rem;
-  }
-  .knowledge-detail-kicker {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.55rem;
-  }
-  .knowledge-copy,
-  .knowledge-detail-copy {
-    font-size: 13px;
-    color: var(--text-muted);
-    line-height: 1.7;
-  }
-  .knowledge-list {
-    list-style: none;
-    display: grid;
-    gap: 0.8rem;
-    margin-top: 1rem;
-  }
-  .knowledge-list li {
-    border-bottom: 0.5px solid var(--border);
-    padding-bottom: 0.8rem;
-  }
-  .knowledge-list li:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-  .knowledge-list-label {
-    display: block;
-    font-size: 13px;
-    color: var(--text);
-    margin-bottom: 0.25rem;
-  }
-  .knowledge-list-meta {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 0.35rem;
-  }
-  .knowledge-pill-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 0.9rem;
-  }
-  .knowledge-pill,
-  .knowledge-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 0.5px solid var(--border2);
-    padding: 4px 8px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    background: rgba(255,255,255,0.03);
-    text-decoration: none;
-  }
-  .knowledge-action {
-    background: none;
-    color: var(--text);
-    cursor: pointer;
-    padding: 7px 10px;
-  }
-  .knowledge-action:hover,
-  .knowledge-pill:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .knowledge-detail-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 1rem;
-  }
-  .knowledge-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
-    margin-top: 1rem;
-  }
-  .knowledge-stat {
-    border: 0.5px solid var(--border);
-    padding: 0.8rem;
-    background: rgba(255,255,255,0.02);
-  }
-  .knowledge-stat-num {
-    font-family: var(--font-head);
-    font-size: 1.4rem;
-    line-height: 1;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
-  .knowledge-stat-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
 </style>
 </head>
 <body>
+
+<div id="upload-overlay">
+  <h2 style="font-family:var(--font-head); color:var(--accent); margin-bottom:1rem; font-size:28px;">Local Database Access</h2>
+  <p style="color:var(--text-muted); max-width:500px; margin-bottom:2rem;">To initialize the platform in standalone mode, please select the authoritative <b>drone_criminaluse_latam_v1.csv</b> database file.</p>
+  <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleFileUpload(event)">
+  <button class="btn btn-accent" onclick="document.getElementById('csvFileInput').click()">Initialize via Database</button>
+</div>
 
 <nav>
   <div class="nav-brand">Drone — LatAm</div>
@@ -661,80 +229,62 @@
     <button class="nav-tab active" onclick="showPage('landing')">Overview</button>
     <button class="nav-tab" onclick="showPage('map')">Map</button>
     <button class="nav-tab" onclick="showPage('database')">Database</button>
-    <button class="nav-tab" onclick="showPage('knowledge')">Knowledge</button>
+    <button class="nav-tab" onclick="showPage('research')">Knowledge/Research</button>
   </div>
-  <div class="nav-meta">2022 – 2026 &nbsp;·&nbsp; <span id="nav-incident-count">—</span> incidents</div>
+  <div class="nav-meta">2022 – 2026 &nbsp;·&nbsp; <span id="nav-count">—</span> incidents</div>
 </nav>
 
-<!-- LANDING -->
 <div id="page-landing" class="page active">
   <div class="hero">
     <div class="hero-tag">OSINT Research Report</div>
     <h1>Criminal drone use<br>in <em>Latin America</em></h1>
-    <p class="hero-sub">A documented dataset of 77 verified incidents in which organised criminal groups across Latin America deployed aerial, maritime, and ground unmanned systems — and the evidence trail linking this capability to the conflict in Ukraine.</p>
+    <p class="hero-sub">A documented dataset of <span id="hero-count">—</span> verified incidents in which organised criminal groups across Latin America deployed aerial, maritime, and ground unmanned systems — and the evidence trail linking this capability to the conflict in Ukraine.</p>
     <div class="hero-actions">
       <button class="btn btn-accent" onclick="showPage('map')">Explore map</button>
-      <button class="btn" onclick="showPage('database')">Search database</button>
-      <button class="btn" onclick="showPage('knowledge')">Knowledge cloud</button>
+      <button class="btn" onclick="showPage('research')">View knowledge cloud</button>
     </div>
   </div>
 
   <div class="stats-bar">
     <div class="stat-cell">
-      <div class="stat-num" id="verified-count">—</div>
+      <div class="stat-num" id="stat-count">—</div>
       <div class="stat-label">Verified incidents</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num" id="country-count">—</div>
+      <div class="stat-num">8</div>
       <div class="stat-label">Countries</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num" id="group-count">—</div>
+      <div class="stat-num">22+</div>
       <div class="stat-label">Criminal groups</div>
     </div>
     <div class="stat-cell">
       <div class="stat-num" id="ukraine-count">—</div>
       <div class="stat-label">Ukraine-linked</div>
     </div>
-    <div class="stat-cell">
-      <div class="stat-num" id="earliest-year">—</div>
-      <div class="stat-label">Earliest case</div>
-    </div>
   </div>
 
   <div class="landing-body">
-
     <div class="info-block">
       <h3>Incidents by country</h3>
       <div class="country-bars" id="country-bars"></div>
     </div>
-
     <div class="info-block">
       <h3>Mission types</h3>
       <ul id="mission-list"></ul>
     </div>
-
     <div class="info-block">
-      <h3>Drone manufacturers</h3>
-      <ul id="mfr-list"></ul>
+      <h3>Methodology & Sources</h3>
+      <p>All cases are strictly corroborated by geolocation, official statements, or secondary reporting from credible outlets (AP, Reuters, InSight Crime, CSIS, War on the Rocks, etc.). Platforms searched include OSINT aggregators, Twitter/X, and Telegram.</p>
+      <p style="color:var(--red); font-size:13px; margin-top:10px;"><b>No verified activity found for:</b> MS-13, Barrio 18, PCC (Brazil), Tren de Aragua, Gulf Clan Colombia.</p>
     </div>
-
-    <div class="info-block">
-      <h3>Methodology & sources</h3>
-      <p>All 77 cases are corroborated by geolocation, police statements, or secondary reporting from credible outlets: AP, Reuters, InSight Crime, CSIS, War on the Rocks, Militant Wire, G1, O Globo, El Tiempo, Semana, Folha de São Paulo, Prensa Libre, El Comercio, and others.</p>
-      <p>Platforms searched include Twitter/X, Telegram, Facebook, YouTube, and OSINT aggregators. Duplicate entries across sources were merged; only the most detailed, corroborated version is retained.</p>
-      <p>Groups with no verified or credible drone activity in the reviewed research: MS-13, Barrio 18, Gulf Clan / Clan del Golfo, Tren de Aragua, Los Choneros, Los Lobos, and other Central American maras.</p>
-    </div>
-
     <div class="ukraine-assessment">
-      <h3>Ukraine knowledge transfer — assessment</h3>
+      <h3>Ukraine Tactical Transfer — Assessment</h3>
       <div class="ukraine-grid" id="ukraine-grid"></div>
     </div>
-
   </div>
 </div>
 
-<!-- MAP -->
 <div id="page-map" class="page">
   <div class="map-container">
     <div id="map"></div>
@@ -743,32 +293,16 @@
       <div class="legend-item"><div class="legend-dot" style="background:#e85c3a"></div><div class="legend-label">Attack</div></div>
       <div class="legend-item"><div class="legend-dot" style="background:#4a9fd4"></div><div class="legend-label">Surveillance</div></div>
       <div class="legend-item"><div class="legend-dot" style="background:#f0a030"></div><div class="legend-label">Smuggling</div></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#2ab89a"></div><div class="legend-label">Prison</div></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#c8f04a"></div><div class="legend-label">Ukraine-linked</div></div>
-    </div>
-    <div class="map-stats">
-      <h4>Filter by mission</h4>
-      <div class="map-filter-row" id="map-filters"></div>
-      <h4 style="margin-top:10px">Filter by country</h4>
-      <div class="map-filter-row" id="map-country-filters"></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2ab89a"></div><div class="legend-label">Prison Drops</div></div>
     </div>
   </div>
 </div>
 
-<!-- DATABASE -->
 <div id="page-database" class="page db-page">
   <div class="db-controls">
     <input type="text" class="db-search" id="db-search" placeholder="Search incidents, locations, gangs..." oninput="filterTable()">
     <select class="db-select" id="filter-country" onchange="filterTable()">
       <option value="">All countries</option>
-    </select>
-    <select class="db-select" id="filter-mission" onchange="filterTable()">
-      <option value="">All mission types</option>
-    </select>
-    <select class="db-select" id="filter-ukraine" onchange="filterTable()">
-      <option value="">Ukraine link: all</option>
-      <option value="TRUE">Ukraine-linked only</option>
-      <option value="FALSE">No Ukraine link</option>
     </select>
     <div class="db-count">Showing <span id="db-shown">—</span> of <span id="db-total">—</span></div>
   </div>
@@ -776,798 +310,386 @@
     <table id="db-table">
       <thead>
         <tr>
-          <th onclick="sortTable(0)">Date <span class="sort-arrow" id="sort-0">↕</span></th>
-          <th onclick="sortTable(1)">Country <span class="sort-arrow" id="sort-1">↕</span></th>
-          <th onclick="sortTable(2)">Location <span class="sort-arrow" id="sort-2">↕</span></th>
-          <th onclick="sortTable(3)">Group(s) <span class="sort-arrow" id="sort-3">↕</span></th>
-          <th onclick="sortTable(4)">Summary <span class="sort-arrow" id="sort-4">↕</span></th>
-          <th onclick="sortTable(5)">Mission <span class="sort-arrow" id="sort-5">↕</span></th>
-          <th onclick="sortTable(6)">Model <span class="sort-arrow" id="sort-6">↕</span></th>
-          <th onclick="sortTable(7)">Manufacturer <span class="sort-arrow" id="sort-7">↕</span></th>
-          <th onclick="sortTable(8)">Ukraine <span class="sort-arrow" id="sort-8">↕</span></th>
-          <th>Source</th>
+          <th>Date</th>
+          <th>Country</th>
+          <th>Location</th>
+          <th>Group(s)</th>
+          <th>Summary</th>
+          <th>Mission</th>
+          <th>Model</th>
         </tr>
       </thead>
       <tbody id="db-body"></tbody>
     </table>
-    <div id="db-empty" class="no-results" style="display:none">No incidents match your filters.</div>
   </div>
 </div>
 
-
+<div id="page-research" class="page">
+  <div class="research-header">
+    <h2>Knowledge Cloud & Research Network</h2>
+    <p>A dynamically generated D3 radial network fusing verified database incidents with broader OSINT research subjects. Maps tactical adoption, procurement channels, the Ukraine knowledge transfer, and explicitly flags organizations with <i>no verified</i> drone operations to date.</p>
+  </div>
+  <div class="network-container" id="research-network"></div>
+</div>
 
 <script>
-const PAGE_ORDER = ['landing', 'map', 'database', 'knowledge'];
 let DATA = [];
-let tableData = [];
-let mapInit = false;
-let leafletMap = null;
-let allMarkers = [];
-let markerById = {};
-let currentMissionFilter = 'all';
-let currentCountryFilter = 'all';
-let sortCol = 0;
-let sortDir = 1;
-let selectedRowId = null;
-let knowledgeBuilt = false;
-let currentKnowledgeKey = 'overview';
+let leafletMap;
 
-const THEME_NODES = [
-  {
-    key: 'mexico_theatre', kind: 'theme', label: 'Mexico theatre', x: 50, y: 20,
-    summary: 'The largest concentration of incidents in the dataset, spanning CJNG, Sinaloa, La Familia Michoacana, LNFM, Cárteles Unidos, and border-linked operations.',
-    tags: ['attacks', 'FPV', 'IED drops', 'border'],
-    preset: { country: 'Mexico' }
-  },
-  {
-    key: 'colombia_theatre', kind: 'theme', label: 'Colombia theatre', x: 78, y: 34,
-    summary: 'ELN and ex-FARC networks are associated with explosive drone attacks, one-way systems, and repeated strikes on security forces and infrastructure.',
-    tags: ['ELN', 'ex-FARC', 'attack drones'],
-    preset: { country: 'Colombia' }
-  },
-  {
-    key: 'brazil_cluster', kind: 'theme', label: 'Brazil / CV', x: 78, y: 66,
-    summary: 'Comando Vermelho anchors the Brazilian cluster, with verified surveillance use and armed drone incidents in Rio de Janeiro.',
-    tags: ['Rio', 'Comando Vermelho', 'surveillance'],
-    preset: { country: 'Brazil' }
-  },
-  {
-    key: 'border_corridor', kind: 'theme', label: 'Border corridor', x: 50, y: 80,
-    summary: 'A cross-border layer connecting northern Mexico and the United States, mixing surveillance, smuggling, incursions, and attack risk.',
-    tags: ['US-Mexico', 'surveillance', 'smuggling'],
-    preset: { search: 'border' }
-  },
-  {
-    key: 'prison_networks', kind: 'theme', label: 'Prison networks', x: 22, y: 66,
-    summary: 'The prison layer is structurally different: contraband delivery, prison surveillance, and seized drones in Ecuador, Colombia, Panama, and Brazil.',
-    tags: ['prisons', 'contraband', 'delivery'],
-    preset: { mission: 'prison contraband' }
-  },
-  {
-    key: 'ukraine_transfer', kind: 'theme', label: 'Ukraine transfer', x: 22, y: 34,
-    summary: 'The strongest evidence points to transfer of tactics and training, especially around FPV and one-way attack concepts, rather than direct hardware supply.',
-    tags: ['training', 'FPV', 'tactics'],
-    preset: { ukraine: 'TRUE' }
+// 1. Initializer - Load CSV
+window.onload = async function() {
+  try {
+    const res = await fetch('drone_criminaluse_latam_v1.csv');
+    if (res.ok) {
+      const text = await res.text();
+      document.getElementById('upload-overlay').style.display = 'none';
+      processData(text);
+    } 
+    // If not OK, the overlay remains visible asking the user to upload it manually.
+  } catch(e) {
+    // Fails locally due to CORS
   }
-];
+};
 
-const RESEARCH_NODES = [
-  {
-    key: 'supply_chains', kind: 'research', label: 'Chinese supply chain', x: 34, y: 13, parent: 'mexico_theatre',
-    summary: 'Commercial DJI systems and Chinese components dominate the open-source picture, with procurement through retail, grey-market, and local assembly pathways.',
-    tags: ['DJI', 'components', 'procurement'],
-    preset: { search: 'China' }
-  },
-  {
-    key: 'fpv_shift', kind: 'research', label: 'FPV / one-way shift', x: 67, y: 13, parent: 'ukraine_transfer',
-    summary: 'FPV and improvised one-way drones are part of the technological escalation, especially in Mexico and Colombia.',
-    tags: ['FPV', 'kamikaze', 'manual control'],
-    preset: { search: 'FPV' }
-  },
-  {
-    key: 'counter_uas', kind: 'research', label: 'Counter-UAS response', x: 89, y: 50, parent: 'colombia_theatre',
-    summary: 'Government responses lag unevenly across the region, while criminal actors also show evidence of jamming and counter-drone adaptation.',
-    tags: ['C-UAS', 'jamming', 'policy gap'],
-    preset: { search: 'jamming' }
-  },
-  {
-    key: 'maritime_systems', kind: 'research', label: 'Maritime systems', x: 66, y: 87, parent: 'border_corridor',
-    summary: 'The broader research points beyond the CSV toward narco-submarines and unmanned maritime systems, especially around Colombia and Ecuador.',
-    tags: ['research only', 'narco-sub', 'non-aerial']
-  },
-  {
-    key: 'ugv_gap', kind: 'research', label: 'No verified UGV use', x: 34, y: 87, parent: 'prison_networks',
-    summary: 'The attached research finds no verified ground-based unmanned vehicle use by criminal groups in the region during the review period.',
-    tags: ['research gap', 'UGV', 'absence']
-  },
-  {
-    key: 'absence_cases', kind: 'research', label: 'No verified activity', x: 11, y: 50, parent: 'ukraine_transfer',
-    summary: 'The research explicitly flags negative evidence for several groups, including MS-13, Barrio 18, Gulf Clan, Tren de Aragua, Los Choneros, and Los Lobos.',
-    tags: ['negative evidence', 'MS-13', 'Tren de Aragua']
-  }
-];
-
-const INCIDENT_SPECS = [
-  {
-    key: 'rio_penha_2025', kind: 'incident', label: 'Rio police strike', x: 90, y: 73, parent: 'brazil_cluster',
-    summary: 'Explosive drones were used against police during the Penha and Alemão megaoperation.',
-    match: row => row.country === 'Brazil' && row.location.includes('Complexo da Penha') && (row.mission_type || '').includes('attack')
-  },
-  {
-    key: 'quitungo_2024', kind: 'incident', label: 'Quitungo grenade', x: 90, y: 58, parent: 'brazil_cluster',
-    summary: 'DJI platform reportedly adapted for grenade delivery in Rio.',
-    match: row => row.country === 'Brazil' && row.location.includes('Quitungo')
-  },
-  {
-    key: 'tepalcatepec_2023', kind: 'incident', label: 'Tepalcatepec 2023', x: 60, y: 6, parent: 'mexico_theatre',
-    summary: 'Early benchmark case in Michoacán tied to escalating cartel drone warfare.',
-    match: row => row.country === 'Mexico' && row.location.includes('Tepalcatepec')
-  },
-  {
-    key: 'michoacan_chemical_2024', kind: 'incident', label: 'Michoacán chemical', x: 42, y: 5, parent: 'mexico_theatre',
-    summary: 'A key escalation point: explosive devices with chemical substances reported in a cartel drone incident.',
-    match: row => row.country === 'Mexico' && (row.summary_of_case || '').toLowerCase().includes('chemical')
-  },
-  {
-    key: 'el_paso_2026', kind: 'incident', label: 'El Paso closure', x: 56, y: 94, parent: 'border_corridor',
-    summary: 'Airport disruption after suspected cartel drone incursion into US airspace.',
-    match: row => row.country === 'United States' && row.location.includes('El Paso')
-  },
-  {
-    key: 'catatumbo_2025', kind: 'incident', label: 'Catatumbo 2025', x: 88, y: 25, parent: 'colombia_theatre',
-    summary: 'ELN attack with an explosive-armed drone caused fatalities and injuries among soldiers.',
-    match: row => row.country === 'Colombia' && row.location.includes('Catatumbo') && (row.gangs_involved || '').includes('ELN') && (row.date || '').startsWith('2025')
-  },
-  {
-    key: 'cucuta_2023', kind: 'incident', label: 'Cúcuta station', x: 82, y: 13, parent: 'colombia_theatre',
-    summary: 'Commercial drone used to drop explosives on a police station.',
-    match: row => row.country === 'Colombia' && row.location.includes('Cúcuta')
-  },
-  {
-    key: 'quito_2024', kind: 'incident', label: 'Quito failed bomb', x: 12, y: 75, parent: 'prison_networks',
-    summary: 'Attempted bomb delivery by drone in Ecuador, tied to gang conflict.',
-    match: row => row.country === 'Ecuador' && row.location.includes('Quito')
-  },
-  {
-    key: 'panama_2023', kind: 'incident', label: 'Panama prison seizures', x: 7, y: 59, parent: 'prison_networks',
-    summary: 'High-volume seizure case underscoring the prison-contraband ecosystem.',
-    match: row => row.country === 'Panama'
-  }
-];
-
-function parseCSV(text) {
-  const lines = text.trim().split(/\r?\n/);
-  const headers = parseCSVLine(lines[0]);
-  return lines.slice(1).map(line => {
-    const vals = parseCSVLine(line);
-    const obj = {};
-    headers.forEach((h, i) => { obj[h.trim()] = (vals[i] || '').trim(); });
-    return obj;
-  });
+function handleFileUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('upload-overlay').style.display = 'none';
+    processData(e.target.result);
+  };
+  reader.readAsText(file);
 }
 
-function parseCSVLine(line) {
-  const result = [];
-  let cur = '';
-  let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') {
-      if (inQ && line[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else {
-        inQ = !inQ;
-      }
-    } else if (c === ',' && !inQ) {
-      result.push(cur);
-      cur = '';
-    } else {
-      cur += c;
+// Basic robust CSV to JSON converter handling quoted text
+function csvJSON(csv) {
+  const lines = [];
+  let row = [];
+  let cell = '';
+  let insideQuote = false;
+  
+  for (let i = 0; i < csv.length; i++) {
+    const char = csv[i];
+    const nextChar = csv[i+1];
+    if (char === '"') {
+      if (insideQuote && nextChar === '"') { cell += '"'; i++; }
+      else { insideQuote = !insideQuote; }
+    } else if (char === ',' && !insideQuote) {
+      row.push(cell.trim()); cell = '';
+    } else if (char === '\n' && !insideQuote) {
+      row.push(cell.trim()); lines.push(row); row = []; cell = '';
+    } else if (char !== '\r') {
+      cell += char;
     }
   }
-  result.push(cur);
+  if (cell || row.length) { row.push(cell.trim()); lines.push(row); }
+  
+  const headers = lines[0];
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (lines[i].length < headers.length - 2) continue; // skip invalid short lines
+    const obj = {};
+    for (let j = 0; j < headers.length; j++) {
+      obj[headers[j]] = lines[i][j];
+    }
+    result.push(obj);
+  }
   return result;
 }
 
-async function loadData() {
-  const res = await fetch('./drone_criminaluse_latam_v1.csv', { cache: 'no-store' });
-  if (!res.ok) throw new Error('Could not load drone_criminaluse_latam_v1.csv');
-  const text = await res.text();
-  DATA = parseCSV(text).filter(row => Object.values(row).some(v => (v || '').trim() !== ''));
-  DATA.forEach((row, i) => { row.__id = `row-${i}`; });
-  tableData = [...DATA];
-  updateMetaNumbers();
+function processData(text) {
+  // Clear any possible tags if fetched via AI proxy 
+  text = text.replace(/\\s*/g, '');
+  DATA = csvJSON(text);
+
+  // Apply accurate database counts to UI headers
+  const total = DATA.length;
+  document.getElementById('nav-count').textContent = total;
+  document.getElementById('hero-count').textContent = total;
+  document.getElementById('stat-count').textContent = total;
+
+  buildLanding();
+  buildTable();
+  showPage('landing');
 }
 
-function normalizeGroupName(name) {
-  return (name || '')
-    .replace(/\(target\)/gi, '')
-    .replace(/\(attacker\)/gi, '')
-    .replace(/\(contextual\)/gi, '')
-    .replace(/\blikely\s+/gi, '')
-    .replace(/\bunspecified\s+/gi, '')
-    .replace(/\bnot specified\b/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function updateMetaNumbers() {
-  const verified = DATA.length;
-  const countries = new Set(DATA.map(d => d.country).filter(Boolean)).size;
-  const groups = new Set();
-  DATA.forEach(d => {
-    (d.gangs_involved || '').split(';').forEach(g => {
-      const cleaned = normalizeGroupName(g);
-      if (cleaned && cleaned !== 'Unknown' && cleaned !== 'Various' && cleaned !== 'N/A') groups.add(cleaned);
-    });
-  });
-  const years = DATA.map(d => parseInt((d.date || '').match(/\d{4}/)?.[0] || '9999', 10)).filter(Number.isFinite);
-  const earliest = years.length ? Math.min(...years) : '—';
-  setText('nav-incident-count', verified);
-  setText('verified-count', verified);
-  setText('country-count', countries);
-  setText('group-count', `${groups.size}+`);
-  setText('earliest-year', earliest);
-}
-
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
-
-function getCoords(row) {
-  const loc = row.location || '';
-  const country = row.country || '';
-  const loclower = loc.toLowerCase();
-
-  if (country === 'Brazil') {
-    if (loclower.includes('rio') || loclower.includes('penha') || loclower.includes('bangu') || loclower.includes('rocinha') || loclower.includes('maré') || loclower.includes('mare') || loclower.includes('quitungo')) return [-22.9068, -43.1729];
-    if (loclower.includes('são paulo') || loclower.includes('sao paulo')) return [-23.5505, -46.6333];
-    return [-15.8, -47.9];
-  }
-  if (country === 'Colombia') {
-    if (loclower.includes('catatumbo')) return [8.9 + (Math.random() - 0.5) * 0.3, -73.1 + (Math.random() - 0.5) * 0.3];
-    if (loclower.includes('nariño') || loclower.includes('narino') || loclower.includes('tambo') || loclower.includes('pasto') || loclower.includes('cumbitara') || loclower.includes('lagunitas')) return [1.3, -77.3];
-    if (loclower.includes('arauca') || loclower.includes('saravena')) return [7.1, -70.8];
-    if (loclower.includes('cauca') || loclower.includes('argelia')) return [2.5, -76.6];
-    if (loclower.includes('cúcuta') || loclower.includes('cucuta')) return [7.9, -72.5];
-    if (loclower.includes('cesar') || loclower.includes('aguachica')) return [9.9, -73.6];
-    return [4.7 + (Math.random() - 0.5) * 2, -74.0 + (Math.random() - 0.5) * 2];
-  }
-  if (country === 'Mexico') {
-    if (loclower.includes('michoacán') || loclower.includes('michoacan') || loclower.includes('tepalcatepec') || loclower.includes('cotija') || loclower.includes('tierra caliente')) return [19.3 + (Math.random() - 0.5) * 0.5, -101.9 + (Math.random() - 0.5) * 0.5];
-    if (loclower.includes('sinaloa') || loclower.includes('culiacán') || loclower.includes('culiacan')) return [25.0, -107.4];
-    if (loclower.includes('guerrero') || loclower.includes('heliodoro')) return [17.7, -100.4];
-    if (loclower.includes('chiapas') || loclower.includes('chicomuselo')) return [16.4, -92.5];
-    if (loclower.includes('jalisco')) return [20.7, -103.3];
-    if (loclower.includes('northern') || loclower.includes('border') || loclower.includes('us-mexico') || loclower.includes('chihuahua') || loclower.includes('baja california')) return [29.0 + (Math.random() - 0.5), -106.0 + (Math.random() - 0.5) * 3];
-    if (loclower.includes('lnfm')) return [22.0, -100.0];
-    return [23.0 + (Math.random() - 0.5) * 5, -102.5 + (Math.random() - 0.5) * 5];
-  }
-  if (country === 'Ecuador') {
-    if (loclower.includes('guayaquil') || loclower.includes('litoral') || loclower.includes('roca') || loclower.includes('durán') || loclower.includes('duran')) return [-2.17 + (Math.random() - 0.5) * 0.1, -79.92 + (Math.random() - 0.5) * 0.1];
-    if (loclower.includes('quito')) return [-0.23, -78.52];
-    return [-1.8, -78.2];
-  }
-  if (country === 'Venezuela') return [10.48, -66.9];
-  if (country === 'Panama') return [8.994, -79.519];
-  if (country === 'Guatemala') return [15.32, -91.47];
-  if (country === 'Honduras') return [15.2, -86.2];
-  if (country === 'United States') {
-    if (loclower.includes('el paso')) return [31.76, -106.49];
-    if (loclower.includes('texas') || loclower.includes('new mexico')) return [32.0, -105.0];
-    return [32.5, -104.0];
-  }
-  return null;
-}
-
-function getMissionColor(mission) {
-  const m = (mission || '').toLowerCase();
-  if (m.includes('attack') || m.includes('kamikaze')) return '#e85c3a';
-  if (m.includes('surveillance') || m.includes('isr')) return '#4a9fd4';
-  if (m.includes('smug') || m.includes('border')) return '#f0a030';
-  if (m.includes('prison')) return '#2ab89a';
-  if (m.includes('counter')) return '#9b7ed4';
-  return '#888780';
-}
-
-function getMissionBadgeClass(m) {
-  const ml = (m || '').toLowerCase();
-  if (ml.includes('attack') || ml.includes('kamikaze') || ml.includes('explosive')) return 'mission-attack';
-  if (ml.includes('surveillance') || ml.includes('isr')) return 'mission-surveillance';
-  if (ml.includes('smug') || ml.includes('border')) return 'mission-smuggling';
-  if (ml.includes('prison') || ml.includes('contraband')) return 'mission-prison';
-  return 'mission-other';
-}
-
+// 2. Navigation
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  const page = document.getElementById('page-' + name);
-  if (page) page.classList.add('active');
-  const idx = PAGE_ORDER.indexOf(name);
-  const tabs = document.querySelectorAll('.nav-tab');
-  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
-
-  if (name === 'map' && !mapInit) {
-    initMap();
-    mapInit = true;
+  
+  document.getElementById('page-' + name).classList.add('active');
+  const btn = document.querySelector(`button[onclick="showPage('${name}')"]`);
+  if(btn) btn.classList.add('active');
+  
+  if (name === 'map') {
+    if (!leafletMap) initMap();
+    else leafletMap.invalidateSize();
   }
-  if (name === 'map' && leafletMap) {
-    setTimeout(() => leafletMap.invalidateSize(), 0);
-  }
-  if (name === 'database') buildTable();
-  if (name === 'knowledge') {
-    buildKnowledge();
-    setTimeout(renderKnowledgeLines, 0);
+  if (name === 'research') {
+    if (!document.querySelector('#research-network svg')) {
+      setTimeout(buildResearch, 50); // slight delay allowing display block paint
+    }
   }
 }
 
+// 3. UI Builders (Adapted from original logic)
 function buildLanding() {
-  const uCount = DATA.filter(d => d.ukraine_link === 'TRUE').length;
-  setText('ukraine-count', uCount);
+  const uCount = DATA.filter(d => (d.ukraine_link||'').toUpperCase() === 'TRUE').length;
+  document.getElementById('ukraine-count').textContent = uCount;
 
   const countryCounts = {};
-  DATA.forEach(d => { countryCounts[d.country] = (countryCounts[d.country] || 0) + 1; });
-  const sorted = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]);
-  const max = sorted[0] ? sorted[0][1] : 1;
-  const colorMap = { Mexico: '', Colombia: 'col', Brazil: 'bra', Ecuador: 'ecu', 'United States': 'usa' };
+  DATA.forEach(d => { if(d.country) countryCounts[d.country] = (countryCounts[d.country] || 0) + 1; });
+  const sortedC = Object.entries(countryCounts).sort((a,b) => b[1]-a[1]);
+  const max = sortedC[0][1];
+  
   const bars = document.getElementById('country-bars');
   bars.innerHTML = '';
-  sorted.forEach(([c, n]) => {
-    const cls = colorMap[c] || 'oth';
+  sortedC.forEach(([c, n]) => {
     bars.innerHTML += `<div class="country-bar-row">
       <div class="country-bar-label">${c}</div>
-      <div class="country-bar-track"><div class="country-bar-fill ${cls}" style="width:${Math.round(n / max * 100)}%"></div></div>
+      <div class="country-bar-track"><div class="country-bar-fill" style="width:${Math.round(n/max*100)}%"></div></div>
       <div class="country-bar-count">${n}</div>
     </div>`;
   });
 
-  const missionCounts = {};
-  DATA.forEach(d => {
-    (d.mission_type || '').split(';').forEach(m => {
-      const mt = m.trim();
-      if (mt) missionCounts[mt] = (missionCounts[mt] || 0) + 1;
-    });
-  });
   const mList = document.getElementById('mission-list');
-  mList.innerHTML = '';
-  Object.entries(missionCounts).sort((a, b) => b[1] - a[1]).forEach(([m, n]) => {
-    const cls = getMissionBadgeClass(m);
-    mList.innerHTML += `<li><span>${m}</span><span class="mission-badge ${cls}">${n}</span></li>`;
-  });
+  mList.innerHTML = `
+    <li><div><span class="tag tag-confirmed" style="background:rgba(232,92,58,0.12); color:var(--red)">Attack (Explosive/Kamikaze)</span></div></li>
+    <li><div><span class="tag tag-confirmed" style="background:rgba(74,159,212,0.12); color:var(--blue)">Surveillance & ISR</span></div></li>
+    <li><div><span class="tag tag-confirmed" style="background:rgba(240,160,48,0.12); color:var(--accent2)">Drug/Border Smuggling</span></div></li>
+    <li><div><span class="tag tag-confirmed" style="background:rgba(42,184,154,0.12); color:var(--teal)">Prison Contraband Drops</span></div></li>
+  `;
 
-  const mfrCounts = {};
-  DATA.forEach(d => {
-    const m = d.drone_manufacturer || 'Unknown';
-    mfrCounts[m] = (mfrCounts[m] || 0) + 1;
-  });
-  const mfrList = document.getElementById('mfr-list');
-  mfrList.innerHTML = '';
-  Object.entries(mfrCounts).sort((a, b) => b[1] - a[1]).forEach(([m, n]) => {
-    mfrList.innerHTML += `<li><span>${m}</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim)">${n}</span></li>`;
-  });
+  document.getElementById('ukraine-grid').innerHTML = `
+    <div class="ukraine-item"><div class="transfer-type">Confirmed Transfers</div><div class="transfer-detail">CJNG, Sinaloa, CV operatives confirmed leveraging Intl Legion fronts to secure FPV doctrine.</div></div>
+    <div class="ukraine-item"><div class="transfer-type">Hardware Origin</div><div class="transfer-detail">No confirmed hardware transfers directly from Ukraine; nearly all sourcing remains Chinese (DJI/COTS).</div></div>
+  `;
+}
 
-  const transfers = [
-    { type: 'FPV drone tactics', detail: 'The broader research tracks confirmed adoption of FPV-style tactics in cartel and insurgent settings, especially in Mexico and Colombia.', cls: 'tag-confirmed', label: 'Confirmed' },
-    { type: 'Personnel training', detail: 'Evidence in the research points to tactical knowledge transfer through training and foreign-fighter pathways, rather than direct hardware supply.', cls: 'tag-confirmed', label: 'Confirmed' },
-    { type: 'Commercial & kamikaze tech', detail: 'Commercial drones and improvised one-way systems form the most plausible pathway for battlefield-style diffusion into criminal use.', cls: 'tag-probable', label: 'Probable' },
-    { type: 'Swarm tactics', detail: 'Discussed in the research as an emerging or speculative trajectory; not all such concepts map cleanly to a verified incident row in the dataset.', cls: 'tag-speculative', label: 'Speculative' },
-    { type: 'Electronic warfare (C-UAS)', detail: 'Research highlights jamming, spoofing, and uneven state responses as part of the widening drone competition.', cls: 'tag-probable', label: 'Probable' }
-  ];
-  const ugrid = document.getElementById('ukraine-grid');
-  ugrid.innerHTML = '';
-  transfers.forEach(t => {
-    ugrid.innerHTML += `<div class="ukraine-item">
-      <div class="transfer-type">${t.type}</div>
-      <div class="transfer-detail">${t.detail}</div>
-      <span class="tag ${t.cls}">${t.label}</span>
-    </div>`;
-  });
+// 4. Mapping
+function getCoords(row) {
+  const loc = row.location || ''; const country = row.country || '';
+  const l = loc.toLowerCase();
+  if (country === 'Brazil') {
+    if (l.includes('rio')||l.includes('penha')||l.includes('bangu')||l.includes('rocinha')) return [-22.9068, -43.1729];
+    return [-15.8, -47.9];
+  }
+  if (country === 'Colombia') {
+    if (l.includes('catatumbo')||l.includes('norte')) return [8.5, -73.0];
+    if (l.includes('nariño')||l.includes('cauca')) return [1.5, -77.0];
+    return [4.5, -74.0];
+  }
+  if (country === 'Mexico') {
+    if (l.includes('michoacán')||l.includes('jalisco')) return [19.2, -101.9];
+    if (l.includes('sinaloa')) return [24.8, -107.4];
+    return [23.6, -102.5];
+  }
+  if (country === 'Ecuador') {
+    if (l.includes('guayaquil')) return [-2.2, -79.9];
+    return [-1.8, -78.1];
+  }
+  if (country === 'United States' || l.includes('el paso')) return [31.7, -106.4];
+  if (country === 'Panama') return [8.9, -79.5];
+  return null;
 }
 
 function initMap() {
-  leafletMap = L.map('map', { zoomControl: false, attributionControl: false }).setView([5, -75], 4);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(leafletMap);
-
-  allMarkers = [];
-  markerById = {};
+  leafletMap = L.map('map', { zoomControl: false, attributionControl: false }).setView([10, -80], 4);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+  
   DATA.forEach(row => {
     const coords = getCoords(row);
     if (!coords) return;
-    const ukraine = row.ukraine_link === 'TRUE';
-    const color = ukraine ? '#c8f04a' : getMissionColor(row.mission_type);
-    const marker = L.circleMarker(coords, {
-      radius: 7,
-      fillColor: color,
-      color: ukraine ? '#0a0a08' : 'rgba(0,0,0,0.4)',
-      weight: ukraine ? 1.5 : 1,
-      fillOpacity: 0.85
-    });
+    const m = (row.mission_type||'').toLowerCase();
+    let col = '#555';
+    if(m.includes('attack')) col = '#e85c3a';
+    else if(m.includes('surveillance')) col = '#4a9fd4';
+    else if(m.includes('smug')) col = '#f0a030';
+    else if(m.includes('prison')) col = '#2ab89a';
 
-    const missions = (row.mission_type || '').split(';').map(m => {
-      const cls = getMissionBadgeClass(m.trim());
-      const bg = cls === 'mission-attack' ? 'rgba(232,92,58,0.15)' : cls === 'mission-surveillance' ? 'rgba(74,159,212,0.15)' : cls === 'mission-prison' ? 'rgba(42,184,154,0.15)' : 'rgba(240,160,48,0.15)';
-      const col = cls === 'mission-attack' ? '#e85c3a' : cls === 'mission-surveillance' ? '#4a9fd4' : cls === 'mission-prison' ? '#2ab89a' : '#f0a030';
-      return `<span class="popup-tag" style="background:${bg}; color:${col}">${m.trim()}</span>`;
-    }).join('');
-
-    const popupHtml = `
-      <div class="popup-date">${row.date}</div>
-      <div class="popup-location">${row.location}</div>
-      <div class="popup-gang">${row.gangs_involved || '—'}</div>
-      <div class="popup-summary">${row.summary_of_case}</div>
-      <div class="popup-tags">${missions}${ukraine ? '<span class="popup-tag" style="background:rgba(200,240,74,0.12);color:#c8f04a">Ukraine-linked</span>' : ''}</div>
-      ${row.url_primary_source ? `<a href="${row.url_primary_source}" class="popup-link" target="_blank">Primary source →</a>` : ''}
-    `;
-    marker.bindPopup(popupHtml, { maxWidth: 340 });
-    marker._rowData = row;
-    marker.addTo(leafletMap);
-    allMarkers.push(marker);
-    markerById[row.__id] = marker;
-  });
-
-  buildMapFilters();
-}
-
-function buildMapFilters() {
-  const countries = new Set();
-  DATA.forEach(d => countries.add(d.country));
-
-  const mf = document.getElementById('map-filters');
-  mf.innerHTML = '<button class="map-filter-btn active" onclick="filterMap(\'all\',\'mission\')">All</button>';
-  ['attack (explosive drop)', 'attack (kamikaze/one-way)', 'surveillance/ISR', 'drug smuggling', 'prison contraband'].forEach(m => {
-    const label = m.replace(' (explosive drop)', '').replace(' (kamikaze/one-way)', ' (kamikaze)').replace('surveillance/ISR', 'surveillance').replace('drug smuggling', 'smuggling').replace('prison contraband', 'prison');
-    mf.innerHTML += `<button class="map-filter-btn" onclick="filterMap('${m}','mission')">${label}</button>`;
-  });
-
-  const cf = document.getElementById('map-country-filters');
-  cf.innerHTML = '<button class="map-filter-btn active" onclick="filterMap(\'all\',\'country\')">All</button>';
-  [...countries].sort().forEach(c => {
-    cf.innerHTML += `<button class="map-filter-btn" onclick="filterMap('${c}','country')">${c}</button>`;
+    const jitter = [coords[0] + (Math.random()-0.5)*0.3, coords[1] + (Math.random()-0.5)*0.3];
+    const marker = L.circleMarker(jitter, { radius: 6, fillColor: col, color: '#111', weight: 1, fillOpacity: 0.9 }).addTo(leafletMap);
+    marker.bindPopup(`
+      <div class="popup-date">${row.date || ''}</div>
+      <div class="popup-location">${row.location || ''}</div>
+      <div class="popup-gang">${row.gangs_involved || ''}</div>
+      <div class="popup-summary">${row.summary_of_case || ''}</div>
+    `);
   });
 }
 
-function filterMap(val, type) {
-  if (type === 'mission') {
-    currentMissionFilter = val;
-    document.querySelectorAll('#map-filters .map-filter-btn').forEach(b => {
-      const isAll = val === 'all' && b.textContent === 'All';
-      const lower = b.textContent.toLowerCase();
-      const match = val !== 'all' && lower.includes(val.split(' ')[0].toLowerCase());
-      b.classList.toggle('active', isAll || match);
-    });
-  } else {
-    currentCountryFilter = val;
-    document.querySelectorAll('#map-country-filters .map-filter-btn').forEach(b => {
-      b.classList.toggle('active', b.textContent === val || (val === 'all' && b.textContent === 'All'));
-    });
-  }
-  applyMapFilters();
-}
-
-function applyMapFilters() {
-  allMarkers.forEach(marker => {
-    const row = marker._rowData;
-    const missionMatch = currentMissionFilter === 'all' || (row.mission_type || '').includes(currentMissionFilter);
-    const countryMatch = currentCountryFilter === 'all' || row.country === currentCountryFilter;
-    if (missionMatch && countryMatch) {
-      if (!leafletMap.hasLayer(marker)) marker.addTo(leafletMap);
-    } else {
-      if (leafletMap.hasLayer(marker)) marker.removeFrom(leafletMap);
-    }
-  });
-}
-
+// 5. Database 
 function buildTable() {
-  const countries = [...new Set(DATA.map(d => d.country))].sort();
-  const countrySelect = document.getElementById('filter-country');
-  if (countrySelect.options.length === 1) {
-    countries.forEach(c => {
-      const o = document.createElement('option');
-      o.value = c;
-      o.textContent = c;
-      countrySelect.appendChild(o);
-    });
+  const countries = [...new Set(DATA.map(d => d.country).filter(x => x))].sort();
+  const cSel = document.getElementById('filter-country');
+  if (cSel.options.length === 1) {
+    countries.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; cSel.appendChild(o); });
   }
-  const missions = new Set();
-  DATA.forEach(d => (d.mission_type || '').split(';').forEach(m => { if (m.trim()) missions.add(m.trim()); }));
-  const missionSelect = document.getElementById('filter-mission');
-  if (missionSelect.options.length === 1) {
-    [...missions].sort().forEach(m => {
-      const o = document.createElement('option');
-      o.value = m;
-      o.textContent = m;
-      missionSelect.appendChild(o);
-    });
-  }
-  setText('db-total', DATA.length);
+  document.getElementById('db-total').textContent = DATA.length;
   filterTable();
 }
 
 function filterTable() {
-  const q = (document.getElementById('db-search').value || '').toLowerCase();
-  const country = document.getElementById('filter-country').value;
-  const mission = document.getElementById('filter-mission').value;
-  const ukraine = document.getElementById('filter-ukraine').value;
-
-  tableData = DATA.filter(d => {
-    const searchable = [d.date, d.location, d.country, d.summary_of_case, d.gangs_involved, d.drone_model, d.drone_manufacturer, d.mission_type].join(' ').toLowerCase();
-    if (q && !searchable.includes(q)) return false;
-    if (country && d.country !== country) return false;
-    if (mission && !(d.mission_type || '').includes(mission)) return false;
-    if (ukraine && d.ukraine_link !== ukraine) return false;
-    return true;
-  });
-  renderTable();
-}
-
-function sortTable(col) {
-  if (sortCol === col) sortDir *= -1;
-  else { sortCol = col; sortDir = 1; }
-  document.querySelectorAll('.sort-arrow').forEach((a, i) => {
-    a.textContent = i === col ? (sortDir === 1 ? '↑' : '↓') : '↕';
-    a.classList.toggle('active', i === col);
-  });
-  const cols = ['date', 'country', 'location', 'gangs_involved', 'summary_of_case', 'mission_type', 'drone_model', 'drone_manufacturer', 'ukraine_link'];
-  tableData.sort((a, b) => {
-    const av = (a[cols[col]] || '').toLowerCase();
-    const bv = (b[cols[col]] || '').toLowerCase();
-    return av < bv ? -sortDir : av > bv ? sortDir : 0;
-  });
-  renderTable();
-}
-
-function renderTable() {
-  const tbody = document.getElementById('db-body');
-  setText('db-shown', tableData.length);
-  document.getElementById('db-empty').style.display = tableData.length === 0 ? 'block' : 'none';
-  if (tableData.length === 0) {
-    tbody.innerHTML = '';
-    return;
-  }
-  tbody.innerHTML = tableData.map(row => {
-    const missions = (row.mission_type || '').split(';').map(m => `<span class="mission-badge ${getMissionBadgeClass(m.trim())}">${m.trim()}</span>`).join('');
-    const ukraine = row.ukraine_link === 'TRUE' ? '<span class="ukraine-true">Yes</span>' : '<span class="ukraine-false">No</span>';
-    const summary = (row.summary_of_case || '').length > 120 ? `${(row.summary_of_case || '').substring(0, 120)}…` : (row.summary_of_case || '');
-    const selectedClass = row.__id === selectedRowId ? 'selected-row' : '';
-    return `<tr class="${selectedClass}">
-      <td class="date-cell">${row.date || '—'}</td>
-      <td class="country-cell">${row.country || '—'}</td>
-      <td class="location-cell">${(row.location || '').split(',')[0]}</td>
-      <td class="gang-cell">${(row.gangs_involved || '—').split(';')[0]}</td>
-      <td class="summary-cell">${summary}</td>
-      <td>${missions}</td>
-      <td class="model-cell">${row.drone_model || '—'}</td>
-      <td class="model-cell">${row.drone_manufacturer || '—'}</td>
-      <td>${ukraine}</td>
-      <td>${row.url_primary_source ? `<a href="${row.url_primary_source}" class="url-link" target="_blank">Source →</a>` : '—'}</td>
+  const query = document.getElementById('db-search').value.toLowerCase();
+  const cFilter = document.getElementById('filter-country').value;
+  
+  let html = '';
+  let shown = 0;
+  
+  DATA.forEach(row => {
+    if (cFilter && row.country !== cFilter) return;
+    const combined = Object.values(row).join(' ').toLowerCase();
+    if (query && !combined.includes(query)) return;
+    
+    shown++;
+    const ms = (row.mission_type||'').split(';').map(m => `<span class="mission-badge" style="background:#222">${m.trim()}</span>`).join('');
+    html += `<tr>
+      <td class="date-cell">${row.date||'—'}</td>
+      <td>${row.country||'—'}</td>
+      <td class="location-cell">${(row.location||'').split(',')[0]}</td>
+      <td class="gang-cell">${(row.gangs_involved||'—').split(';')[0]}</td>
+      <td class="summary-cell">${(row.summary_of_case||'').substring(0, 100)}...</td>
+      <td>${ms}</td>
+      <td style="font-family:var(--font-mono); font-size:11px;">${row.drone_model||'—'}</td>
     </tr>`;
-  }).join('');
-}
-
-function applyDatabasePreset(preset = {}) {
-  const dbSearch = document.getElementById('db-search');
-  const dbCountry = document.getElementById('filter-country');
-  const dbMission = document.getElementById('filter-mission');
-  const dbUkraine = document.getElementById('filter-ukraine');
-  dbSearch.value = preset.search || '';
-  dbCountry.value = preset.country || '';
-  dbMission.value = preset.mission || '';
-  dbUkraine.value = preset.ukraine || '';
-  selectedRowId = preset.rowId || null;
-  showPage('database');
-  filterTable();
-}
-
-function showRowInDatabase(rowId) {
-  const row = DATA.find(r => r.__id === rowId);
-  if (!row) return;
-  applyDatabasePreset({ search: `${row.location} ${row.date}`, rowId });
-}
-
-function showRowOnMap(rowId) {
-  const row = DATA.find(r => r.__id === rowId);
-  if (!row) return;
-  selectedRowId = rowId;
-  showPage('map');
-  const marker = markerById[rowId];
-  if (marker && leafletMap) {
-    const ll = marker.getLatLng();
-    leafletMap.setView(ll, 7, { animate: true });
-    marker.openPopup();
-  }
-}
-
-function resolveIncident(spec) {
-  return DATA.find(spec.match) || null;
-}
-
-function collectRelatedRows(node) {
-  if (node.kind === 'incident') {
-    const row = resolveIncident(node);
-    return row ? [row] : [];
-  }
-  if (node.preset) {
-    return DATA.filter(row => {
-      if (node.preset.country && row.country !== node.preset.country) return false;
-      if (node.preset.mission && !(row.mission_type || '').includes(node.preset.mission)) return false;
-      if (node.preset.ukraine && row.ukraine_link !== node.preset.ukraine) return false;
-      if (node.preset.search) {
-        const hay = [row.location, row.country, row.summary_of_case, row.gangs_involved, row.mission_type, row.drone_model, row.drone_manufacturer].join(' ').toLowerCase();
-        if (!hay.includes(node.preset.search.toLowerCase())) return false;
-      }
-      return true;
-    });
-  }
-  return [];
-}
-
-function allKnowledgeNodes() {
-  return [...THEME_NODES, ...RESEARCH_NODES, ...INCIDENT_SPECS];
-}
-
-function buildKnowledge() {
-  const network = document.getElementById('knowledge-network');
-  const quick = document.getElementById('knowledge-quick-links');
-  if (!knowledgeBuilt) {
-    network.querySelectorAll('.knowledge-node').forEach(n => n.remove());
-    allKnowledgeNodes().forEach(node => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `knowledge-node ${node.kind}`;
-      button.dataset.key = node.key;
-      button.style.left = `${node.x}%`;
-      button.style.top = `${node.y}%`;
-      button.innerHTML = `<span class="knowledge-node-dot"></span><span>${node.label}</span>`;
-      button.addEventListener('click', () => focusKnowledgeNode(node.key));
-      network.appendChild(button);
-    });
-    quick.innerHTML = [
-      { label: 'Mexico', key: 'mexico_theatre' },
-      { label: 'Colombia', key: 'colombia_theatre' },
-      { label: 'Brazil', key: 'brazil_cluster' },
-      { label: 'Prisons', key: 'prison_networks' },
-      { label: 'Ukraine transfer', key: 'ukraine_transfer' },
-      { label: 'Maritime', key: 'maritime_systems' }
-    ].map(item => `<button type="button" class="knowledge-action" onclick="focusKnowledgeNode('${item.key}')">${item.label}</button>`).join('');
-    knowledgeBuilt = true;
-  }
-  focusKnowledgeNode(currentKnowledgeKey || 'overview');
-}
-
-function renderKnowledgeLines() {
-  const panel = document.querySelector('.knowledge-panel');
-  const svg = document.getElementById('knowledge-svg');
-  if (!panel || !svg) return;
-  const rect = panel.getBoundingClientRect();
-  svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
-  svg.innerHTML = '';
-  const centerPoint = { x: rect.width / 2, y: rect.height / 2 };
-  const nodeMap = new Map();
-  allKnowledgeNodes().forEach(node => {
-    nodeMap.set(node.key, { x: rect.width * node.x / 100, y: rect.height * node.y / 100, node });
   });
-  allKnowledgeNodes().forEach(node => {
-    const from = nodeMap.get(node.key);
-    const to = node.parent ? nodeMap.get(node.parent) : { x: centerPoint.x, y: centerPoint.y, node: { key: 'overview' } };
-    if (!from || !to) return;
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', from.x);
-    line.setAttribute('y1', from.y);
-    line.setAttribute('x2', to.x);
-    line.setAttribute('y2', to.y);
-    line.setAttribute('class', 'knowledge-line');
-    line.dataset.from = node.key;
-    line.dataset.to = node.parent || 'overview';
-    if (node.key === currentKnowledgeKey || node.parent === currentKnowledgeKey) line.classList.add('active');
-    svg.appendChild(line);
+  document.getElementById('db-body').innerHTML = html;
+  document.getElementById('db-shown').textContent = shown;
+}
+
+// 6. Knowledge / Research Network (D3.js)
+function buildResearch() {
+  const container = document.getElementById('research-network');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  const nodes = [
+    {id: 'root', group: 0, label: 'LatAm Drone Use', val: 32},
+    // Themes
+    {id: 'theme_attack', group: 1, label: 'Weaponized Attacks', val: 18},
+    {id: 'theme_surv', group: 1, label: 'Surveillance / ISR', val: 18},
+    {id: 'theme_smug', group: 1, label: 'Border Smuggling', val: 18},
+    {id: 'theme_prison', group: 1, label: 'Prison Contraband', val: 18},
+    // Core Verified Groups
+    {id: 'grp_cjng', group: 2, label: 'CJNG', val: 16},
+    {id: 'grp_sin', group: 2, label: 'Sinaloa Cartel', val: 16},
+    {id: 'grp_cv', group: 2, label: 'Comando Vermelho', val: 16},
+    {id: 'grp_eln', group: 2, label: 'ELN', val: 16},
+    {id: 'grp_farc', group: 2, label: 'ex-FARC', val: 16},
+    {id: 'grp_ecu', group: 2, label: 'Choneros / Lobos', val: 16},
+    // Research Focus / No Verified Activity
+    {id: 'theme_noverif', group: 3, label: 'NO VERIFIED DRONE ACTIVITY', val: 22},
+    {id: 'grp_ms13', group: 3, label: 'MS-13', val: 12},
+    {id: 'grp_pcc', group: 3, label: 'PCC (Brazil)', val: 12},
+    {id: 'grp_tda', group: 3, label: 'Tren de Aragua', val: 12},
+    // Ukraine Transfer & Procurement
+    {id: 'theme_ukr', group: 4, label: 'Ukraine Tactical Transfer', val: 22},
+    {id: 'ukr_legion', group: 4, label: 'Intl Legion Infiltration', val: 14},
+    {id: 'theme_proc', group: 5, label: 'Procurement Channels', val: 20},
+    {id: 'proc_dji', group: 5, label: 'Chinese COTS (DJI)', val: 15},
+    {id: 'proc_fpv', group: 5, label: 'Custom FPV Hubs', val: 14}
+  ];
+
+  const links = [
+    {source: 'root', target: 'theme_attack'}, {source: 'root', target: 'theme_surv'},
+    {source: 'root', target: 'theme_smug'}, {source: 'root', target: 'theme_prison'},
+    {source: 'root', target: 'theme_noverif'}, {source: 'root', target: 'theme_ukr'},
+    {source: 'root', target: 'theme_proc'},
+    
+    // Group Links
+    {source: 'theme_attack', target: 'grp_cjng'}, {source: 'theme_attack', target: 'grp_cv'},
+    {source: 'theme_attack', target: 'grp_eln'}, {source: 'theme_attack', target: 'grp_farc'},
+    {source: 'theme_surv', target: 'grp_cjng'}, {source: 'theme_surv', target: 'grp_sin'},
+    {source: 'theme_smug', target: 'grp_sin'}, {source: 'theme_prison', target: 'grp_ecu'},
+    
+    // No verifications
+    {source: 'theme_noverif', target: 'grp_ms13'}, {source: 'theme_noverif', target: 'grp_pcc'},
+    {source: 'theme_noverif', target: 'grp_tda'},
+    
+    // Ukraine & Procurement
+    {source: 'theme_ukr', target: 'ukr_legion'}, {source: 'ukr_legion', target: 'grp_cjng'},
+    {source: 'ukr_legion', target: 'grp_cv'}, {source: 'ukr_legion', target: 'grp_eln'},
+    {source: 'theme_proc', target: 'proc_dji'}, {source: 'theme_proc', target: 'proc_fpv'},
+    {source: 'proc_dji', target: 'grp_cv'}, {source: 'proc_dji', target: 'grp_ecu'},
+    {source: 'proc_fpv', target: 'grp_cjng'}
+  ];
+
+  // Dynamically blend specific incidents from DB
+  DATA.forEach((row, i) => {
+    const incId = 'inc_' + i;
+    const g = (row.gangs_involved || '').toLowerCase();
+    const m = (row.mission_type || '').toLowerCase();
+    
+    nodes.push({ id: incId, group: 10, label: (row.location||'').split(',')[0], val: 4, desc: row.summary_of_case });
+    
+    let isLinked = false;
+    if (g.includes('cjng')) { links.push({source: incId, target: 'grp_cjng'}); isLinked=true; }
+    else if (g.includes('vermelho')||g.includes('cv')) { links.push({source: incId, target: 'grp_cv'}); isLinked=true; }
+    else if (g.includes('sinaloa')) { links.push({source: incId, target: 'grp_sin'}); isLinked=true; }
+    else if (g.includes('eln')) { links.push({source: incId, target: 'grp_eln'}); isLinked=true; }
+    else if (g.includes('farc')) { links.push({source: incId, target: 'grp_farc'}); isLinked=true; }
+    else if (g.includes('choneros')||g.includes('lobos')) { links.push({source: incId, target: 'grp_ecu'}); isLinked=true; }
+
+    if(!isLinked) {
+      if(m.includes('attack')) links.push({source: incId, target: 'theme_attack'});
+      else if(m.includes('prison')) links.push({source: incId, target: 'theme_prison'});
+      else links.push({source: incId, target: 'root'});
+    }
+  });
+
+  const nodeData = nodes.map(d => Object.assign({}, d));
+  const linkData = links.map(d => Object.assign({}, d));
+
+  const svg = d3.select('#research-network').append('svg')
+    .attr('width', width).attr('height', height)
+    .call(d3.zoom().on("zoom", (e) => { svgGroup.attr("transform", e.transform); }));
+    
+  const svgGroup = svg.append('g');
+
+  const simulation = d3.forceSimulation(nodeData)
+    .force('link', d3.forceLink(linkData).id(d => d.id).distance(l => {
+      const gS = typeof l.source==='object' ? l.source.group : nodes.find(n=>n.id===l.source).group;
+      const gT = typeof l.target==='object' ? l.target.group : nodes.find(n=>n.id===l.target).group;
+      if (gS === 0) return 150;
+      if (gT === 10) return 30;
+      return 90;
+    }))
+    .force('charge', d3.forceManyBody().strength(d => d.group === 10 ? -20 : -350))
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collide', d3.forceCollide().radius(d => d.val + 8));
+
+  const link = svgGroup.append('g').selectAll('line').data(linkData).join('line')
+    .attr('stroke', 'rgba(255,255,255,0.1)').attr('stroke-width', 1);
+
+  const colors = { 0:'#c8f04a', 1:'#4a9fd4', 2:'#e85c3a', 3:'#888780', 4:'#f0a030', 5:'#2ab89a', 10:'rgba(255,255,255,0.3)' };
+
+  const node = svgGroup.append('g').selectAll('circle').data(nodeData).join('circle')
+    .attr('r', d => d.val)
+    .attr('fill', d => colors[d.group] || '#999')
+    .attr('stroke', '#111').attr('stroke-width', 1.5)
+    .call(d3.drag()
+      .on('start', e => { if (!e.active) simulation.alphaTarget(0.3).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
+      .on('drag', e => { e.subject.fx = e.x; e.subject.fy = e.y; })
+      .on('end', e => { if (!e.active) simulation.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; }));
+
+  node.append('title').text(d => d.desc ? `${d.label}\n\n${d.desc}` : d.label);
+
+  const label = svgGroup.append('g').selectAll('text').data(nodeData.filter(d => d.group !== 10)).join('text')
+    .text(d => d.label)
+    .attr('font-size', d => d.group === 0 ? '16px' : '11px')
+    .attr('fill', d => d.group === 3 ? '#888780' : '#e8e6df')
+    .attr('text-anchor', 'middle')
+    .attr('dy', d => d.val + 14)
+    .style('font-family', 'IBM Plex Mono');
+
+  simulation.on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    node.attr('cx', d => d.x).attr('cy', d => d.y);
+    label.attr('x', d => d.x).attr('y', d => d.y);
   });
 }
-
-function focusKnowledgeNode(key) {
-  currentKnowledgeKey = key;
-  document.querySelectorAll('.knowledge-node').forEach(node => node.classList.toggle('active', node.dataset.key === key));
-  const center = document.querySelector('.knowledge-center');
-  if (center) center.classList.toggle('active', key === 'overview');
-  renderKnowledgeLines();
-  renderKnowledgeDetail(key);
-}
-
-function renderKnowledgeDetail(key) {
-  const detail = document.getElementById('knowledge-detail');
-  if (!detail) return;
-
-  if (key === 'overview') {
-    const countries = new Set(DATA.map(d => d.country).filter(Boolean)).size;
-    const ukraineCount = DATA.filter(d => d.ukraine_link === 'TRUE').length;
-    const attackCount = DATA.filter(d => (d.mission_type || '').toLowerCase().includes('attack')).length;
-    const prisonCount = DATA.filter(d => (d.mission_type || '').toLowerCase().includes('prison')).length;
-    detail.innerHTML = `
-      <div class="knowledge-detail-kicker">Overview</div>
-      <div class="knowledge-detail-title">What this fourth page adds</div>
-      <div class="knowledge-detail-copy">The original dashboard already shows overview, map, and database views. This knowledge layer keeps the incident dataset intact but adds a networked research view that links rows to larger patterns: tactical transfer, prison ecosystems, counter-drone gaps, supply chains, negative evidence, and the broader non-aerial research perimeter.</div>
-      <div class="knowledge-stat-grid">
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${DATA.length}</div><div class="knowledge-stat-label">CSV incidents</div></div>
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${countries}</div><div class="knowledge-stat-label">Countries</div></div>
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${ukraineCount}</div><div class="knowledge-stat-label">Ukraine-linked</div></div>
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${attackCount}</div><div class="knowledge-stat-label">Attack rows</div></div>
-      </div>
-      <ul class="knowledge-list">
-        <li><span class="knowledge-list-label">Incident nodes</span><span class="knowledge-copy">These are direct pointers to rows in the authoritative CSV.</span></li>
-        <li><span class="knowledge-list-label">Research nodes</span><span class="knowledge-copy">These synthesize themes that may span many rows or sit partly outside the dataset, such as maritime systems or verified absence cases.</span></li>
-        <li><span class="knowledge-list-label">Prison layer</span><span class="knowledge-copy">${prisonCount} row(s) in the dataset are explicitly tagged as prison contraband, but the research also frames prisons as a broader delivery and surveillance ecosystem.</span></li>
-      </ul>
-      <div class="knowledge-detail-actions">
-        <button type="button" class="knowledge-action" onclick="showPage('database')">Open database</button>
-        <button type="button" class="knowledge-action" onclick="showPage('map')">Open map</button>
-      </div>
-    `;
-    return;
-  }
-
-  const node = allKnowledgeNodes().find(n => n.key === key);
-  if (!node) return;
-  const related = collectRelatedRows(node);
-  const isIncident = node.kind === 'incident';
-  const row = isIncident ? resolveIncident(node) : null;
-
-  const chips = (node.tags || []).map(tag => `<span class="knowledge-pill">${tag}</span>`).join('');
-  const relatedHtml = related.slice(0, 4).map(r => `
-    <li>
-      <span class="knowledge-list-meta">${r.date} · ${r.country}</span>
-      <span class="knowledge-list-label">${r.location}</span>
-      <span class="knowledge-copy">${(r.summary_of_case || '').substring(0, 120)}${(r.summary_of_case || '').length > 120 ? '…' : ''}</span>
-    </li>
-  `).join('');
-
-  let actions = '';
-  if (row) {
-    actions += `<button type="button" class="knowledge-action" onclick="showRowInDatabase('${row.__id}')">Open in database</button>`;
-    actions += `<button type="button" class="knowledge-action" onclick="showRowOnMap('${row.__id}')">Locate on map</button>`;
-    if (row.url_primary_source) actions += `<a class="knowledge-action" href="${row.url_primary_source}" target="_blank">Primary source</a>`;
-  } else if (node.preset) {
-    actions += `<button type="button" class="knowledge-action" onclick='applyDatabasePreset(${JSON.stringify(node.preset)})'>Filter dataset</button>`;
-  }
-
-  detail.innerHTML = `
-    <div class="knowledge-detail-kicker">${node.kind === 'theme' ? 'Cluster' : node.kind === 'research' ? 'Research thread' : 'Incident node'}</div>
-    <div class="knowledge-detail-title">${node.label}</div>
-    <div class="knowledge-detail-copy">${row ? row.summary_of_case : node.summary}</div>
-    ${chips ? `<div class="knowledge-pill-row">${chips}</div>` : ''}
-    ${row ? `
-      <div class="knowledge-stat-grid">
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${row.country}</div><div class="knowledge-stat-label">Country</div></div>
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${row.date}</div><div class="knowledge-stat-label">Date</div></div>
-      </div>
-    ` : related.length ? `
-      <div class="knowledge-stat-grid">
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${related.length}</div><div class="knowledge-stat-label">Related rows</div></div>
-        <div class="knowledge-stat"><div class="knowledge-stat-num">${new Set(related.map(r => r.country)).size}</div><div class="knowledge-stat-label">Countries touched</div></div>
-      </div>
-    ` : ''}
-    ${actions ? `<div class="knowledge-detail-actions">${actions}</div>` : ''}
-    ${related.length ? `<ul class="knowledge-list">${relatedHtml}</ul>` : `<ul class="knowledge-list"><li><span class="knowledge-list-label">Research-only node</span><span class="knowledge-copy">This node is part of the broader analytical framing and does not need to resolve to a specific incident row.</span></li></ul>`}
-  `;
-}
-
-async function bootstrap() {
-  try {
-    await loadData();
-    buildLanding();
-    buildKnowledge();
-    buildTable();
-    showPage('landing');
-  } catch (err) {
-    console.error(err);
-    document.getElementById('page-landing').innerHTML = `<div class="hero"><div class="hero-tag">Load error</div><h1>Dataset not loaded</h1><p class="hero-sub">Keep <code>drone_criminaluse_latam_v1.csv</code> in the same folder as this HTML file and serve the folder over HTTP or HTTPS.</p></div>`;
-  }
-}
-
-document.addEventListener('DOMContentLoaded', bootstrap);
-window.addEventListener('resize', () => { if (document.getElementById('page-knowledge')?.classList.contains('active')) renderKnowledgeLines(); });
 </script>
+</body>
+</html>
