@@ -124,12 +124,10 @@
   .popup-loc { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
   .popup-desc { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 10px; }
   .popup-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; background: rgba(255,255,255,0.05); color: var(--text-main); margin-right: 4px; }
-  
-  /* UPDATED: Brightened map filter */
   .leaflet-tile { filter: brightness(0.6) saturate(0.2) contrast(1.2) hue-rotate(180deg); }
   .leaflet-control-zoom a { background: var(--bg-surface) !important; color: var(--text-main) !important; border-color: var(--border-med) !important; }
 
-  /* DATABASE */
+  /* DATABASE & MODAL */
   .db-container { display: flex; flex-direction: column; height: calc(100vh - 60px); }
   .db-toolbar {
     padding: 1rem 1.5rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-light);
@@ -137,8 +135,7 @@
   }
   .db-input, .db-select {
     background: var(--bg-base); border: 1px solid var(--border-med); color: var(--text-main);
-    font-family: var(--font-mono); font-size: 12px; padding: 0.5rem 1rem; border-radius: 4px; outline: none;
-    transition: border-color 0.2s;
+    font-family: var(--font-mono); font-size: 12px; padding: 0.5rem 1rem; border-radius: 4px; outline: none; transition: border-color 0.2s;
   }
   .db-input:focus, .db-select:focus { border-color: var(--accent); }
   .db-input { flex: 1; min-width: 250px; }
@@ -148,33 +145,55 @@
   .table-wrapper { flex: 1; overflow: auto; background: var(--bg-base); }
   table { width: 100%; border-collapse: collapse; text-align: left; }
   thead { position: sticky; top: 0; background: rgba(15, 16, 17, 0.95); backdrop-filter: blur(8px); z-index: 10; box-shadow: 0 1px 0 var(--border-light); }
-  th {
-    padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--text-sec);
-    text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; user-select: none; white-space: nowrap;
-  }
+  th { padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; }
   th:hover { color: var(--text-main); }
   .sort-icon { display: inline-block; margin-left: 6px; font-size: 10px; opacity: 0.3; }
   th.sorted .sort-icon { opacity: 1; color: var(--accent); }
   td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-light); color: var(--text-main); vertical-align: top; }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+  .clickable-row { cursor: pointer; transition: background 0.1s; }
+  .clickable-row:hover td { background: rgba(255,255,255,0.04); }
   .cell-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); white-space: nowrap; }
   .cell-desc { max-width: 350px; font-size: 13px; color: var(--text-sec); line-height: 1.5; }
   .cell-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
 
+  /* DB MODAL */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+    z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  .modal-content {
+    background: var(--bg-surface); border: 1px solid var(--border-med); border-radius: 8px;
+    width: 90%; max-width: 600px; padding: 2rem; position: relative; transform: translateY(20px); transition: transform 0.2s; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+  }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; font-size: 1.5rem; color: var(--text-sec); cursor: pointer; line-height: 1; }
+  .modal-close:hover { color: var(--text-main); }
+
   /* KNOWLEDGE CLOUD */
-  .network-wrapper { height: calc(100vh - 60px); position: relative; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
+  .network-wrapper { height: calc(100vh - 60px); position: relative; background: radial-gradient(circle at center, #111 0%, #050505 100%); overflow: hidden; }
   #network-svg { width: 100%; height: 100%; cursor: grab; }
   #network-svg:active { cursor: grabbing; }
-  .network-hud {
-    position: absolute; top: 2rem; left: 2rem; pointer-events: none; max-width: 400px;
-  }
+  
+  .network-hud { position: absolute; top: 2rem; left: 2rem; pointer-events: none; max-width: 400px; z-index: 10; }
   .network-hud h2 { font-family: var(--font-head); font-size: 1.5rem; color: var(--text-main); margin-bottom: 0.5rem; }
   .network-hud p { font-size: 13px; color: var(--text-sec); line-height: 1.5; pointer-events: auto; }
-  .node-tooltip {
-    position: absolute; background: var(--bg-surface); border: 1px solid var(--border-med);
-    padding: 10px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px;
-    color: var(--text-main); pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  
+  .network-toggle { position: absolute; top: 2rem; right: 2rem; z-index: 10; display: flex; align-items: center; gap: 10px; background: var(--bg-glass); padding: 0.5rem; border: 1px solid var(--border-med); border-radius: 6px; backdrop-filter: blur(8px); }
+  .network-toggle label { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; margin-right: 4px; }
+  
+  .network-legend { position: absolute; bottom: 2rem; left: 2rem; z-index: 10; background: var(--bg-glass); padding: 1.2rem; border: 1px solid var(--border-med); border-radius: 6px; backdrop-filter: blur(8px); pointer-events: auto; }
+  .network-legend h4 { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  .network-sidebar {
+    position: absolute; top: 0; right: 0; width: 350px; height: 100%; background: var(--bg-glass); backdrop-filter: blur(16px);
+    border-left: 1px solid var(--border-med); padding: 2rem; transform: translateX(100%); transition: transform 0.3s ease; z-index: 20; box-shadow: -10px 0 30px rgba(0,0,0,0.5); overflow-y: auto;
   }
+  .network-sidebar.active { transform: translateX(0); }
+  .sidebar-close { font-size: 18px; color: var(--text-sec); cursor: pointer; float: right; }
+  .sidebar-close:hover { color: var(--text-main); }
+  .sidebar-title { font-family: var(--font-head); font-size: 1.5rem; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--text-main); }
+  .sidebar-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; background: rgba(255,255,255,0.05); color: var(--accent); margin-bottom: 1.5rem; }
 
   /* UPLOAD OVERLAY */
   #init-overlay {
@@ -230,8 +249,18 @@
     </div>
 
     <div class="panel">
+      <h3>Temporal Activity (Spike)</h3>
+      <div id="chart-timeline"></div>
+    </div>
+
+    <div class="panel">
       <h3>Dominant Mission Types</h3>
       <div id="chart-missions"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Payload Typology</h3>
+      <div id="chart-payloads"></div>
     </div>
 
     <div class="panel" style="grid-column: 1 / -1;">
@@ -316,14 +345,44 @@
   </div>
 </div>
 
+<div id="incident-modal" class="modal-overlay" onclick="if(event.target===this) closeDBModal()">
+  <div class="modal-content">
+    <span class="modal-close" onclick="closeDBModal()">&times;</span>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
 <div id="view-network" class="page">
   <div class="network-wrapper">
     <div class="network-hud">
       <h2>Entity Relationship Graph</h2>
-      <p>This force-directed graph is generated directly from the authoritative dataset. It maps relationships between specific <b>Criminal Groups</b>, <b>Countries of Operation</b>, and hardware <b>Procurement origins</b> (like DJI/China or Ukraine tactics). Hover over nodes to explore connections.</p>
+      <p>Maps systemic relationships directly from the authoritative dataset. Click any node to isolate its operational network.</p>
     </div>
+    
+    <div class="network-toggle">
+      <label>Analysis Level:</label>
+      <button id="btn-detailed" class="btn primary" onclick="setNetworkMode(false)">Detailed (All Incidents)</button>
+      <button id="btn-macro" class="btn" onclick="setNetworkMode(true)">Macro (Aggregated)</button>
+    </div>
+
+    <div class="network-legend">
+      <h4>Graph Legend</h4>
+      <div class="legend-item"><div class="dot" style="background:#fff"></div> Root Node</div>
+      <div class="legend-item"><div class="dot" style="background:var(--accent)"></div> Criminal Entity</div>
+      <div class="legend-item"><div class="dot" style="background:var(--text-sec)"></div> Target Country</div>
+      <div class="legend-item"><div class="dot" style="background:var(--blue)"></div> Supply Chain / DJI</div>
+      <div class="legend-item"><div class="dot" style="background:var(--red)"></div> Ukraine Transfer Link</div>
+      <div class="legend-item"><div class="dot" style="background:rgba(255,255,255,0.4)"></div> Specific Incident</div>
+    </div>
+
     <div id="network-svg"></div>
-    <div id="node-tooltip" class="node-tooltip"></div>
+
+    <div id="network-sidebar" class="network-sidebar">
+      <span class="sidebar-close" onclick="closeNetworkSidebar()">&#10005;</span>
+      <h3 class="sidebar-title" id="sb-title">Node Title</h3>
+      <div class="sidebar-badge" id="sb-badge">CATEGORY</div>
+      <div id="sb-content" style="color:var(--text-sec); font-size:13px; line-height:1.6;"></div>
+    </div>
   </div>
 </div>
 
@@ -335,6 +394,7 @@ let sortAsc = false;
 let leafletMap = null;
 let markerLayer = null;
 let networkRendered = false;
+let isMacroMode = false;
 
 // Initialization / Upload
 window.onload = async () => {
@@ -344,9 +404,7 @@ window.onload = async () => {
       const text = await res.text();
       initApp(text);
     }
-  } catch(e) {
-    // Await manual upload if fetch fails
-  }
+  } catch(e) { } // Fallback to manual overlay
 };
 
 function handleFileUpload(e) {
@@ -360,7 +418,6 @@ function handleFileUpload(e) {
 function parseCSV(csv) {
   const lines = [];
   let row = [], cell = '', inside = false;
-  
   csv = csv.replace(/\\s*/g, '');
   
   for (let i = 0; i < csv.length; i++) {
@@ -385,9 +442,7 @@ function parseCSV(csv) {
     for (let j = 0; j < headers.length; j++) {
       obj[headers[j]] = lines[i][j] || '';
     }
-    if ((obj.verification_status || '').toUpperCase() !== 'UNVERIFIED') {
-      data.push(obj);
-    }
+    if ((obj.verification_status || '').toUpperCase() !== 'UNVERIFIED') data.push(obj);
   }
   return data;
 }
@@ -418,7 +473,7 @@ function initApp(csvText) {
 
   buildOverviewCharts();
   populateDropdowns(countries);
-  applyFilters('db'); // Renders Table
+  applyFilters('db');
   
   switchTab('overview');
 }
@@ -439,42 +494,70 @@ function switchTab(tabId) {
   }
 }
 
-// Charts
+// ================= OVERVIEW CHARTS =================
+function renderBarChart(elementId, sortedData, maxVal, colorOverride) {
+  document.getElementById(elementId).innerHTML = sortedData.map(([label, n]) => {
+    let color = colorOverride || 'var(--accent)';
+    if (!colorOverride) {
+      const l = label.toLowerCase();
+      if(l.includes('attack')||l.includes('explosive')) color = 'var(--red)';
+      else if(l.includes('surv')||l.includes('optic')) color = 'var(--blue)';
+      else if(l.includes('smug')||l.includes('contraband')) color = 'var(--orange)';
+      else if(l.includes('prison')) color = 'var(--teal)';
+    }
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(n/maxVal)*100}%; background:${color}"></div></div>
+        <div class="bar-val">${n}</div>
+      </div>
+    `;
+  }).join('');
+}
+
 function buildOverviewCharts() {
+  // 1. Countries
   const cCounts = {};
   RAW_DATA.forEach(d => { if(d.country) cCounts[d.country] = (cCounts[d.country] || 0) + 1; });
   const sortedC = Object.entries(cCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
-  const maxC = sortedC[0][1];
-  
-  document.getElementById('chart-countries').innerHTML = sortedC.map(([c, n]) => `
-    <div class="bar-row">
-      <div class="bar-label">${c}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxC)*100}%"></div></div>
-      <div class="bar-val">${n}</div>
-    </div>
-  `).join('');
+  renderBarChart('chart-countries', sortedC, sortedC[0][1], 'var(--accent)');
 
-  const mCounts = { 'Attack':0, 'Surveillance':0, 'Smuggling':0, 'Prison Drops':0 };
+  // 2. Timeline (Spike)
+  const yrCounts = {};
+  RAW_DATA.forEach(d => {
+    const match = (d.date||'').match(/^202[0-9]/);
+    const yr = match ? match[0] : 'Unknown';
+    if(yr !== 'Unknown') yrCounts[yr] = (yrCounts[yr]||0) + 1;
+  });
+  const sortedY = Object.entries(yrCounts).sort((a,b) => a[0].localeCompare(b[0])); // chron sort
+  const maxY = Math.max(...sortedY.map(x=>x[1]));
+  renderBarChart('chart-timeline', sortedY, maxY, 'var(--teal)');
+
+  // 3. Missions
+  const mCounts = { 'Weaponized Attack':0, 'Surveillance / ISR':0, 'Border Smuggling':0, 'Prison Contraband':0 };
   RAW_DATA.forEach(d => {
     const m = (d.mission_type||'').toLowerCase();
-    if(m.includes('attack') || m.includes('explosive')) mCounts['Attack']++;
-    if(m.includes('surv') || m.includes('isr')) mCounts['Surveillance']++;
-    if(m.includes('smug') || m.includes('drug')) mCounts['Smuggling']++;
-    if(m.includes('prison') || m.includes('contraband')) mCounts['Prison Drops']++;
+    if(m.includes('attack') || m.includes('explosive')) mCounts['Weaponized Attack']++;
+    if(m.includes('surv') || m.includes('isr')) mCounts['Surveillance / ISR']++;
+    if(m.includes('smug') || m.includes('drug')) mCounts['Border Smuggling']++;
+    if(m.includes('prison') || m.includes('contraband')) mCounts['Prison Contraband']++;
   });
   const sortedM = Object.entries(mCounts).sort((a,b) => b[1]-a[1]);
-  const maxM = sortedM[0][1] || 1;
+  renderBarChart('chart-missions', sortedM, sortedM[0][1], null);
 
-  document.getElementById('chart-missions').innerHTML = sortedM.map(([m, n]) => `
-    <div class="bar-row">
-      <div class="bar-label">${m}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxM)*100}%; background:var(--${m==='Attack'?'red':m==='Surveillance'?'blue':m==='Smuggling'?'orange':'teal'})"></div></div>
-      <div class="bar-val">${n}</div>
-    </div>
-  `).join('');
+  // 4. Payload Typology
+  const pCounts = { 'Explosives / IEDs':0, 'Contraband / Narcotics':0, 'Optical / Surveillance':0 };
+  RAW_DATA.forEach(d => {
+    const p = (d.payload_type||'').toLowerCase();
+    if(p.includes('explosive') || p.includes('ied') || p.includes('grenade')) pCounts['Explosives / IEDs']++;
+    else if(p.includes('contraband') || p.includes('drug') || p.includes('phone') || p.includes('weapon')) pCounts['Contraband / Narcotics']++;
+    else if(p.includes('surv') || p.includes('optic') || p.includes('camera') || p.includes('none')) pCounts['Optical / Surveillance']++;
+  });
+  const sortedP = Object.entries(pCounts).sort((a,b) => b[1]-a[1]);
+  renderBarChart('chart-payloads', sortedP, sortedP[0][1], null);
 }
 
-// Map Logic
+// ================= GEOSPATIAL MAP =================
 function getCoords(row) {
   const loc = (row.location || '').toLowerCase();
   const c = (row.country || '').toLowerCase();
@@ -558,7 +641,7 @@ function updateMapMarkers() {
   });
 }
 
-// Database Filter & Sort
+// ================= DB FILTER, SORT, AND MODAL =================
 function populateDropdowns(countries) {
   const cSel = document.getElementById('filter-country');
   const mSel = document.getElementById('map-filter-country');
@@ -629,10 +712,10 @@ function renderTable() {
     return;
   }
 
-  tbody.innerHTML = FILTERED_DATA.map(row => {
+  tbody.innerHTML = FILTERED_DATA.map((row, i) => {
     const g = (row.gangs_involved || 'Unknown').split(';')[0];
-    const summary = (row.summary_of_case || '').substring(0, 150) + ((row.summary_of_case||'').length > 150 ? '...' : '');
-    return `<tr>
+    const summary = (row.summary_of_case || '').substring(0, 120) + ((row.summary_of_case||'').length > 120 ? '...' : '');
+    return `<tr class="clickable-row" onclick="openDBModal(${i})">
       <td class="cell-date">${row.date || '—'}</td>
       <td>${row.country || '—'}</td>
       <td class="cell-tag">${(row.location || '').split(',')[0]}</td>
@@ -643,7 +726,44 @@ function renderTable() {
   }).join('');
 }
 
-// Network Map (D3)
+function openDBModal(index) {
+  const row = FILTERED_DATA[index];
+  const b = document.getElementById('modal-body');
+  
+  let sourceBtn = '';
+  if (row.url_primary_source) {
+    sourceBtn = `<a href="${row.url_primary_source}" target="_blank" class="btn primary" style="text-decoration:none; display:inline-block; margin-top:1rem;">View Primary Source</a>`;
+  }
+  
+  b.innerHTML = `
+    <h2 style="font-family:var(--font-head); font-size:24px; color:var(--text-main); margin-bottom:0.25rem">${row.location || row.country}</h2>
+    <div style="color:var(--accent); font-family:var(--font-mono); font-size:12px; margin-bottom:1.5rem">${row.date || 'Unknown Date'}</div>
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; font-size:13px;">
+      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Criminal Entity</strong> ${row.gangs_involved || 'Unspecified'}</div>
+      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Platform/Origin</strong> ${row.drone_category || 'Unknown'} <br> <span style="color:var(--text-dim)">${row.supply_chain_origin || ''}</span></div>
+      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Mission & Payload</strong> ${row.mission_type || 'Unspecified'} <br> <span style="color:var(--text-dim)">${row.payload_type || ''}</span></div>
+      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">OSINT Verification</strong> ${row.verification_status || 'Unspecified'} <br> <span style="color:var(--text-dim)">Quality: ${row.evidence_quality || ''}</span></div>
+    </div>
+    
+    <div style="color:var(--text-main); font-size:14px; line-height:1.7; padding-top:1.5rem; border-top:1px solid var(--border-light);">
+      ${row.summary_of_case || 'No detailed summary provided.'}
+    </div>
+    ${sourceBtn}
+  `;
+  document.getElementById('incident-modal').classList.add('active');
+}
+function closeDBModal() { document.getElementById('incident-modal').classList.remove('active'); }
+
+// ================= ENTITY GRAPH (D3) =================
+function setNetworkMode(macro) {
+  isMacroMode = macro;
+  document.getElementById('btn-macro').classList.toggle('primary', macro);
+  document.getElementById('btn-detailed').classList.toggle('primary', !macro);
+  document.getElementById('network-svg').innerHTML = '';
+  buildNetwork();
+}
+
 function buildNetwork() {
   const container = document.getElementById('network-svg');
   const width = container.clientWidth;
@@ -655,24 +775,44 @@ function buildNetwork() {
 
   const nodeMap = new Map();
   const links = [];
+  const linkSet = new Set(); // Prevent duplicates in macro mode
 
   function addNode(id, group, label, size, color) {
     if (!nodeMap.has(id)) nodeMap.set(id, { id, group, label, size, color, count: 0 });
     nodeMap.get(id).count++;
     return id;
   }
+  
+  function safeLink(s, t) {
+    const key = s < t ? s+'-'+t : t+'-'+s;
+    if(!linkSet.has(key)) { linkSet.add(key); links.push({source: s, target: t}); }
+  }
 
   const rootId = addNode('root', 'root', 'LATAM DRONE NEXUS', 25, '#ffffff');
 
   RAW_DATA.forEach((row, i) => {
-    const incId = addNode(`inc_${i}`, 'incident', row.location || 'Incident', 3, 'rgba(255,255,255,0.4)');
+    let incId = null;
+    if (!isMacroMode) {
+      incId = addNode(`inc_${i}`, 'incident', row.location || 'Incident', 3, 'rgba(255,255,255,0.4)');
+    }
     
+    let cId = null;
     if (row.country) {
-      const cId = addNode(`c_${row.country}`, 'country', row.country, 12, 'var(--text-sec)');
-      links.push({ source: rootId, target: cId });
-      links.push({ source: cId, target: incId });
-    } else {
-      links.push({ source: rootId, target: incId });
+      cId = addNode(`c_${row.country}`, 'country', row.country, 12, 'var(--text-sec)');
+      safeLink(rootId, cId);
+      if (!isMacroMode) safeLink(cId, incId);
+    } else if (!isMacroMode) {
+      safeLink(rootId, incId);
+    }
+
+    let pId = null, uId = null;
+    if (row.supply_chain_origin && row.supply_chain_origin.includes('China')) {
+      pId = addNode('p_china', 'supply', 'Chinese COTS / DJI', 18, 'var(--blue)');
+      if (!isMacroMode) safeLink(incId, pId);
+    }
+    if ((row.ukraine_link || '').toUpperCase() === 'TRUE') {
+      uId = addNode('p_ukr', 'supply', 'Ukraine Tactical Doctrine', 18, 'var(--red)');
+      if (!isMacroMode) safeLink(incId, uId);
     }
 
     if (row.gangs_involved) {
@@ -680,40 +820,39 @@ function buildNetwork() {
         const gName = gang.trim();
         if(gName && !gName.toLowerCase().includes('unspecified')) {
           const gId = addNode(`g_${gName}`, 'gang', gName, 15, 'var(--accent)');
-          links.push({ source: gId, target: incId });
+          if (!isMacroMode) {
+            safeLink(gId, incId);
+          } else {
+            if (cId) safeLink(gId, cId);
+            if (pId) safeLink(gId, pId);
+            if (uId) safeLink(gId, uId);
+          }
         }
       });
-    }
-
-    if (row.supply_chain_origin && row.supply_chain_origin.includes('China')) {
-      const pId = addNode('p_china', 'supply', 'Chinese COTS / DJI', 18, 'var(--blue)');
-      links.push({ source: incId, target: pId });
-    }
-    if ((row.ukraine_link || '').toUpperCase() === 'TRUE') {
-      const uId = addNode('p_ukr', 'supply', 'Ukraine Tactical Doctrine', 18, 'var(--red)');
-      links.push({ source: incId, target: uId });
     }
   });
 
   const nodes = Array.from(nodeMap.values());
   nodes.forEach(n => {
     if (n.group === 'gang' || n.group === 'country') {
-      n.size = Math.min(30, n.size + (n.count * 0.5));
+      n.size = Math.min(30, n.size + (n.count * (isMacroMode ? 0.2 : 0.5)));
     }
   });
 
   const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+      if(isMacroMode) return 180;
       if(d.source.group === 'root') return 150;
       if(d.source.group === 'country' && d.target.group === 'incident') return 60;
       return 100;
     }))
-    .force('charge', d3.forceManyBody().strength(d => d.group === 'incident' ? -15 : -250))
+    .force('charge', d3.forceManyBody().strength(d => d.group === 'incident' ? -15 : (isMacroMode ? -500 : -250)))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collide', d3.forceCollide().radius(d => d.size + 10));
+    .force('collide', d3.forceCollide().radius(d => d.size + 15));
 
   const link = g.append('g').selectAll('line').data(links).join('line')
-    .attr('stroke', 'rgba(255,255,255,0.08)').attr('stroke-width', 1);
+    .attr('stroke', isMacroMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)')
+    .attr('stroke-width', isMacroMode ? 2 : 1);
 
   const node = g.append('g').selectAll('circle').data(nodes).join('circle')
     .attr('r', d => d.size)
@@ -724,28 +863,65 @@ function buildNetwork() {
       .on('drag', e => { e.subject.fx = e.x; e.subject.fy = e.y; })
       .on('end', e => { if(!e.active) simulation.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; }));
 
-  const tooltip = d3.select('#node-tooltip');
-  node.on('mouseover', (event, d) => {
-    tooltip.style('opacity', 1)
-           .html(`<b>${d.label}</b><br><span style="color:var(--text-dim)">Type: ${d.group.toUpperCase()}</span>`)
-           .style('left', (event.pageX + 15) + 'px')
-           .style('top', (event.pageY + 15) + 'px');
-  }).on('mouseout', () => tooltip.style('opacity', 0));
+  // CLICK TO ISOLATE & SIDEBAR LOGIC
+  node.on('click', (event, d) => {
+    event.stopPropagation();
+    
+    // Setup Sidebar
+    document.getElementById('sb-title').textContent = d.label;
+    document.getElementById('sb-badge').textContent = d.group.toUpperCase();
+    
+    // Find connections
+    const connected = new Set();
+    connected.add(d.id);
+    links.forEach(l => {
+      if (l.source.id === d.id) connected.add(l.target.id);
+      if (l.target.id === d.id) connected.add(l.source.id);
+    });
+    
+    document.getElementById('sb-content').innerHTML = `
+      <p style="margin-bottom:10px"><b style="color:var(--text-main)">Direct Graph Connections:</b> ${connected.size - 1}</p>
+      <p style="margin-bottom:10px"><b style="color:var(--text-main)">Total Dataset Occurrences:</b> ${d.count}</p>
+      <p style="margin-top:20px; font-style:italic;">Click on the background to reset map view and close sidebar.</p>
+    `;
+    document.getElementById('network-sidebar').classList.add('active');
+
+    // Isolate Visuals
+    node.style('opacity', n => connected.has(n.id) ? 1 : 0.1)
+        .attr('stroke', n => n.id === d.id ? 'var(--text-main)' : '#000');
+    link.style('opacity', l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05);
+  });
+
+  // Background Click Reset
+  svg.on('click', (event) => {
+    if (event.target.tagName === 'svg') {
+      node.style('opacity', 1).attr('stroke', '#000');
+      link.style('opacity', 1);
+      closeNetworkSidebar();
+    }
+  });
 
   const labels = g.append('g').selectAll('text').data(nodes.filter(d => d.group !== 'incident')).join('text')
     .text(d => d.label)
-    .attr('font-size', d => d.group === 'root' ? '14px' : '11px')
+    .attr('font-size', d => d.group === 'root' ? '14px' : (isMacroMode ? '13px' : '11px'))
     .attr('fill', 'var(--text-main)')
     .attr('text-anchor', 'middle')
-    .attr('dy', d => d.size + 14)
+    .attr('dy', d => d.size + 16)
     .style('font-family', 'var(--font-mono)')
-    .style('pointer-events', 'none');
+    .style('pointer-events', 'none')
+    .style('text-shadow', '0 2px 4px rgba(0,0,0,0.8)');
 
   simulation.on('tick', () => {
     link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
     node.attr('cx', d => d.x).attr('cy', d => d.y);
     labels.attr('x', d => d.x).attr('y', d => d.y);
   });
+}
+
+function closeNetworkSidebar() {
+  document.getElementById('network-sidebar').classList.remove('active');
+  d3.selectAll('circle').style('opacity', 1).attr('stroke', '#000');
+  d3.selectAll('line').style('opacity', 1);
 }
 </script>
 </body>
