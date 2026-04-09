@@ -376,6 +376,281 @@
   }
   .sort-arrow { margin-left: 4px; opacity: 0.4; }
   .sort-arrow.active { opacity: 1; color: var(--accent); }
+
+
+  /* ===== KNOWLEDGE ===== */
+  .selected-row td { background: rgba(200,240,74,0.08) !important; }
+
+  .knowledge-page { padding: 1.5rem 2rem 3rem; }
+  .knowledge-shell { max-width: 1280px; margin: 0 auto; }
+  .knowledge-header { padding: 1rem 0 1.5rem; }
+  .knowledge-title {
+    font-family: var(--font-head);
+    font-size: clamp(2rem, 4.5vw, 3.6rem);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.9rem;
+  }
+  .knowledge-sub {
+    max-width: 850px;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .knowledge-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.8fr);
+    gap: 1rem;
+    align-items: start;
+  }
+  @media (max-width: 1080px) {
+    .knowledge-layout { grid-template-columns: 1fr; }
+  }
+  .knowledge-panel {
+    position: relative;
+    min-height: 720px;
+    border: 0.5px solid var(--border);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(200,240,74,0.06), transparent 22%),
+      radial-gradient(circle at 50% 50%, rgba(74,159,212,0.04), transparent 44%),
+      linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0));
+    overflow: hidden;
+  }
+  .knowledge-rings,
+  .knowledge-network,
+  .knowledge-svg { position: absolute; inset: 0; }
+  .knowledge-ring {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 0.5px dashed rgba(255,255,255,0.08);
+  }
+  .knowledge-ring.ring-1 { width: 240px; height: 240px; }
+  .knowledge-ring.ring-2 { width: 430px; height: 430px; }
+  .knowledge-ring.ring-3 { width: 620px; height: 620px; }
+  .knowledge-svg { width: 100%; height: 100%; pointer-events: none; }
+  .knowledge-line {
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  .knowledge-line.active { stroke: rgba(200,240,74,0.45); }
+  .knowledge-network { position: relative; width: 100%; height: 720px; }
+  .knowledge-center {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 1px solid rgba(200,240,74,0.35);
+    background: rgba(17,17,16,0.94);
+    box-shadow: 0 0 35px rgba(200,240,74,0.08);
+    color: var(--text);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .knowledge-center:hover,
+  .knowledge-center.active {
+    border-color: var(--accent);
+    transform: translate(-50%, -50%) scale(1.02);
+  }
+  .knowledge-center-kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .knowledge-center-title {
+    font-family: var(--font-head);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .knowledge-center-note {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .knowledge-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    border: 0.5px solid var(--border2);
+    background: rgba(17,17,16,0.96);
+    color: var(--text);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .knowledge-node:hover,
+  .knowledge-node.active {
+    transform: translate(-50%, -50%) scale(1.03);
+    border-color: var(--accent);
+    background: rgba(26,26,24,0.98);
+  }
+  .knowledge-node.theme {
+    padding: 10px 14px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .knowledge-node.research {
+    padding: 8px 11px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .knowledge-node.incident {
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .knowledge-node-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent2);
+    flex-shrink: 0;
+  }
+  .knowledge-node.theme .knowledge-node-dot { background: var(--accent); }
+  .knowledge-node.research .knowledge-node-dot { background: var(--blue); }
+  .knowledge-node.incident .knowledge-node-dot { background: var(--red); }
+  .knowledge-side { display: grid; gap: 1rem; }
+  .knowledge-card {
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    padding: 1.2rem;
+  }
+  .knowledge-card h3,
+  .knowledge-detail-title {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.8rem;
+  }
+  .knowledge-detail-kicker {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.55rem;
+  }
+  .knowledge-copy,
+  .knowledge-detail-copy {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .knowledge-list {
+    list-style: none;
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .knowledge-list li {
+    border-bottom: 0.5px solid var(--border);
+    padding-bottom: 0.8rem;
+  }
+  .knowledge-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .knowledge-list-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .knowledge-list-meta {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+  }
+  .knowledge-pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.9rem;
+  }
+  .knowledge-pill,
+  .knowledge-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 0.5px solid var(--border2);
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: rgba(255,255,255,0.03);
+    text-decoration: none;
+  }
+  .knowledge-action {
+    background: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 7px 10px;
+  }
+  .knowledge-action:hover,
+  .knowledge-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .knowledge-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1rem;
+  }
+  .knowledge-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .knowledge-stat {
+    border: 0.5px solid var(--border);
+    padding: 0.8rem;
+    background: rgba(255,255,255,0.02);
+  }
+  .knowledge-stat-num {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .knowledge-stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
 </style>
 </head>
 <body>
@@ -386,8 +661,9 @@
     <button class="nav-tab active" onclick="showPage('landing')">Overview</button>
     <button class="nav-tab" onclick="showPage('map')">Map</button>
     <button class="nav-tab" onclick="showPage('database')">Database</button>
+    <button class="nav-tab" onclick="showPage('knowledge')">Knowledge</button>
   </div>
-  <div class="nav-meta">2022 – 2026 &nbsp;·&nbsp; 77 incidents</div>
+  <div class="nav-meta">2022 – 2026 &nbsp;·&nbsp; <span id="nav-incident-count">—</span> incidents</div>
 </nav>
 
 <!-- LANDING -->
@@ -399,20 +675,21 @@
     <div class="hero-actions">
       <button class="btn btn-accent" onclick="showPage('map')">Explore map</button>
       <button class="btn" onclick="showPage('database')">Search database</button>
+      <button class="btn" onclick="showPage('knowledge')">Knowledge cloud</button>
     </div>
   </div>
 
   <div class="stats-bar">
     <div class="stat-cell">
-      <div class="stat-num">77</div>
+      <div class="stat-num" id="verified-count">—</div>
       <div class="stat-label">Verified incidents</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num">8</div>
+      <div class="stat-num" id="country-count">—</div>
       <div class="stat-label">Countries</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num">22+</div>
+      <div class="stat-num" id="group-count">—</div>
       <div class="stat-label">Criminal groups</div>
     </div>
     <div class="stat-cell">
@@ -420,7 +697,7 @@
       <div class="stat-label">Ukraine-linked</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num">2022</div>
+      <div class="stat-num" id="earliest-year">—</div>
       <div class="stat-label">Earliest case</div>
     </div>
   </div>
@@ -446,7 +723,7 @@
       <h3>Methodology & sources</h3>
       <p>All 77 cases are corroborated by geolocation, police statements, or secondary reporting from credible outlets: AP, Reuters, InSight Crime, CSIS, War on the Rocks, Militant Wire, G1, O Globo, El Tiempo, Semana, Folha de São Paulo, Prensa Libre, El Comercio, and others.</p>
       <p>Platforms searched include Twitter/X, Telegram, Facebook, YouTube, and OSINT aggregators. Duplicate entries across sources were merged; only the most detailed, corroborated version is retained.</p>
-      <p>Groups with no verified drone activity in the period: MS-13, Barrio 18, PCC (Brazil), Tren de Aragua, Los Lobos (general), Gulf Clan Colombia.</p>
+      <p>Groups with no verified or credible drone activity in the reviewed research: MS-13, Barrio 18, Gulf Clan / Clan del Golfo, Tren de Aragua, Los Choneros, Los Lobos, and other Central American maras.</p>
     </div>
 
     <div class="ukraine-assessment">
@@ -517,78 +794,149 @@
   </div>
 </div>
 
+
+
 <script>
-const RAW = `date,location,country,summary_of_case,drone_category,drone_model,drone_manufacturer,payload_type,control_method,mission_type,gangs_involved,link_to_other_criminal_activity,procurement_method,supply_chain_origin,ukraine_link,ukraine_link_classification,verification_status,evidence_quality,platform_source,url_primary_source,url_all_sources,row_note
-2025-10-28,"Complexo da Penha & Alemão, Rio de Janeiro",Brazil,Drones dropped explosives on police during major security operation; videos and police confirm armed drone use; at least 54 dead; military advisor later arrested,commercial COTS,DJI (model unspecified),DJI,explosives,unknown,attack (explosive drop),Comando Vermelho,rival gang warfare; drug trafficking,not specified,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,YouTube; G1; Folha; O Globo,https://www1.folha.uol.com.br/internacional/en/brazil/2025/10/operation-against-comando-vermelho-leaves-at-least-54-dead-barricades-and-drone-delivered-bombs-in-rio-de-janeiro.shtml,,,
-2025-10-28,"Complexo da Penha & Alemão, Rio de Janeiro",Brazil,Drones used for real-time surveillance of police movements during the same megaoperation; distinct from explosive attack row,commercial COTS,Unknown,Unknown,surveillance,unknown,surveillance/ISR,Comando Vermelho,rival gang warfare; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,YouTube,https://www.youtube.com/watch?v=3gjPLqMfKIc,,,
-2025-07-26,"Jardim Bangu, Rio de Janeiro",Brazil,Drone used for surveillance to plan attack on rival militiamen; police obtained drone footage,commercial COTS,Unknown,Unknown,surveillance,unknown,surveillance/ISR,Comando Vermelho,rival gang warfare; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,G1,https://g1.globo.com/rj/rio-de-janeiro/noticia/2025/07/28/trafico-usou-drone-antes-de-ataque-a-milicianos.ghtml,,,
-2025-09-15,"Bangu, Rio de Janeiro",Brazil,Drone tracked suspected rival; police registered overflight in official records,commercial COTS,Unknown,Unknown,surveillance,unknown,surveillance/ISR,Comando Vermelho,rival gang warfare; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,G1,https://g1.globo.com/rj/rio-de-janeiro/noticia/2025/10/21/comando-vermelho-drone-emboscadas.ghtml,,,
-2024-07-09,"Quitungo, Rio de Janeiro",Brazil,Drone (DJI; 46-min autonomy; 15 km range) launched grenades in favela; technical details and police seizure documented,commercial COTS,DJI (model unspecified),DJI,explosives,unknown,attack (explosive drop),Comando Vermelho,rival gang warfare; drug trafficking,not specified,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,G1,https://g1.globo.com/rj/rio-de-janeiro/noticia/2024/07/09/como-funciona-drone-que-lancou-granada-em-favela-do-rio.ghtml,,,
-2023-10-09,"Maré; Vila Cruzeiro; Cidade de Deus, Rio de Janeiro",Brazil,Drones used for facial and licence plate recognition by traffickers for surveillance during police operation,commercial COTS,Unknown,Unknown,surveillance,GPS waypoint/autonomous,surveillance/ISR,Comando Vermelho,rival gang warfare; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,G1,https://g1.globo.com/rj/rio-de-janeiro/noticia/2023/10/09/forcas-de-seguranca-usam-drones-no-reconhecimento-facial-e-de-placas-de-veiculos.ghtml,,,
-2025-06-05,"Rocinha, Rio de Janeiro",Brazil,Drone used for escape surveillance by Ceará cell of Comando Vermelho; joint police/government operation,commercial COTS,Unknown,Unknown,surveillance,unknown,surveillance/ISR,Comando Vermelho,rival gang warfare; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,G1,https://g1.globo.com/rj/rio-de-janeiro/noticia/2025/06/05/traficantes-ceara-identificados-drone-fuga-rocinha.ghtml,,,
-2025-02-20,Rio de Janeiro,Brazil,Comando Vermelho deployed FPV drones for real-time surveillance during favela shootout,commercial COTS,DJI FPV,DJI,surveillance,FPV manual,surveillance/ISR,Comando Vermelho,rival gang warfare; drug trafficking,legal retail,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,BBC,https://bbc.com/mundo/noticias-america-latina-60512345,,,
-2025-10-30,Rio de Janeiro,Brazil,Ex-Brazilian Navy advisor arrested after coordinating drone acquisition and adapting Ukraine war-derived drone tactics for Comando Vermelho,commercial COTS,Unknown,Unknown,explosives,unknown,attack (explosive drop),Comando Vermelho,rival gang warfare; drug trafficking,battlefield adaptation (Ukraine),Unknown,TRUE,Confirmed,VERIFIED,Confirmed,UOL Notícias; G1; Folha,https://noticias.uol.com.br/cotidiano/ultimas-noticias/2025/10/30/militar-da-marinha-acusado-de-levar-drones-ao-cv-vai-para-presidio-federal.htm,,,
-2026-02-11,"El Paso, Texas",United States,El Paso airport temporarily closed after suspected cartel drone incursion into US airspace,unknown,Unknown,Unknown,surveillance,unknown,surveillance/ISR,Unspecified Mexican cartel(s),drug trafficking; arms trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,Twitter/X; Reuters; AP,https://www.reuters.com/world/us/cartel-drones-become-flashpoint-between-us-mexico-2026-02-12/,,,
-2026-01,"Northern Mexico, near US border",Mexico,Cartel operatives used drones to drop IEDs on rival groups near US border; video geolocated by OSINT analysts,commercial COTS,Unknown,Unknown,explosives (IED),FPV manual,attack (explosive drop),Likely CJNG; Likely Sinaloa,drug trafficking; arms trafficking; rival gang warfare,grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,YouTube; Twitter/X,https://www.youtube.com/watch?v=Z4abjd_4iR8,,,
-2023-01-01,"Various border municipalities, Northern Mexico",Mexico,Drones used systematically for surveillance and drug delivery across the US-Mexico border; multi-year general trend,commercial COTS,Unknown,Unknown,drugs; surveillance,GPS waypoint/autonomous,surveillance/ISR; drug smuggling; border crossing,CJNG; Sinaloa; CDN,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,Twitter/X; Facebook; AP; Reuters,https://apnews.com/article/drones-carteles-mexico-eeuu-espacio-aereo-el-paso-39781505ae52177bd20d39868aeea3de,,,
-2025-01-01,US-Mexico border region,United States,Kamikaze drones with explosives targeted US Border Patrol agents; video evidence; marks escalation to attacking law enforcement on US soil,commercial COTS,Unknown,Unknown,explosives,FPV manual,attack (kamikaze/one-way),Likely CJNG; Likely Sinaloa,drug trafficking; arms trafficking,battlefield adaptation (Ukraine); grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,YouTube,https://www.youtube.com/watch?v=FPqW4G2lYnU,,,
-2024-01-01,"New Mexico and Texas border regions",United States,Repeated cartel drone incursions for surveillance and drug drops; prompted anti-drone measures,commercial COTS,Unknown,Unknown,drugs; surveillance,GPS waypoint/autonomous,surveillance/ISR; drug smuggling; border crossing,Unspecified Mexican cartels,drug trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,YouTube; Twitter/X; Reuters,https://www.reuters.com/world/senator-seeks-us-watchdog-probe-into-texas-drone-incidents-2026-03-13/,,,
-2023-01-01,"Tierra Caliente; Michoacán; Jalisco; Guanajuato",Mexico,CJNG and allied groups used DJI Mavic drones modified for grenade drops and IED delivery against rivals and security forces,commercial COTS,DJI Mavic series,DJI,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),CJNG; La Familia Michoacana,drug trafficking; arms trafficking; rival gang warfare; civilian displacement,legal retail; grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,Facebook; Twitter/X; YouTube; AP; Militant Wire,https://www.militantwire.com/p/flying-south-for-the-war-the-rise,,,
-2024-04-01,"Michoacán, Mexico",Mexico,CJNG deployed FPV drone for first confirmed cartel FPV attack and dropped explosive devices with chemical substances causing respiratory distress,improvised/FPV,DJI Mavic series,DJI,explosives (chemical),FPV manual,attack (kamikaze/one-way); attack (explosive drop),CJNG,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market; battlefield adaptation (Ukraine),China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,Twitter/X; Telegram; CSIS; InSight Crime,https://www.csis.org/analysis/illicit-innovation-latin-america-not-prepared-fight-criminal-drones,,,
-2025-08-01,"Mexico (location undisclosed)",Mexico,Cárteles Unidos released video of drone attack on CJNG positions; geolocated by OSINT analysts,commercial COTS,DJI Mavic 2,DJI,explosives,GPS waypoint/autonomous,attack (explosive drop),Cárteles Unidos (attacker); CJNG (target),rival gang warfare,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,Twitter/X; YouTube; Militant Wire,https://www.militantwire.com/p/flying-south-for-the-war-the-rise,,,
-2025-07-20,"Catatumbo, Norte de Santander",Colombia,ELN explosive drone attack on military patrol killed 3 soldiers and wounded 8; commercial photography drone adapted for IED delivery,commercial COTS,Unknown,Unknown,explosives (IED),GPS waypoint/autonomous,attack (explosive drop),ELN,drug trafficking; arms trafficking,legal retail; grey market; black market/dark web,China (DJI),TRUE,Probable,VERIFIED,Confirmed,War on the Rocks; AP; Twitter/X,https://apnews.com/article/colombia-drone-attack-eln-catatumbo-61768f71290d2604a2d123d017cb18b4,,,
-2024-07-01,"Colombia (undisclosed region)",Colombia,First lethal drone attack in Colombia attributed to ELN or FARC dissidents; casualties among security forces,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ELN; ex-FARC dissidents,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,CSIS; InSight Crime,https://www.csis.org/analysis/illicit-innovation-latin-america-not-prepared-fight-criminal-drones,,,
-2025-04-01,"Colombia (location undisclosed)",Colombia,First documented one-way (kamikaze) attack drone deployed by a Colombian nonstate actor,improvised/FPV,Unknown,Unknown,explosives,FPV manual,attack (kamikaze/one-way),Likely FARC dissidents; Likely ELN,drug trafficking; arms trafficking,black market/dark web; battlefield adaptation (Ukraine),China (components),TRUE,Confirmed,VERIFIED,Confirmed,Twitter/X; War on the Rocks,https://warontherocks.com/2025/09/the-future-of-criminal-drone-use-in-latin-america/,,,
-2023-01-01,"Colombia (general)",Colombia,115 drone attacks by rebel groups in 2024; mostly commercial drones with explosives,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),ELN; ex-FARC mafia,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market; black market/dark web,China (DJI),TRUE,Probable,VERIFIED,Confirmed,AP,https://apnews.com/article/colombia-drone-attack-eln-catatumbo-61768f71290d2604a2d123d017cb18b4,,,
-2024-01-01,"Cauca & Nariño, Colombia",Colombia,Series of drone attacks on army and infrastructure by ex-FARC mafia in southwest Colombia,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ex-FARC mafia,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2023-01-01,"Colombian prisons, northern region",Colombia,Seven prison officials prosecuted for drone-based smuggling into prison,Not specified,Unknown,Unknown,contraband (prison),GPS waypoint/autonomous,prison contraband,Corrupt INPEC officials,prison corruption,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2023-08-18,"Cúcuta, Colombia",Colombia,FARC dissidents used commercial drone to drop explosives on police station; no injuries,commercial COTS,DJI Phantom 4,DJI,explosives,GPS waypoint/autonomous,attack (explosive drop),ex-FARC dissidents,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/colombia-drones-farc-dissidents-explosives/,,,
-2024-03-15,"Arauca, Colombia",Colombia,ELN used improvised drones to drop grenades on military outpost; minor injuries reported,improvised/FPV,Custom quadcopter,N/A,explosives,FPV manual,attack (explosive drop),ELN,drug trafficking; arms trafficking,black market/dark web; local assembly,China (components),TRUE,Probable,VERIFIED,Confirmed,Colombia Reports,https://colombiareports.com/eln-drone-attack-arauca-2024/,,,
-2026-01-01,"Catatumbo, Norte de Santander",Colombia,ELN explosive drone attack on Colombian Army patrol; one soldier killed; four wounded; Venezuela-based logistics,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ELN,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/un-militar-fue-asesinado-por-ataque-de-drones-explosivos-del-eln-contra-el-ejercito-nacional-en-el-catatumbo-4-mas-permanecen-heridos-3524924,,,
-2026-01-01,"Saravena, Arauca",Colombia,ELN FPV drone of new generation attacked Colombian Air Force base; two officers wounded; Venezuela-based ELN coordination,improvised/FPV,Generic FPV quad,Various (China),explosives,FPV manual,attack (kamikaze/one-way),ELN,drug trafficking; arms trafficking,black market/dark web; battlefield adaptation (Ukraine),China (components),TRUE,Confirmed,VERIFIED,Confirmed,Semana,https://www.semana.com/nacion/articulo/base-de-la-fuerza-aeroespacial-colombiana-en-arauca-es-atacada-con-drones-explosivos-de-nueva-generacion/202622/,,,
-2024-01-01,"Michoacán, Mexico",Mexico,CJNG used drones armed with IEDs against an army convoy in Michoacán,commercial COTS,Unknown,Unknown,explosives (IED),GPS waypoint/autonomous,attack (explosive drop),CJNG,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2023-05-01,"Heliodoro Castillo, Guerrero",Mexico,Drone attack killed 2 people and displaced approximately 600; attributed to local criminal group,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),Unnamed criminal group (likely CJNG or rivals),drug trafficking; civilian displacement,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2023-05-01,"Tepalcatepec, Michoacán",Mexico,CJNG used drones to drop explosives on rival Cárteles Unidos; attacks increasing in frequency,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),CJNG; Cárteles Unidos (target),rival gang warfare; drug trafficking,grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/tepalcatepec-mexico-staging-ground-for-drone-warfare/,,,
-2023-09-01,"Michoacán, Mexico",Mexico,Eight Colombians arrested for manufacturing drone-borne explosives for Los Viagras cartel,improvised/FPV,Unknown,Unknown,explosives,FPV manual,attack (explosive drop),Los Viagras; Cárteles Unidos,drug trafficking; arms trafficking,local assembly,local (Latin America),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2024-12-01,"Cotija, Michoacán",Mexico,Cárteles Unidos drone attack killed 2 soldiers and injured 5; IEDs and drones confirmed by SEDENA,commercial COTS,Unknown,Unknown,explosives (IED),GPS waypoint/autonomous,attack (explosive drop),Cárteles Unidos,drug trafficking; arms trafficking; rival gang warfare,grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/criminal-groups-mexico-improvised-explosive-devices/,,,
-2023-01-01,"Chicomuselo, Chiapas",Mexico,Criminal groups used drones to drop explosives on homes; displacing 400 people in civilian area,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop); psychological warfare,Unspecified criminal groups,drug trafficking; civilian displacement; rival gang warfare,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/warring-criminal-groups-are-targeting-civilians-in-chiapas-mexico/,,,
-2023-01-01,"Sinaloa, Mexico",Mexico,Authorities seized dozens of drones and explosives amid cartel infighting; Sinaloa Cartel factions involved,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),Sinaloa Cartel factions,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/criminal-groups-mexico-improvised-explosive-devices/,,,
-2025-03-01,"Mexico (undisclosed region)",Mexico,Largest UAV-delivered munition to date seized from cartel; used for explosive attacks,improvised/FPV,Generic FPV quad,Various (China),explosives (IED),FPV manual,attack (kamikaze/one-way),CJNG,drug trafficking; arms trafficking,local assembly; battlefield adaptation (Ukraine),China (components),TRUE,Confirmed,VERIFIED,Confirmed,ARES; Armament Research,https://armamentresearch.com/mexican-drug-cartel-use-of-uav-delivered-munitions/,,,
-2025-01-01,"Mexico (undisclosed region)",Mexico,Gulf Cartel drone attack on El Chapo's mother's house with grenade-dropping drone,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop); psychological warfare,Gulf Cartel (CDG),rival gang warfare; drug trafficking,grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,Militant Wire,https://www.militantwire.com/p/flying-south-for-the-war-the-rise,,,
-2023-01-01,"Various regions, Mexico",Mexico,CJNG specialized drone unit (Operadores Droneros) responsible for approx 20 percent of all drone attacks; custom insignia and doctrine,commercial COTS,DJI Mavic series; custom FPV,DJI,explosives; surveillance,FPV manual; GPS waypoint/autonomous,attack (explosive drop); surveillance/ISR,CJNG,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market; front company,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,Militant Wire; CSIS,https://www.militantwire.com/p/flying-south-for-the-war-the-rise,,,
-2023-07-01,"Guayaquil & Durán, Ecuador",Ecuador,Police seized 3 drones (5km range; 5kg payload) used for drug smuggling,commercial COTS,Unknown,Unknown,drugs,GPS waypoint/autonomous,drug smuggling,Unspecified trafficking networks,drug trafficking,legal retail,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2024-01-07,"Guayaquil, Ecuador",Ecuador,Los Choneros suspected of using drones for surveillance during prison escape of leader Fito,commercial COTS,DJI Mavic 2,DJI,surveillance,FPV manual,surveillance/ISR; prison contraband,Los Choneros,drug trafficking; prison corruption,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,AP,https://apnews.com/world-news/general-news-35a2811ece87a394843596eb92dcd0a4,,,
-2024-04-02,"Quito, Ecuador",Ecuador,Lobos gang attempted drone bomb attack on rival gang safehouse; device failed to detonate,commercial COTS,DJI Matrice 300,DJI,explosives,GPS waypoint/autonomous,attack (explosive drop),Los Lobos,drug trafficking; rival gang warfare,grey market; black market/dark web,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,El Comercio,https://elcomercio.com/actualidad/seguridad/lobos-drone-bomba-quito-2024.html,,,
-2022-07-20,"Penitenciaría del Litoral, Guayaquil",Ecuador,Drone-delivered explosives caused three explosions damaging prison roof; attributed contextually to Los Lobos and Los Choneros rivalry,unknown,Unknown,Unknown,explosives,unknown,attack (explosive drop),Los Lobos; Los Choneros (contextual),rival gang warfare; prison corruption; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,El Comercio,https://www.elcomercio.com/actualidad/seguridad/drones-explosivos-armas-penitenciaria-litoral.html,,,
-2023-07-25,"Penitenciaría del Litoral, Guayaquil",Ecuador,Los Lobos drones damaged prison infrastructure during violent disturbances,unknown,Unknown,Unknown,explosives,unknown,attack (explosive drop),Los Lobos,rival gang warfare; prison corruption,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,Plan V,https://planv.com.ec/historias/ruptura-entre-lobos-y-tiguerones-genera-nueva-matanza-la-penitenciaria/,,,
-2023-09-12,"La Roca Prison, Guayaquil",Ecuador,Commercial drone carrying approximately 40 lbs of explosives dropped on prison roof causing structural damage,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),Los Choneros; Los Lobos; R7 (contextual),rival gang warfare; prison corruption,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,La Hora,https://www.lahora.com.ec/pais/la-roca-gobierno-apuesta-por-francotiradores-ante-la-falta-de-tecnologia-para-evitar-drones-con-explosivos-en-las-carceles/,,,
-2022-01-01,"Ecuadorian prisons (general)",Ecuador,Ongoing pattern of commercial drones used to smuggle contraband into prisons by Los Choneros; Los Lobos; R7 networks,commercial COTS,Unknown,Unknown,contraband (prison),GPS waypoint/autonomous,prison contraband,Los Choneros; Los Lobos; R7,prison corruption; drug trafficking,legal retail,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2023-01-01,"Panama (prisons)",Panama,1587 drones seized for smuggling contraband into prisons; nationwide operation,Not specified,Unknown,Unknown,contraband (prison),GPS waypoint/autonomous,prison contraband,Not specified,prison corruption; drug trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-fuel-criminal-arms-race-latin-america/,,,
-2024-05-10,"Caracas, Venezuela",Venezuela,Tren de Aragua reportedly used drones for perimeter surveillance of drug shipment,commercial COTS,DJI Mini 3,DJI,surveillance,FPV manual,surveillance/ISR,Tren de Aragua,drug trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,Not assessed,Not assessed,InSight Crime,https://insightcrime.org/news/venezuela-tren-aragua-drone-surveillance-2024/,,,
-2024-06-01,"São Paulo, Brazil",Brazil,PCC used drones to deliver drugs into prison; intercepted by authorities,commercial COTS,DJI Phantom 4,DJI,drugs,GPS waypoint/autonomous,prison contraband,PCC,drug trafficking; prison corruption,legal retail,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,Folha de S.Paulo,https://folha.uol.com.br/cotidiano/2024/06/pcc-drone-prison-sao-paulo.shtml,,,
-2025-12-08,"Huehuetenango, Guatemala",Guatemala,Drones; arms; and explosives seized after Sinaloa Cartel incursion into Guatemalan territory; drones used for reconnaissance,commercial COTS,Unknown,Unknown,surveillance,unknown,surveillance/ISR,Sinaloa Cartel,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,Prensa Libre,https://www.prensalibre.com/guatemala/justicia/tres-fallecidos-drones-armas-y-granadas-revelan-mas-detalles-de-los-enfrentamientos-entre-el-cartel-de-sinaloa-y-chiapas-guatemala-breaking/,,,
-2024-08-08,"El Porvenir; Siria, Honduras",Honduras,Drones used for surveillance of military police inside Honduran prison; criminal structures suspected,commercial COTS,Unknown,Unknown,surveillance,unknown,surveillance/ISR; prison contraband,Unspecified criminal structures,prison corruption; drug trafficking,not specified,Unknown,FALSE,Not applicable,Not assessed,Not assessed,La Prensa Honduras,https://www.laprensa.hn/premium/carcel-siria-militares-vigilancia-drones-estructuras-criminales-NC20773718,,,
-2023-04-24,"Pasto–Tumaco road, Nariño",Colombia,IED-laden Syma commercial drone seized before attack could be carried out; smuggled from Ecuador,commercial COTS,Unknown,Unknown,explosives (IED),GPS waypoint/autonomous,attack (explosive drop),ex-FARC dissidents (FOS),drug trafficking; arms trafficking,black market/dark web,local (Latin America),FALSE,Not applicable,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/drones-emerge-new-weapon-war-colombia-pacific/,,,
-2025-12-18,"Aguachica, Cesar",Colombia,Combined IED-drone and mortar attack on military; at least 6 soldiers killed; 28 wounded; one of deadliest drone-assisted attacks in Colombia,commercial COTS,Unknown,Unknown,explosives (IED),GPS waypoint/autonomous,attack (explosive drop),Unknown armed group,drug trafficking; arms trafficking,not specified,Unknown,FALSE,Not applicable,VERIFIED,Confirmed,Colombia Reports,https://colombiareports.com/six-soldiers-killed-in-northern-colombia-drone-and-mortar-attack/,,,
-2024-04-01,"Argelia, Cauca",Colombia,First confirmed FARC dissident drone attack; attributed to Carlos Patiño faction,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ex-FARC dissidents (Carlos Patiño),drug trafficking; arms trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/a-mas-de-300-se-elevan-los-ataques-con-drones-en-colombia-215-victimas-entre-militares-policias-y-civiles-segun-un-informe-oficial-3494551,,,
-2025-09-01,"Cumbitara and Policarpa, Nariño",Colombia,FARC dissident drone killed one civilian woman and wounded two soldiers,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ex-FARC dissidents (Franco Benavides),drug trafficking; arms trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/colombia/otras-ciudades/cinco-integrantes-de-las-disidencias-de-las-farc-se-entregaron-al-ejercito-en-narino-3387736,,,
-2025-02-01,"El Tambo, Nariño",Colombia,FARC dissident drone attack on police station; three grenades dropped; no casualties,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ex-FARC dissidents (EMC; Franco Benavides),drug trafficking; arms trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/colombia/cali/un-grupo-armado-lanzo-tres-explosivos-mediante-el-uso-de-drones-contra-la-estacion-de-policia-del-municipio-de-el-tambo-narino-lo-que-se-sabe-3517354,,,
-2026-03-04,"Lagunitas, San Pablo, Nariño",Colombia,FARC dissident (EMC) explosive drone attack on Army; one of series in Nariño,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ex-FARC dissidents (EMC),drug trafficking; arms trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/amp/colombia/cali/autoridades-analizan-el-orden-publico-de-cara-a-las-elecciones-tras-el-ultimo-ataque-con-drones-en-narino-militares-fueron-blanco-de-explosivos-3537722,,,
-2023-01-01,"Mexico (nationwide)",Mexico,SEDENA reported 260 drone attacks in first half of 2023; mainly by CJNG; using weaponized drones against rivals,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),CJNG,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,CSIS,https://www.csis.org/analysis/illicit-innovation-latin-america-not-prepared-fight-criminal-drones,,,
-2024-07-01,"Mexico (undisclosed)",Mexico,First lethal drone attack in Mexico killed a 10-year-old boy; at least 11 deaths from drone attacks in first 5 months of 2025,commercial COTS,Unknown,Unknown,explosives,FPV manual,attack (explosive drop),CJNG,drug trafficking; civilian displacement,not specified,Unknown,TRUE,Confirmed,VERIFIED,Confirmed,CSIS,https://www.csis.org/analysis/illicit-innovation-latin-america-not-prepared-fight-criminal-drones,,,
-2024-01-01,"US-Mexico border",United States,Approximately 1000 drone incursions per month from Mexico into US; used for surveillance and drug delivery,commercial COTS,Unknown,Unknown,drugs; surveillance,GPS waypoint/autonomous,surveillance/ISR; drug smuggling; border crossing,Unspecified Mexican cartels,drug trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,CSIS,https://www.csis.org/analysis/united-states-needs-southwest-drone-wall,,,
-2024-02-01,"Mexico (undisclosed)",Mexico,Drones used to deliver illicit goods across borders; evading patrols; growing cartel tactic,commercial COTS,Unknown,Unknown,drugs,GPS waypoint/autonomous,drug smuggling; border crossing,Unspecified Mexican cartels,drug trafficking,legal retail; grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,CSIS,https://www.csis.org/analysis/illicit-innovation-latin-america-not-prepared-fight-criminal-drones,,,
-2024-01-01,"Mexico (undisclosed)",Mexico,Cartels adapt DJI drones for grenade drops using light-switch mechanisms; technical documentation,commercial COTS,DJI Mavic 3; Matrice series,DJI,explosives (IED),GPS waypoint/autonomous,attack (explosive drop),CJNG; Sinaloa,drug trafficking; arms trafficking,legal retail; grey market,China (DJI),TRUE,Confirmed,VERIFIED,Confirmed,Bellingcat; ARES,https://www.bellingcat.com/resources/2024/01/19/identifying-small-drones-from-screenshots-and-displays/,,,
-2024-01-01,"Mexico (undisclosed)",Mexico,FPV drones (hand-built with Chinese components) used for short-range and one-way attacks,improvised/FPV,Generic FPV quad,Various (China),explosives (IED),FPV manual,attack (kamikaze/one-way),CJNG; Sinaloa,drug trafficking; arms trafficking,black market/dark web; local assembly,China (components),TRUE,Confirmed,VERIFIED,Confirmed,ARES,https://armamentresearch.com/mexican-drug-cartel-use-of-uav-delivered-munitions/,,,
-2024-01-01,"Mexico (undisclosed)",Mexico,Cartels employ counter-UAS electronic warfare devices to jam rival and government drones,C-UAS/electronic warfare,C-UAS devices,Various,electronic warfare (jamming),N/A,counter-drone (C-UAS),CJNG; Sinaloa,drug trafficking; arms trafficking,grey market; black market/dark web,Various,TRUE,Confirmed,VERIFIED,Confirmed,ARES,https://armamentresearch.com/mexican-drug-cartel-use-of-uav-delivered-munitions/,,,
-2024-01-01,"Mexico (undisclosed)",Mexico,CJNG and Sinaloa Cartel use DJI Mavic 3 and Autel EVO drones for ISTAR and drug smuggling,commercial COTS,DJI Mavic 3; Autel EVO,DJI; Autel Robotics,drugs; surveillance,GPS waypoint/autonomous,surveillance/ISR; drug smuggling,CJNG; Sinaloa,drug trafficking,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,ARES,https://armamentresearch.com/mexican-drug-cartel-use-of-uav-delivered-munitions/,,,
-2024-01-01,"LNFM territory, Mexico",Mexico,LNFM drone attacks increased from 6 in 2023 to 20 in 2024; weaponized drones against rivals,commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),LNFM,drug trafficking; rival gang warfare,grey market,China (DJI),FALSE,Not applicable,VERIFIED,Confirmed,Small Wars Journal,https://smallwarsjournal.com/2026/02/16/mexican-cartel-drone-attacks-report/,,,
-2023-01-01,"Mexico (nationwide)",Mexico,Cartels building custom-made narco-drones for narcotics transport and attacks; DEA confirms trend; production hubs in Querétaro and Guadalajara,improvised/FPV,Custom narco-drones,Various (China),drugs; explosives,FPV manual; GPS waypoint/autonomous,drug smuggling; attack (explosive drop),CJNG; La Familia Michoacana,drug trafficking; arms trafficking,front company; local assembly,China (components),TRUE,Confirmed,VERIFIED,Confirmed,InSight Crime,https://insightcrime.org/news/brief/mexico-s-cartels-building-custom-made-narco-drones-dea/,,,
-2025-01-01,"Colombia (general)",Colombia,Aggregate: 418 explosive drone attacks in 22 months; approximately 1000 explosive devices dropped; 215 victims (military; police; civilians),commercial COTS,Unknown,Unknown,explosives,FPV manual; GPS waypoint/autonomous,attack (explosive drop),ELN; ex-FARC dissidents; Clan del Golfo,drug trafficking; arms trafficking; rival gang warfare,legal retail; grey market; black market/dark web,China (DJI),TRUE,Probable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/en-22-meses-se-registraron-418-ataques-con-drones-cargados-con-explosivos-3535498,,,
-2026-01-01,"Catatumbo, Norte de Santander",Colombia,Multiple ELN explosive drone attacks coordinated from Venezuelan territory; part of escalating campaign,commercial COTS,Unknown,Unknown,explosives,GPS waypoint/autonomous,attack (explosive drop),ELN,drug trafficking; arms trafficking; civilian displacement,legal retail; grey market,China (DJI),TRUE,Probable,VERIFIED,Confirmed,El Tiempo,https://www.eltiempo.com/justicia/conflicto-y-narcotrafico/disputa-entre-el-eln-y-disidencias-de-las-farc-de-alias-calarca-profundiza-la-crisis-en-el-catatumbo-desplazamiento-forzado-y-ataques-con-drones-3521195,,,`;
+const PAGE_ORDER = ['landing', 'map', 'database', 'knowledge'];
+let DATA = [];
+let tableData = [];
+let mapInit = false;
+let leafletMap = null;
+let allMarkers = [];
+let markerById = {};
+let currentMissionFilter = 'all';
+let currentCountryFilter = 'all';
+let sortCol = 0;
+let sortDir = 1;
+let selectedRowId = null;
+let knowledgeBuilt = false;
+let currentKnowledgeKey = 'overview';
+
+const THEME_NODES = [
+  {
+    key: 'mexico_theatre', kind: 'theme', label: 'Mexico theatre', x: 50, y: 20,
+    summary: 'The largest concentration of incidents in the dataset, spanning CJNG, Sinaloa, La Familia Michoacana, LNFM, Cárteles Unidos, and border-linked operations.',
+    tags: ['attacks', 'FPV', 'IED drops', 'border'],
+    preset: { country: 'Mexico' }
+  },
+  {
+    key: 'colombia_theatre', kind: 'theme', label: 'Colombia theatre', x: 78, y: 34,
+    summary: 'ELN and ex-FARC networks are associated with explosive drone attacks, one-way systems, and repeated strikes on security forces and infrastructure.',
+    tags: ['ELN', 'ex-FARC', 'attack drones'],
+    preset: { country: 'Colombia' }
+  },
+  {
+    key: 'brazil_cluster', kind: 'theme', label: 'Brazil / CV', x: 78, y: 66,
+    summary: 'Comando Vermelho anchors the Brazilian cluster, with verified surveillance use and armed drone incidents in Rio de Janeiro.',
+    tags: ['Rio', 'Comando Vermelho', 'surveillance'],
+    preset: { country: 'Brazil' }
+  },
+  {
+    key: 'border_corridor', kind: 'theme', label: 'Border corridor', x: 50, y: 80,
+    summary: 'A cross-border layer connecting northern Mexico and the United States, mixing surveillance, smuggling, incursions, and attack risk.',
+    tags: ['US-Mexico', 'surveillance', 'smuggling'],
+    preset: { search: 'border' }
+  },
+  {
+    key: 'prison_networks', kind: 'theme', label: 'Prison networks', x: 22, y: 66,
+    summary: 'The prison layer is structurally different: contraband delivery, prison surveillance, and seized drones in Ecuador, Colombia, Panama, and Brazil.',
+    tags: ['prisons', 'contraband', 'delivery'],
+    preset: { mission: 'prison contraband' }
+  },
+  {
+    key: 'ukraine_transfer', kind: 'theme', label: 'Ukraine transfer', x: 22, y: 34,
+    summary: 'The strongest evidence points to transfer of tactics and training, especially around FPV and one-way attack concepts, rather than direct hardware supply.',
+    tags: ['training', 'FPV', 'tactics'],
+    preset: { ukraine: 'TRUE' }
+  }
+];
+
+const RESEARCH_NODES = [
+  {
+    key: 'supply_chains', kind: 'research', label: 'Chinese supply chain', x: 34, y: 13, parent: 'mexico_theatre',
+    summary: 'Commercial DJI systems and Chinese components dominate the open-source picture, with procurement through retail, grey-market, and local assembly pathways.',
+    tags: ['DJI', 'components', 'procurement'],
+    preset: { search: 'China' }
+  },
+  {
+    key: 'fpv_shift', kind: 'research', label: 'FPV / one-way shift', x: 67, y: 13, parent: 'ukraine_transfer',
+    summary: 'FPV and improvised one-way drones are part of the technological escalation, especially in Mexico and Colombia.',
+    tags: ['FPV', 'kamikaze', 'manual control'],
+    preset: { search: 'FPV' }
+  },
+  {
+    key: 'counter_uas', kind: 'research', label: 'Counter-UAS response', x: 89, y: 50, parent: 'colombia_theatre',
+    summary: 'Government responses lag unevenly across the region, while criminal actors also show evidence of jamming and counter-drone adaptation.',
+    tags: ['C-UAS', 'jamming', 'policy gap'],
+    preset: { search: 'jamming' }
+  },
+  {
+    key: 'maritime_systems', kind: 'research', label: 'Maritime systems', x: 66, y: 87, parent: 'border_corridor',
+    summary: 'The broader research points beyond the CSV toward narco-submarines and unmanned maritime systems, especially around Colombia and Ecuador.',
+    tags: ['research only', 'narco-sub', 'non-aerial']
+  },
+  {
+    key: 'ugv_gap', kind: 'research', label: 'No verified UGV use', x: 34, y: 87, parent: 'prison_networks',
+    summary: 'The attached research finds no verified ground-based unmanned vehicle use by criminal groups in the region during the review period.',
+    tags: ['research gap', 'UGV', 'absence']
+  },
+  {
+    key: 'absence_cases', kind: 'research', label: 'No verified activity', x: 11, y: 50, parent: 'ukraine_transfer',
+    summary: 'The research explicitly flags negative evidence for several groups, including MS-13, Barrio 18, Gulf Clan, Tren de Aragua, Los Choneros, and Los Lobos.',
+    tags: ['negative evidence', 'MS-13', 'Tren de Aragua']
+  }
+];
+
+const INCIDENT_SPECS = [
+  {
+    key: 'rio_penha_2025', kind: 'incident', label: 'Rio police strike', x: 90, y: 73, parent: 'brazil_cluster',
+    summary: 'Explosive drones were used against police during the Penha and Alemão megaoperation.',
+    match: row => row.country === 'Brazil' && row.location.includes('Complexo da Penha') && (row.mission_type || '').includes('attack')
+  },
+  {
+    key: 'quitungo_2024', kind: 'incident', label: 'Quitungo grenade', x: 90, y: 58, parent: 'brazil_cluster',
+    summary: 'DJI platform reportedly adapted for grenade delivery in Rio.',
+    match: row => row.country === 'Brazil' && row.location.includes('Quitungo')
+  },
+  {
+    key: 'tepalcatepec_2023', kind: 'incident', label: 'Tepalcatepec 2023', x: 60, y: 6, parent: 'mexico_theatre',
+    summary: 'Early benchmark case in Michoacán tied to escalating cartel drone warfare.',
+    match: row => row.country === 'Mexico' && row.location.includes('Tepalcatepec')
+  },
+  {
+    key: 'michoacan_chemical_2024', kind: 'incident', label: 'Michoacán chemical', x: 42, y: 5, parent: 'mexico_theatre',
+    summary: 'A key escalation point: explosive devices with chemical substances reported in a cartel drone incident.',
+    match: row => row.country === 'Mexico' && (row.summary_of_case || '').toLowerCase().includes('chemical')
+  },
+  {
+    key: 'el_paso_2026', kind: 'incident', label: 'El Paso closure', x: 56, y: 94, parent: 'border_corridor',
+    summary: 'Airport disruption after suspected cartel drone incursion into US airspace.',
+    match: row => row.country === 'United States' && row.location.includes('El Paso')
+  },
+  {
+    key: 'catatumbo_2025', kind: 'incident', label: 'Catatumbo 2025', x: 88, y: 25, parent: 'colombia_theatre',
+    summary: 'ELN attack with an explosive-armed drone caused fatalities and injuries among soldiers.',
+    match: row => row.country === 'Colombia' && row.location.includes('Catatumbo') && (row.gangs_involved || '').includes('ELN') && (row.date || '').startsWith('2025')
+  },
+  {
+    key: 'cucuta_2023', kind: 'incident', label: 'Cúcuta station', x: 82, y: 13, parent: 'colombia_theatre',
+    summary: 'Commercial drone used to drop explosives on a police station.',
+    match: row => row.country === 'Colombia' && row.location.includes('Cúcuta')
+  },
+  {
+    key: 'quito_2024', kind: 'incident', label: 'Quito failed bomb', x: 12, y: 75, parent: 'prison_networks',
+    summary: 'Attempted bomb delivery by drone in Ecuador, tied to gang conflict.',
+    match: row => row.country === 'Ecuador' && row.location.includes('Quito')
+  },
+  {
+    key: 'panama_2023', kind: 'incident', label: 'Panama prison seizures', x: 7, y: 59, parent: 'prison_networks',
+    summary: 'High-volume seizure case underscoring the prison-contraband ecosystem.',
+    match: row => row.country === 'Panama'
+  }
+];
 
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
+  const lines = text.trim().split(/\r?\n/);
   const headers = parseCSVLine(lines[0]);
   return lines.slice(1).map(line => {
     const vals = parseCSVLine(line);
@@ -599,43 +947,74 @@ function parseCSV(text) {
 }
 
 function parseCSVLine(line) {
-  const result = []; let cur = ''; let inQ = false;
+  const result = [];
+  let cur = '';
+  let inQ = false;
   for (let i = 0; i < line.length; i++) {
     const c = line[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
-    else { cur += c; }
+    if (c === '"') {
+      if (inQ && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQ = !inQ;
+      }
+    } else if (c === ',' && !inQ) {
+      result.push(cur);
+      cur = '';
+    } else {
+      cur += c;
+    }
   }
   result.push(cur);
   return result;
 }
 
-const DATA = parseCSV(RAW);
+async function loadData() {
+  const res = await fetch('./drone_criminaluse_latam_v1.csv', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Could not load drone_criminaluse_latam_v1.csv');
+  const text = await res.text();
+  DATA = parseCSV(text).filter(row => Object.values(row).some(v => (v || '').trim() !== ''));
+  DATA.forEach((row, i) => { row.__id = `row-${i}`; });
+  tableData = [...DATA];
+  updateMetaNumbers();
+}
 
-// Coordinates for known locations
-const COORDS = {
-  'Brazil': { 'Rio de Janeiro': [-22.9068, -43.1729], 'São Paulo': [-23.5505, -46.6333] },
-  'Mexico': {
-    'Michoacán': [19.7, -101.9], 'Sinaloa': [25.0, -107.4], 'Guerrero': [17.7, -100.4],
-    'Chiapas': [16.8, -93.1], 'Jalisco': [20.7, -103.3], 'Mexico City': [19.4, -99.1],
-    'Northern Mexico': [28.5, -106.0], 'US-Mexico border': [29.5, -104.0]
-  },
-  'Colombia': {
-    'Catatumbo': [8.9, -73.1], 'Nariño': [1.3, -77.3], 'Arauca': [7.1, -70.8],
-    'Cauca': [2.5, -76.6], 'Cúcuta': [7.9, -72.5], 'Bogotá': [4.7, -74.0],
-    'Cesar': [9.9, -73.6]
-  },
-  'Ecuador': {
-    'Guayaquil': [-2.1700, -79.9224], 'Quito': [-0.2295, -78.5243]
-  },
-  'Panama': { 'Panama': [8.994, -79.519] },
-  'Venezuela': { 'Caracas': [10.4806, -66.9036] },
-  'Guatemala': { 'Huehuetenango': [15.32, -91.47] },
-  'Honduras': { 'Honduras': [15.2, -86.2] },
-  'United States': {
-    'El Paso': [31.7619, -106.4850], 'Texas': [31.0, -100.0], 'New Mexico': [34.5, -106.0]
-  }
-};
+function normalizeGroupName(name) {
+  return (name || '')
+    .replace(/\(target\)/gi, '')
+    .replace(/\(attacker\)/gi, '')
+    .replace(/\(contextual\)/gi, '')
+    .replace(/\blikely\s+/gi, '')
+    .replace(/\bunspecified\s+/gi, '')
+    .replace(/\bnot specified\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function updateMetaNumbers() {
+  const verified = DATA.length;
+  const countries = new Set(DATA.map(d => d.country).filter(Boolean)).size;
+  const groups = new Set();
+  DATA.forEach(d => {
+    (d.gangs_involved || '').split(';').forEach(g => {
+      const cleaned = normalizeGroupName(g);
+      if (cleaned && cleaned !== 'Unknown' && cleaned !== 'Various' && cleaned !== 'N/A') groups.add(cleaned);
+    });
+  });
+  const years = DATA.map(d => parseInt((d.date || '').match(/\d{4}/)?.[0] || '9999', 10)).filter(Number.isFinite);
+  const earliest = years.length ? Math.min(...years) : '—';
+  setText('nav-incident-count', verified);
+  setText('verified-count', verified);
+  setText('country-count', countries);
+  setText('group-count', `${groups.size}+`);
+  setText('earliest-year', earliest);
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
 
 function getCoords(row) {
   const loc = row.location || '';
@@ -643,32 +1022,31 @@ function getCoords(row) {
   const loclower = loc.toLowerCase();
 
   if (country === 'Brazil') {
-    if (loclower.includes('rio') || loclower.includes('penha') || loclower.includes('bangu') ||
-        loclower.includes('rocinha') || loclower.includes('maré') || loclower.includes('quitungo')) return [-22.9068, -43.1729];
+    if (loclower.includes('rio') || loclower.includes('penha') || loclower.includes('bangu') || loclower.includes('rocinha') || loclower.includes('maré') || loclower.includes('mare') || loclower.includes('quitungo')) return [-22.9068, -43.1729];
     if (loclower.includes('são paulo') || loclower.includes('sao paulo')) return [-23.5505, -46.6333];
     return [-15.8, -47.9];
   }
   if (country === 'Colombia') {
-    if (loclower.includes('catatumbo')) return [8.9 + (Math.random()-0.5)*0.3, -73.1 + (Math.random()-0.5)*0.3];
+    if (loclower.includes('catatumbo')) return [8.9 + (Math.random() - 0.5) * 0.3, -73.1 + (Math.random() - 0.5) * 0.3];
     if (loclower.includes('nariño') || loclower.includes('narino') || loclower.includes('tambo') || loclower.includes('pasto') || loclower.includes('cumbitara') || loclower.includes('lagunitas')) return [1.3, -77.3];
     if (loclower.includes('arauca') || loclower.includes('saravena')) return [7.1, -70.8];
     if (loclower.includes('cauca') || loclower.includes('argelia')) return [2.5, -76.6];
     if (loclower.includes('cúcuta') || loclower.includes('cucuta')) return [7.9, -72.5];
     if (loclower.includes('cesar') || loclower.includes('aguachica')) return [9.9, -73.6];
-    return [4.7 + (Math.random()-0.5)*2, -74.0 + (Math.random()-0.5)*2];
+    return [4.7 + (Math.random() - 0.5) * 2, -74.0 + (Math.random() - 0.5) * 2];
   }
   if (country === 'Mexico') {
-    if (loclower.includes('michoacán') || loclower.includes('michoacan') || loclower.includes('tepalcatepec') || loclower.includes('cotija') || loclower.includes('tierra caliente')) return [19.3 + (Math.random()-0.5)*0.5, -101.9 + (Math.random()-0.5)*0.5];
-    if (loclower.includes('sinaloa')) return [25.0, -107.4];
+    if (loclower.includes('michoacán') || loclower.includes('michoacan') || loclower.includes('tepalcatepec') || loclower.includes('cotija') || loclower.includes('tierra caliente')) return [19.3 + (Math.random() - 0.5) * 0.5, -101.9 + (Math.random() - 0.5) * 0.5];
+    if (loclower.includes('sinaloa') || loclower.includes('culiacán') || loclower.includes('culiacan')) return [25.0, -107.4];
     if (loclower.includes('guerrero') || loclower.includes('heliodoro')) return [17.7, -100.4];
     if (loclower.includes('chiapas') || loclower.includes('chicomuselo')) return [16.4, -92.5];
     if (loclower.includes('jalisco')) return [20.7, -103.3];
-    if (loclower.includes('northern') || loclower.includes('border') || loclower.includes('us-mexico')) return [29.0 + (Math.random()-0.5), -106.0 + (Math.random()-0.5)*3];
+    if (loclower.includes('northern') || loclower.includes('border') || loclower.includes('us-mexico') || loclower.includes('chihuahua') || loclower.includes('baja california')) return [29.0 + (Math.random() - 0.5), -106.0 + (Math.random() - 0.5) * 3];
     if (loclower.includes('lnfm')) return [22.0, -100.0];
-    return [23.0 + (Math.random()-0.5)*5, -102.5 + (Math.random()-0.5)*5];
+    return [23.0 + (Math.random() - 0.5) * 5, -102.5 + (Math.random() - 0.5) * 5];
   }
   if (country === 'Ecuador') {
-    if (loclower.includes('guayaquil') || loclower.includes('litoral') || loclower.includes('roca') || loclower.includes('durán')) return [-2.17 + (Math.random()-0.5)*0.1, -79.92 + (Math.random()-0.5)*0.1];
+    if (loclower.includes('guayaquil') || loclower.includes('litoral') || loclower.includes('roca') || loclower.includes('durán') || loclower.includes('duran')) return [-2.17 + (Math.random() - 0.5) * 0.1, -79.92 + (Math.random() - 0.5) * 0.1];
     if (loclower.includes('quito')) return [-0.23, -78.52];
     return [-1.8, -78.2];
   }
@@ -694,84 +1072,6 @@ function getMissionColor(mission) {
   return '#888780';
 }
 
-// ===== PAGE ROUTING =====
-let mapInit = false;
-let leafletMap = null;
-let allMarkers = [];
-let currentMissionFilter = 'all';
-let currentCountryFilter = 'all';
-
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.querySelectorAll('.nav-tab')[['landing','map','database'].indexOf(name)].classList.add('active');
-  if (name === 'map' && !mapInit) { initMap(); mapInit = true; }
-  if (name === 'database') { buildTable(); }
-}
-
-// ===== LANDING =====
-function buildLanding() {
-  // Ukraine count
-  const uCount = DATA.filter(d => d.ukraine_link === 'TRUE').length;
-  document.getElementById('ukraine-count').textContent = uCount;
-
-  // Country bars
-  const countryCounts = {};
-  DATA.forEach(d => { countryCounts[d.country] = (countryCounts[d.country] || 0) + 1; });
-  const sorted = Object.entries(countryCounts).sort((a,b) => b[1]-a[1]);
-  const max = sorted[0][1];
-  const colorMap = { Mexico: '', Colombia: 'col', Brazil: 'bra', Ecuador: 'ecu', 'United States': 'usa' };
-  const bars = document.getElementById('country-bars');
-  sorted.forEach(([c, n]) => {
-    const cls = colorMap[c] || 'oth';
-    bars.innerHTML += `<div class="country-bar-row">
-      <div class="country-bar-label">${c}</div>
-      <div class="country-bar-track"><div class="country-bar-fill ${cls}" style="width:${Math.round(n/max*100)}%"></div></div>
-      <div class="country-bar-count">${n}</div>
-    </div>`;
-  });
-
-  // Mission types
-  const missionCounts = {};
-  DATA.forEach(d => {
-    (d.mission_type || '').split(';').forEach(m => {
-      const mt = m.trim();
-      if (mt) missionCounts[mt] = (missionCounts[mt] || 0) + 1;
-    });
-  });
-  const mList = document.getElementById('mission-list');
-  Object.entries(missionCounts).sort((a,b)=>b[1]-a[1]).forEach(([m,n]) => {
-    const cls = getMissionBadgeClass(m);
-    mList.innerHTML += `<li><span>${m}</span><span class="mission-badge ${cls}">${n}</span></li>`;
-  });
-
-  // Manufacturers
-  const mfrCounts = {};
-  DATA.forEach(d => { const m = d.drone_manufacturer || 'Unknown'; mfrCounts[m] = (mfrCounts[m]||0)+1; });
-  const mfrList = document.getElementById('mfr-list');
-  Object.entries(mfrCounts).sort((a,b)=>b[1]-a[1]).forEach(([m,n]) => {
-    mfrList.innerHTML += `<li><span>${m}</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim)">${n}</span></li>`;
-  });
-
-  // Ukraine grid
-  const transfers = [
-    { type: 'FPV drone tactics', detail: 'Confirmed adoption by CJNG, Sinaloa, ELN. FPV kamikaze attacks documented in Mexico and Colombia.', cls: 'tag-confirmed', label: 'Confirmed' },
-    { type: 'Personnel training', detail: 'Cartel operatives documented in Ukraine foreign fighter units. Brazilian Navy advisor arrested for tech transfer to Comando Vermelho.', cls: 'tag-confirmed', label: 'Confirmed' },
-    { type: 'Commercial & kamikaze tech', detail: 'Modified commercial drones for combat. Accessible to non-state actors. Feasible adaptation from Ukrainian battlefield practice.', cls: 'tag-probable', label: 'Probable' },
-    { type: 'Swarm tactics', detail: 'No confirmed implementation in Latin America. Plausible based on global proliferation trends.', cls: 'tag-speculative', label: 'Speculative' },
-    { type: 'Electronic warfare (C-UAS)', detail: 'Cartels confirmed using signal jammers against rival and government drones. Likely battlefield adaptation.', cls: 'tag-probable', label: 'Probable' },
-  ];
-  const ugrid = document.getElementById('ukraine-grid');
-  transfers.forEach(t => {
-    ugrid.innerHTML += `<div class="ukraine-item">
-      <div class="transfer-type">${t.type}</div>
-      <div class="transfer-detail">${t.detail}</div>
-      <span class="tag ${t.cls}">${t.label}</span>
-    </div>`;
-  });
-}
-
 function getMissionBadgeClass(m) {
   const ml = (m || '').toLowerCase();
   if (ml.includes('attack') || ml.includes('kamikaze') || ml.includes('explosive')) return 'mission-attack';
@@ -781,59 +1081,147 @@ function getMissionBadgeClass(m) {
   return 'mission-other';
 }
 
-// ===== MAP =====
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const page = document.getElementById('page-' + name);
+  if (page) page.classList.add('active');
+  const idx = PAGE_ORDER.indexOf(name);
+  const tabs = document.querySelectorAll('.nav-tab');
+  if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+
+  if (name === 'map' && !mapInit) {
+    initMap();
+    mapInit = true;
+  }
+  if (name === 'map' && leafletMap) {
+    setTimeout(() => leafletMap.invalidateSize(), 0);
+  }
+  if (name === 'database') buildTable();
+  if (name === 'knowledge') {
+    buildKnowledge();
+    setTimeout(renderKnowledgeLines, 0);
+  }
+}
+
+function buildLanding() {
+  const uCount = DATA.filter(d => d.ukraine_link === 'TRUE').length;
+  setText('ukraine-count', uCount);
+
+  const countryCounts = {};
+  DATA.forEach(d => { countryCounts[d.country] = (countryCounts[d.country] || 0) + 1; });
+  const sorted = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]);
+  const max = sorted[0] ? sorted[0][1] : 1;
+  const colorMap = { Mexico: '', Colombia: 'col', Brazil: 'bra', Ecuador: 'ecu', 'United States': 'usa' };
+  const bars = document.getElementById('country-bars');
+  bars.innerHTML = '';
+  sorted.forEach(([c, n]) => {
+    const cls = colorMap[c] || 'oth';
+    bars.innerHTML += `<div class="country-bar-row">
+      <div class="country-bar-label">${c}</div>
+      <div class="country-bar-track"><div class="country-bar-fill ${cls}" style="width:${Math.round(n / max * 100)}%"></div></div>
+      <div class="country-bar-count">${n}</div>
+    </div>`;
+  });
+
+  const missionCounts = {};
+  DATA.forEach(d => {
+    (d.mission_type || '').split(';').forEach(m => {
+      const mt = m.trim();
+      if (mt) missionCounts[mt] = (missionCounts[mt] || 0) + 1;
+    });
+  });
+  const mList = document.getElementById('mission-list');
+  mList.innerHTML = '';
+  Object.entries(missionCounts).sort((a, b) => b[1] - a[1]).forEach(([m, n]) => {
+    const cls = getMissionBadgeClass(m);
+    mList.innerHTML += `<li><span>${m}</span><span class="mission-badge ${cls}">${n}</span></li>`;
+  });
+
+  const mfrCounts = {};
+  DATA.forEach(d => {
+    const m = d.drone_manufacturer || 'Unknown';
+    mfrCounts[m] = (mfrCounts[m] || 0) + 1;
+  });
+  const mfrList = document.getElementById('mfr-list');
+  mfrList.innerHTML = '';
+  Object.entries(mfrCounts).sort((a, b) => b[1] - a[1]).forEach(([m, n]) => {
+    mfrList.innerHTML += `<li><span>${m}</span><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim)">${n}</span></li>`;
+  });
+
+  const transfers = [
+    { type: 'FPV drone tactics', detail: 'The broader research tracks confirmed adoption of FPV-style tactics in cartel and insurgent settings, especially in Mexico and Colombia.', cls: 'tag-confirmed', label: 'Confirmed' },
+    { type: 'Personnel training', detail: 'Evidence in the research points to tactical knowledge transfer through training and foreign-fighter pathways, rather than direct hardware supply.', cls: 'tag-confirmed', label: 'Confirmed' },
+    { type: 'Commercial & kamikaze tech', detail: 'Commercial drones and improvised one-way systems form the most plausible pathway for battlefield-style diffusion into criminal use.', cls: 'tag-probable', label: 'Probable' },
+    { type: 'Swarm tactics', detail: 'Discussed in the research as an emerging or speculative trajectory; not all such concepts map cleanly to a verified incident row in the dataset.', cls: 'tag-speculative', label: 'Speculative' },
+    { type: 'Electronic warfare (C-UAS)', detail: 'Research highlights jamming, spoofing, and uneven state responses as part of the widening drone competition.', cls: 'tag-probable', label: 'Probable' }
+  ];
+  const ugrid = document.getElementById('ukraine-grid');
+  ugrid.innerHTML = '';
+  transfers.forEach(t => {
+    ugrid.innerHTML += `<div class="ukraine-item">
+      <div class="transfer-type">${t.type}</div>
+      <div class="transfer-detail">${t.detail}</div>
+      <span class="tag ${t.cls}">${t.label}</span>
+    </div>`;
+  });
+}
+
 function initMap() {
   leafletMap = L.map('map', { zoomControl: false, attributionControl: false }).setView([5, -75], 4);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap contributors'
-}).addTo(leafletMap);
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(leafletMap);
 
+  allMarkers = [];
+  markerById = {};
   DATA.forEach(row => {
     const coords = getCoords(row);
     if (!coords) return;
     const ukraine = row.ukraine_link === 'TRUE';
     const color = ukraine ? '#c8f04a' : getMissionColor(row.mission_type);
     const marker = L.circleMarker(coords, {
-      radius: 7, fillColor: color, color: ukraine ? '#0a0a08' : 'rgba(0,0,0,0.4)',
-      weight: ukraine ? 1.5 : 1, fillOpacity: 0.85
+      radius: 7,
+      fillColor: color,
+      color: ukraine ? '#0a0a08' : 'rgba(0,0,0,0.4)',
+      weight: ukraine ? 1.5 : 1,
+      fillOpacity: 0.85
     });
 
     const missions = (row.mission_type || '').split(';').map(m => {
       const cls = getMissionBadgeClass(m.trim());
-      return `<span class="popup-tag ${cls === 'mission-attack' ? 'mission-attack' : ''}" style="background:${cls==='mission-attack'?'rgba(232,92,58,0.15)':cls==='mission-surveillance'?'rgba(74,159,212,0.15)':cls==='mission-prison'?'rgba(42,184,154,0.15)':'rgba(240,160,48,0.15)'}; color:${cls==='mission-attack'?'#e85c3a':cls==='mission-surveillance'?'#4a9fd4':cls==='mission-prison'?'#2ab89a':'#f0a030'}">${m.trim()}</span>`;
+      const bg = cls === 'mission-attack' ? 'rgba(232,92,58,0.15)' : cls === 'mission-surveillance' ? 'rgba(74,159,212,0.15)' : cls === 'mission-prison' ? 'rgba(42,184,154,0.15)' : 'rgba(240,160,48,0.15)';
+      const col = cls === 'mission-attack' ? '#e85c3a' : cls === 'mission-surveillance' ? '#4a9fd4' : cls === 'mission-prison' ? '#2ab89a' : '#f0a030';
+      return `<span class="popup-tag" style="background:${bg}; color:${col}">${m.trim()}</span>`;
     }).join('');
 
-    const url = row.url_primary_source;
     const popupHtml = `
       <div class="popup-date">${row.date}</div>
       <div class="popup-location">${row.location}</div>
       <div class="popup-gang">${row.gangs_involved || '—'}</div>
       <div class="popup-summary">${row.summary_of_case}</div>
       <div class="popup-tags">${missions}${ukraine ? '<span class="popup-tag" style="background:rgba(200,240,74,0.12);color:#c8f04a">Ukraine-linked</span>' : ''}</div>
-      ${url ? `<a href="${url}" class="popup-link" target="_blank">Primary source →</a>` : ''}
+      ${row.url_primary_source ? `<a href="${row.url_primary_source}" class="popup-link" target="_blank">Primary source →</a>` : ''}
     `;
     marker.bindPopup(popupHtml, { maxWidth: 340 });
     marker._rowData = row;
     marker.addTo(leafletMap);
     allMarkers.push(marker);
+    markerById[row.__id] = marker;
   });
 
   buildMapFilters();
 }
 
 function buildMapFilters() {
-  const missions = new Set();
   const countries = new Set();
-  DATA.forEach(d => {
-    countries.add(d.country);
-    (d.mission_type||'').split(';').forEach(m => { if(m.trim()) missions.add(m.trim()); });
-  });
+  DATA.forEach(d => countries.add(d.country));
 
   const mf = document.getElementById('map-filters');
   mf.innerHTML = '<button class="map-filter-btn active" onclick="filterMap(\'all\',\'mission\')">All</button>';
-  ['attack (explosive drop)','attack (kamikaze/one-way)','surveillance/ISR','drug smuggling','prison contraband'].forEach(m => {
-    const label = m.replace(' (explosive drop)','').replace(' (kamikaze/one-way)',' (kamikaze)').replace('surveillance/ISR','surveillance').replace('drug smuggling','smuggling').replace('prison contraband','prison');
+  ['attack (explosive drop)', 'attack (kamikaze/one-way)', 'surveillance/ISR', 'drug smuggling', 'prison contraband'].forEach(m => {
+    const label = m.replace(' (explosive drop)', '').replace(' (kamikaze/one-way)', ' (kamikaze)').replace('surveillance/ISR', 'surveillance').replace('drug smuggling', 'smuggling').replace('prison contraband', 'prison');
     mf.innerHTML += `<button class="map-filter-btn" onclick="filterMap('${m}','mission')">${label}</button>`;
   });
 
@@ -848,7 +1236,10 @@ function filterMap(val, type) {
   if (type === 'mission') {
     currentMissionFilter = val;
     document.querySelectorAll('#map-filters .map-filter-btn').forEach(b => {
-      b.classList.toggle('active', b.textContent.toLowerCase().replace(' (kamikaze)','').includes(val === 'all' ? 'all' : val.split(' ')[0].toLowerCase()) || (val === 'all' && b.textContent === 'All'));
+      const isAll = val === 'all' && b.textContent === 'All';
+      const lower = b.textContent.toLowerCase();
+      const match = val !== 'all' && lower.includes(val.split(' ')[0].toLowerCase());
+      b.classList.toggle('active', isAll || match);
     });
   } else {
     currentCountryFilter = val;
@@ -862,7 +1253,7 @@ function filterMap(val, type) {
 function applyMapFilters() {
   allMarkers.forEach(marker => {
     const row = marker._rowData;
-    const missionMatch = currentMissionFilter === 'all' || (row.mission_type||'').includes(currentMissionFilter);
+    const missionMatch = currentMissionFilter === 'all' || (row.mission_type || '').includes(currentMissionFilter);
     const countryMatch = currentCountryFilter === 'all' || row.country === currentCountryFilter;
     if (missionMatch && countryMatch) {
       if (!leafletMap.hasLayer(marker)) marker.addTo(leafletMap);
@@ -872,24 +1263,29 @@ function applyMapFilters() {
   });
 }
 
-// ===== DATABASE =====
-let tableData = [...DATA];
-let sortCol = 0;
-let sortDir = 1;
-
 function buildTable() {
   const countries = [...new Set(DATA.map(d => d.country))].sort();
   const countrySelect = document.getElementById('filter-country');
   if (countrySelect.options.length === 1) {
-    countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; countrySelect.appendChild(o); });
+    countries.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c;
+      o.textContent = c;
+      countrySelect.appendChild(o);
+    });
   }
   const missions = new Set();
-  DATA.forEach(d => (d.mission_type||'').split(';').forEach(m => { if(m.trim()) missions.add(m.trim()); }));
+  DATA.forEach(d => (d.mission_type || '').split(';').forEach(m => { if (m.trim()) missions.add(m.trim()); }));
   const missionSelect = document.getElementById('filter-mission');
   if (missionSelect.options.length === 1) {
-    [...missions].sort().forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; missionSelect.appendChild(o); });
+    [...missions].sort().forEach(m => {
+      const o = document.createElement('option');
+      o.value = m;
+      o.textContent = m;
+      missionSelect.appendChild(o);
+    });
   }
-  document.getElementById('db-total').textContent = DATA.length;
+  setText('db-total', DATA.length);
   filterTable();
 }
 
@@ -903,7 +1299,7 @@ function filterTable() {
     const searchable = [d.date, d.location, d.country, d.summary_of_case, d.gangs_involved, d.drone_model, d.drone_manufacturer, d.mission_type].join(' ').toLowerCase();
     if (q && !searchable.includes(q)) return false;
     if (country && d.country !== country) return false;
-    if (mission && !(d.mission_type||'').includes(mission)) return false;
+    if (mission && !(d.mission_type || '').includes(mission)) return false;
     if (ukraine && d.ukraine_link !== ukraine) return false;
     return true;
   });
@@ -911,13 +1307,14 @@ function filterTable() {
 }
 
 function sortTable(col) {
-  if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = 1; }
-  document.querySelectorAll('.sort-arrow').forEach((a,i) => {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('.sort-arrow').forEach((a, i) => {
     a.textContent = i === col ? (sortDir === 1 ? '↑' : '↓') : '↕';
     a.classList.toggle('active', i === col);
   });
-  const cols = ['date','country','location','gangs_involved','summary_of_case','mission_type','drone_model','drone_manufacturer','ukraine_link'];
-  tableData.sort((a,b) => {
+  const cols = ['date', 'country', 'location', 'gangs_involved', 'summary_of_case', 'mission_type', 'drone_model', 'drone_manufacturer', 'ukraine_link'];
+  tableData.sort((a, b) => {
     const av = (a[cols[col]] || '').toLowerCase();
     const bv = (b[cols[col]] || '').toLowerCase();
     return av < bv ? -sortDir : av > bv ? sortDir : 0;
@@ -927,22 +1324,18 @@ function sortTable(col) {
 
 function renderTable() {
   const tbody = document.getElementById('db-body');
-  document.getElementById('db-shown').textContent = tableData.length;
+  setText('db-shown', tableData.length);
   document.getElementById('db-empty').style.display = tableData.length === 0 ? 'block' : 'none';
-
-  if (tableData.length === 0) { tbody.innerHTML = ''; return; }
+  if (tableData.length === 0) {
+    tbody.innerHTML = '';
+    return;
+  }
   tbody.innerHTML = tableData.map(row => {
-    const missions = (row.mission_type||'').split(';').map(m => {
-      return `<span class="mission-badge ${getMissionBadgeClass(m.trim())}">${m.trim()}</span>`;
-    }).join('');
-    const url = row.url_primary_source;
-    const ukraine = row.ukraine_link === 'TRUE'
-      ? '<span class="ukraine-true">Yes</span>'
-      : '<span class="ukraine-false">No</span>';
-    const summary = (row.summary_of_case || '').length > 120
-      ? (row.summary_of_case || '').substring(0, 120) + '…'
-      : (row.summary_of_case || '');
-    return `<tr>
+    const missions = (row.mission_type || '').split(';').map(m => `<span class="mission-badge ${getMissionBadgeClass(m.trim())}">${m.trim()}</span>`).join('');
+    const ukraine = row.ukraine_link === 'TRUE' ? '<span class="ukraine-true">Yes</span>' : '<span class="ukraine-false">No</span>';
+    const summary = (row.summary_of_case || '').length > 120 ? `${(row.summary_of_case || '').substring(0, 120)}…` : (row.summary_of_case || '');
+    const selectedClass = row.__id === selectedRowId ? 'selected-row' : '';
+    return `<tr class="${selectedClass}">
       <td class="date-cell">${row.date || '—'}</td>
       <td class="country-cell">${row.country || '—'}</td>
       <td class="location-cell">${(row.location || '').split(',')[0]}</td>
@@ -952,12 +1345,229 @@ function renderTable() {
       <td class="model-cell">${row.drone_model || '—'}</td>
       <td class="model-cell">${row.drone_manufacturer || '—'}</td>
       <td>${ukraine}</td>
-      <td>${url ? `<a href="${url}" class="url-link" target="_blank">Source →</a>` : '—'}</td>
+      <td>${row.url_primary_source ? `<a href="${row.url_primary_source}" class="url-link" target="_blank">Source →</a>` : '—'}</td>
     </tr>`;
   }).join('');
 }
 
-buildLanding();
+function applyDatabasePreset(preset = {}) {
+  const dbSearch = document.getElementById('db-search');
+  const dbCountry = document.getElementById('filter-country');
+  const dbMission = document.getElementById('filter-mission');
+  const dbUkraine = document.getElementById('filter-ukraine');
+  dbSearch.value = preset.search || '';
+  dbCountry.value = preset.country || '';
+  dbMission.value = preset.mission || '';
+  dbUkraine.value = preset.ukraine || '';
+  selectedRowId = preset.rowId || null;
+  showPage('database');
+  filterTable();
+}
+
+function showRowInDatabase(rowId) {
+  const row = DATA.find(r => r.__id === rowId);
+  if (!row) return;
+  applyDatabasePreset({ search: `${row.location} ${row.date}`, rowId });
+}
+
+function showRowOnMap(rowId) {
+  const row = DATA.find(r => r.__id === rowId);
+  if (!row) return;
+  selectedRowId = rowId;
+  showPage('map');
+  const marker = markerById[rowId];
+  if (marker && leafletMap) {
+    const ll = marker.getLatLng();
+    leafletMap.setView(ll, 7, { animate: true });
+    marker.openPopup();
+  }
+}
+
+function resolveIncident(spec) {
+  return DATA.find(spec.match) || null;
+}
+
+function collectRelatedRows(node) {
+  if (node.kind === 'incident') {
+    const row = resolveIncident(node);
+    return row ? [row] : [];
+  }
+  if (node.preset) {
+    return DATA.filter(row => {
+      if (node.preset.country && row.country !== node.preset.country) return false;
+      if (node.preset.mission && !(row.mission_type || '').includes(node.preset.mission)) return false;
+      if (node.preset.ukraine && row.ukraine_link !== node.preset.ukraine) return false;
+      if (node.preset.search) {
+        const hay = [row.location, row.country, row.summary_of_case, row.gangs_involved, row.mission_type, row.drone_model, row.drone_manufacturer].join(' ').toLowerCase();
+        if (!hay.includes(node.preset.search.toLowerCase())) return false;
+      }
+      return true;
+    });
+  }
+  return [];
+}
+
+function allKnowledgeNodes() {
+  return [...THEME_NODES, ...RESEARCH_NODES, ...INCIDENT_SPECS];
+}
+
+function buildKnowledge() {
+  const network = document.getElementById('knowledge-network');
+  const quick = document.getElementById('knowledge-quick-links');
+  if (!knowledgeBuilt) {
+    network.querySelectorAll('.knowledge-node').forEach(n => n.remove());
+    allKnowledgeNodes().forEach(node => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `knowledge-node ${node.kind}`;
+      button.dataset.key = node.key;
+      button.style.left = `${node.x}%`;
+      button.style.top = `${node.y}%`;
+      button.innerHTML = `<span class="knowledge-node-dot"></span><span>${node.label}</span>`;
+      button.addEventListener('click', () => focusKnowledgeNode(node.key));
+      network.appendChild(button);
+    });
+    quick.innerHTML = [
+      { label: 'Mexico', key: 'mexico_theatre' },
+      { label: 'Colombia', key: 'colombia_theatre' },
+      { label: 'Brazil', key: 'brazil_cluster' },
+      { label: 'Prisons', key: 'prison_networks' },
+      { label: 'Ukraine transfer', key: 'ukraine_transfer' },
+      { label: 'Maritime', key: 'maritime_systems' }
+    ].map(item => `<button type="button" class="knowledge-action" onclick="focusKnowledgeNode('${item.key}')">${item.label}</button>`).join('');
+    knowledgeBuilt = true;
+  }
+  focusKnowledgeNode(currentKnowledgeKey || 'overview');
+}
+
+function renderKnowledgeLines() {
+  const panel = document.querySelector('.knowledge-panel');
+  const svg = document.getElementById('knowledge-svg');
+  if (!panel || !svg) return;
+  const rect = panel.getBoundingClientRect();
+  svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+  svg.innerHTML = '';
+  const centerPoint = { x: rect.width / 2, y: rect.height / 2 };
+  const nodeMap = new Map();
+  allKnowledgeNodes().forEach(node => {
+    nodeMap.set(node.key, { x: rect.width * node.x / 100, y: rect.height * node.y / 100, node });
+  });
+  allKnowledgeNodes().forEach(node => {
+    const from = nodeMap.get(node.key);
+    const to = node.parent ? nodeMap.get(node.parent) : { x: centerPoint.x, y: centerPoint.y, node: { key: 'overview' } };
+    if (!from || !to) return;
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', from.x);
+    line.setAttribute('y1', from.y);
+    line.setAttribute('x2', to.x);
+    line.setAttribute('y2', to.y);
+    line.setAttribute('class', 'knowledge-line');
+    line.dataset.from = node.key;
+    line.dataset.to = node.parent || 'overview';
+    if (node.key === currentKnowledgeKey || node.parent === currentKnowledgeKey) line.classList.add('active');
+    svg.appendChild(line);
+  });
+}
+
+function focusKnowledgeNode(key) {
+  currentKnowledgeKey = key;
+  document.querySelectorAll('.knowledge-node').forEach(node => node.classList.toggle('active', node.dataset.key === key));
+  const center = document.querySelector('.knowledge-center');
+  if (center) center.classList.toggle('active', key === 'overview');
+  renderKnowledgeLines();
+  renderKnowledgeDetail(key);
+}
+
+function renderKnowledgeDetail(key) {
+  const detail = document.getElementById('knowledge-detail');
+  if (!detail) return;
+
+  if (key === 'overview') {
+    const countries = new Set(DATA.map(d => d.country).filter(Boolean)).size;
+    const ukraineCount = DATA.filter(d => d.ukraine_link === 'TRUE').length;
+    const attackCount = DATA.filter(d => (d.mission_type || '').toLowerCase().includes('attack')).length;
+    const prisonCount = DATA.filter(d => (d.mission_type || '').toLowerCase().includes('prison')).length;
+    detail.innerHTML = `
+      <div class="knowledge-detail-kicker">Overview</div>
+      <div class="knowledge-detail-title">What this fourth page adds</div>
+      <div class="knowledge-detail-copy">The original dashboard already shows overview, map, and database views. This knowledge layer keeps the incident dataset intact but adds a networked research view that links rows to larger patterns: tactical transfer, prison ecosystems, counter-drone gaps, supply chains, negative evidence, and the broader non-aerial research perimeter.</div>
+      <div class="knowledge-stat-grid">
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${DATA.length}</div><div class="knowledge-stat-label">CSV incidents</div></div>
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${countries}</div><div class="knowledge-stat-label">Countries</div></div>
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${ukraineCount}</div><div class="knowledge-stat-label">Ukraine-linked</div></div>
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${attackCount}</div><div class="knowledge-stat-label">Attack rows</div></div>
+      </div>
+      <ul class="knowledge-list">
+        <li><span class="knowledge-list-label">Incident nodes</span><span class="knowledge-copy">These are direct pointers to rows in the authoritative CSV.</span></li>
+        <li><span class="knowledge-list-label">Research nodes</span><span class="knowledge-copy">These synthesize themes that may span many rows or sit partly outside the dataset, such as maritime systems or verified absence cases.</span></li>
+        <li><span class="knowledge-list-label">Prison layer</span><span class="knowledge-copy">${prisonCount} row(s) in the dataset are explicitly tagged as prison contraband, but the research also frames prisons as a broader delivery and surveillance ecosystem.</span></li>
+      </ul>
+      <div class="knowledge-detail-actions">
+        <button type="button" class="knowledge-action" onclick="showPage('database')">Open database</button>
+        <button type="button" class="knowledge-action" onclick="showPage('map')">Open map</button>
+      </div>
+    `;
+    return;
+  }
+
+  const node = allKnowledgeNodes().find(n => n.key === key);
+  if (!node) return;
+  const related = collectRelatedRows(node);
+  const isIncident = node.kind === 'incident';
+  const row = isIncident ? resolveIncident(node) : null;
+
+  const chips = (node.tags || []).map(tag => `<span class="knowledge-pill">${tag}</span>`).join('');
+  const relatedHtml = related.slice(0, 4).map(r => `
+    <li>
+      <span class="knowledge-list-meta">${r.date} · ${r.country}</span>
+      <span class="knowledge-list-label">${r.location}</span>
+      <span class="knowledge-copy">${(r.summary_of_case || '').substring(0, 120)}${(r.summary_of_case || '').length > 120 ? '…' : ''}</span>
+    </li>
+  `).join('');
+
+  let actions = '';
+  if (row) {
+    actions += `<button type="button" class="knowledge-action" onclick="showRowInDatabase('${row.__id}')">Open in database</button>`;
+    actions += `<button type="button" class="knowledge-action" onclick="showRowOnMap('${row.__id}')">Locate on map</button>`;
+    if (row.url_primary_source) actions += `<a class="knowledge-action" href="${row.url_primary_source}" target="_blank">Primary source</a>`;
+  } else if (node.preset) {
+    actions += `<button type="button" class="knowledge-action" onclick='applyDatabasePreset(${JSON.stringify(node.preset)})'>Filter dataset</button>`;
+  }
+
+  detail.innerHTML = `
+    <div class="knowledge-detail-kicker">${node.kind === 'theme' ? 'Cluster' : node.kind === 'research' ? 'Research thread' : 'Incident node'}</div>
+    <div class="knowledge-detail-title">${node.label}</div>
+    <div class="knowledge-detail-copy">${row ? row.summary_of_case : node.summary}</div>
+    ${chips ? `<div class="knowledge-pill-row">${chips}</div>` : ''}
+    ${row ? `
+      <div class="knowledge-stat-grid">
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${row.country}</div><div class="knowledge-stat-label">Country</div></div>
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${row.date}</div><div class="knowledge-stat-label">Date</div></div>
+      </div>
+    ` : related.length ? `
+      <div class="knowledge-stat-grid">
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${related.length}</div><div class="knowledge-stat-label">Related rows</div></div>
+        <div class="knowledge-stat"><div class="knowledge-stat-num">${new Set(related.map(r => r.country)).size}</div><div class="knowledge-stat-label">Countries touched</div></div>
+      </div>
+    ` : ''}
+    ${actions ? `<div class="knowledge-detail-actions">${actions}</div>` : ''}
+    ${related.length ? `<ul class="knowledge-list">${relatedHtml}</ul>` : `<ul class="knowledge-list"><li><span class="knowledge-list-label">Research-only node</span><span class="knowledge-copy">This node is part of the broader analytical framing and does not need to resolve to a specific incident row.</span></li></ul>`}
+  `;
+}
+
+async function bootstrap() {
+  try {
+    await loadData();
+    buildLanding();
+    buildKnowledge();
+    buildTable();
+    showPage('landing');
+  } catch (err) {
+    console.error(err);
+    document.getElementById('page-landing').innerHTML = `<div class="hero"><div class="hero-tag">Load error</div><h1>Dataset not loaded</h1><p class="hero-sub">Keep <code>drone_criminaluse_latam_v1.csv</code> in the same folder as this HTML file and serve the folder over HTTP or HTTPS.</p></div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', bootstrap);
+window.addEventListener('resize', () => { if (document.getElementById('page-knowledge')?.classList.contains('active')) renderKnowledgeLines(); });
 </script>
-</body>
-</html>
