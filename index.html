@@ -124,7 +124,9 @@
   .popup-loc { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
   .popup-desc { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 10px; }
   .popup-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; background: rgba(255,255,255,0.05); color: var(--text-main); margin-right: 4px; }
-  .leaflet-tile { filter: brightness(0.2) saturate(0.2) contrast(1.2) hue-rotate(180deg); }
+  
+  /* UPDATED: Brightened map filter */
+  .leaflet-tile { filter: brightness(0.6) saturate(0.2) contrast(1.2) hue-rotate(180deg); }
   .leaflet-control-zoom a { background: var(--bg-surface) !important; color: var(--text-main) !important; border-color: var(--border-med) !important; }
 
   /* DATABASE */
@@ -230,6 +232,24 @@
     <div class="panel">
       <h3>Dominant Mission Types</h3>
       <div id="chart-missions"></div>
+    </div>
+
+    <div class="panel" style="grid-column: 1 / -1;">
+      <h3>Supply Chain & Procurement Channels</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="border-left: 2px solid var(--blue); padding-left: 1rem;">
+          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Chinese E-Commerce</h4>
+          <p style="color:var(--text-sec); font-size:12px;">Direct imports via AliExpress & Banggood for FPV components with minimal export restrictions.</p>
+        </div>
+        <div style="border-left: 2px solid var(--accent); padding-left: 1rem;">
+          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Local Cartel Workshops</h4>
+          <p style="color:var(--text-sec); font-size:12px;">CJNG and Sinaloa commission local engineers to build/modify UAVs (grenade droppers) from imported parts.</p>
+        </div>
+        <div style="border-left: 2px solid var(--orange); padding-left: 1rem;">
+          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Grey Market Brokers</h4>
+          <p style="color:var(--text-sec); font-size:12px;">Intermediaries in the US and Mexico bulk-buy commercial DJI models (Mavic, Matrice) to evade forensic tracking.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
