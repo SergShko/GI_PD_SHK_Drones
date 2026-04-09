@@ -96,6 +96,18 @@
   /* MAP */
   #map-container { height: calc(100vh - 60px); width: 100%; background: #080808; position: relative; }
   #map { height: 100%; width: 100%; }
+  
+  .map-controls {
+    position: absolute; top: 1.5rem; right: 1.5rem; z-index: 1000;
+    background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-med); padding: 0.75rem; border-radius: 8px;
+    display: flex; gap: 0.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+  .map-controls .db-select {
+    background: var(--bg-surface); border: 1px solid var(--border-light); color: var(--text-main);
+    font-family: var(--font-mono); font-size: 12px; padding: 0.5rem 1rem; border-radius: 4px; outline: none;
+  }
+
   .map-legend {
     position: absolute; bottom: 2rem; left: 2rem; z-index: 999;
     background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-med);
@@ -225,6 +237,20 @@
 <div id="view-map" class="page">
   <div id="map-container">
     <div id="map"></div>
+    
+    <div class="map-controls">
+      <select class="db-select" id="map-filter-country" onchange="applyFilters('map')">
+        <option value="">All Countries</option>
+      </select>
+      <select class="db-select" id="map-filter-mission" onchange="applyFilters('map')">
+        <option value="">All Mission Types</option>
+        <option value="attack">Weaponized Attack</option>
+        <option value="surveillance">Surveillance</option>
+        <option value="smuggling">Smuggling</option>
+        <option value="prison">Prison Drops</option>
+      </select>
+    </div>
+
     <div class="map-legend">
       <h4>Mission Classification</h4>
       <div class="legend-item"><div class="dot" style="background:var(--red)"></div> Weaponized Attack</div>
@@ -239,11 +265,11 @@
 <div id="view-database" class="page">
   <div class="db-container">
     <div class="db-toolbar">
-      <input type="text" class="db-input" id="search-input" placeholder="Search incidents, gangs, locations..." oninput="applyFilters()">
-      <select class="db-select" id="filter-country" onchange="applyFilters()">
+      <input type="text" class="db-input" id="search-input" placeholder="Search incidents, gangs, locations..." oninput="applyFilters('db')">
+      <select class="db-select" id="filter-country" onchange="applyFilters('db')">
         <option value="">All Countries</option>
       </select>
-      <select class="db-select" id="filter-mission" onchange="applyFilters()">
+      <select class="db-select" id="filter-mission" onchange="applyFilters('db')">
         <option value="">All Mission Types</option>
         <option value="attack">Weaponized Attack</option>
         <option value="surveillance">Surveillance</option>
@@ -314,7 +340,7 @@ function handleFileUpload(e) {
 function parseCSV(csv) {
   const lines = [];
   let row = [], cell = '', inside = false;
-  // Clean AI injection sources if present
+  
   csv = csv.replace(/\\s*/g, '');
   
   for (let i = 0; i < csv.length; i++) {
@@ -339,7 +365,6 @@ function parseCSV(csv) {
     for (let j = 0; j < headers.length; j++) {
       obj[headers[j]] = lines[i][j] || '';
     }
-    // Only accept if verification is NOT unverified (as per instructions in md)
     if ((obj.verification_status || '').toUpperCase() !== 'UNVERIFIED') {
       data.push(obj);
     }
@@ -373,7 +398,7 @@ function initApp(csvText) {
 
   buildOverviewCharts();
   populateDropdowns(countries);
-  applyFilters(); // Renders Table
+  applyFilters('db'); // Renders Table
   
   switchTab('overview');
 }
@@ -396,7 +421,6 @@ function switchTab(tabId) {
 
 // Charts
 function buildOverviewCharts() {
-  // Countries
   const cCounts = {};
   RAW_DATA.forEach(d => { if(d.country) cCounts[d.country] = (cCounts[d.country] || 0) + 1; });
   const sortedC = Object.entries(cCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
@@ -410,7 +434,6 @@ function buildOverviewCharts() {
     </div>
   `).join('');
 
-  // Missions
   const mCounts = { 'Attack':0, 'Surveillance':0, 'Smuggling':0, 'Prison Drops':0 };
   RAW_DATA.forEach(d => {
     const m = (d.mission_type||'').toLowerCase();
@@ -431,17 +454,15 @@ function buildOverviewCharts() {
   `).join('');
 }
 
-// Map Logic (Enhanced Geocoding to capture all CSV locations)
+// Map Logic
 function getCoords(row) {
   const loc = (row.location || '').toLowerCase();
   const c = (row.country || '').toLowerCase();
   
-  // Brazil
   if (c === 'brazil') {
     if (loc.includes('rio') || loc.includes('penha') || loc.includes('bangu') || loc.includes('quitungo') || loc.includes('maré') || loc.includes('rocinha') || loc.includes('cidade de deus')) return [-22.9068 + (Math.random()-0.5)*0.08, -43.1729 + (Math.random()-0.5)*0.08];
     return [-15.8, -47.9];
   }
-  // Mexico
   if (c === 'mexico') {
     if (loc.includes('michoacán') || loc.includes('tepalcatepec')) return [19.1, -102.3 + (Math.random()-0.5)*0.2];
     if (loc.includes('sinaloa')) return [24.8, -107.4];
@@ -454,7 +475,6 @@ function getCoords(row) {
     if (loc.includes('guanajuato')) return [21.0, -101.2];
     return [23.6 + (Math.random()-0.5)*2, -102.5 + (Math.random()-0.5)*2];
   }
-  // Colombia
   if (c === 'colombia') {
     if (loc.includes('catatumbo') || loc.includes('norte de santander')) return [8.5 + (Math.random()-0.5)*0.2, -73.0 + (Math.random()-0.5)*0.2];
     if (loc.includes('cauca') || loc.includes('cali') || loc.includes('valle')) return [3.4 + (Math.random()-0.5)*0.3, -76.5 + (Math.random()-0.5)*0.3];
@@ -464,7 +484,6 @@ function getCoords(row) {
     if (loc.includes('putumayo')) return [1.1, -76.6];
     return [4.5, -74.0];
   }
-  // Ecuador
   if (c === 'ecuador') {
     if (loc.includes('guayaquil') || loc.includes('durán') || loc.includes('guayas') || loc.includes('litoral')) return [-2.2 + (Math.random()-0.5)*0.1, -79.9 + (Math.random()-0.5)*0.1];
     if (loc.includes('esmeraldas')) return [0.9, -79.6];
@@ -472,7 +491,6 @@ function getCoords(row) {
     if (loc.includes('manabí')) return [-1.0, -80.4];
     return [-1.8, -78.1];
   }
-  // Others
   if (loc.includes('el paso') || loc.includes('texas')) return [31.7, -106.4];
   if (c === 'panama') return [8.9, -79.5];
   if (c === 'honduras') return [14.0, -87.2];
@@ -480,9 +498,7 @@ function getCoords(row) {
   if (c === 'venezuela') return [6.4, -66.5];
   if (c === 'peru') return [-9.1, -75.0];
   
-  // Safe Fallback based on typical regions
   if (c.includes('us') || c.includes('states')) return [31.5, -106.0];
-  
   return [10 + (Math.random()-0.5)*10, -80 + (Math.random()-0.5)*10]; 
 }
 
@@ -525,15 +541,28 @@ function updateMapMarkers() {
 // Database Filter & Sort
 function populateDropdowns(countries) {
   const cSel = document.getElementById('filter-country');
+  const mSel = document.getElementById('map-filter-country');
   countries.sort().forEach(c => {
     const opt = document.createElement('option'); opt.value = c; opt.textContent = c; cSel.appendChild(opt);
+    const opt2 = document.createElement('option'); opt2.value = c; opt2.textContent = c; mSel.appendChild(opt2);
   });
 }
 
-function applyFilters() {
-  const term = document.getElementById('search-input').value.toLowerCase();
-  const cFilt = document.getElementById('filter-country').value;
-  const mFilt = document.getElementById('filter-mission').value;
+function applyFilters(source = 'db') {
+  let term = document.getElementById('search-input').value.toLowerCase();
+  let cFilt, mFilt;
+
+  if (source === 'map') {
+    cFilt = document.getElementById('map-filter-country').value;
+    mFilt = document.getElementById('map-filter-mission').value;
+    document.getElementById('filter-country').value = cFilt;
+    document.getElementById('filter-mission').value = mFilt;
+  } else {
+    cFilt = document.getElementById('filter-country').value;
+    mFilt = document.getElementById('filter-mission').value;
+    document.getElementById('map-filter-country').value = cFilt;
+    document.getElementById('map-filter-mission').value = mFilt;
+  }
 
   FILTERED_DATA = RAW_DATA.filter(row => {
     const matchC = !cFilt || row.country === cFilt;
@@ -545,11 +574,11 @@ function applyFilters() {
   renderTable();
   updateMapMarkers();
 }
+
 function sortTable(col) {
   if (sortCol === col) sortAsc = !sortAsc;
   else { sortCol = col; sortAsc = true; }
   
-  // Update UI headers
   document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
   const th = document.querySelector(`th[onclick="sortTable('${col}')"]`);
   if(th) {
@@ -559,7 +588,7 @@ function sortTable(col) {
 
   FILTERED_DATA.sort((a, b) => {
     let valA = a[col] || ''; let valB = b[col] || '';
-    if (col === 'date') { // Basic string sort works for YYYY-MM-DD
+    if (col === 'date') { 
       if(valA === 'Unknown') valA = '0000';
       if(valB === 'Unknown') valB = '0000';
     }
@@ -594,7 +623,7 @@ function renderTable() {
   }).join('');
 }
 
-// Sensible Data-Driven Network (D3)
+// Network Map (D3)
 function buildNetwork() {
   const container = document.getElementById('network-svg');
   const width = container.clientWidth;
@@ -602,10 +631,8 @@ function buildNetwork() {
   const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
   const g = svg.append('g');
   
-  // Setup Zoom
   svg.call(d3.zoom().scaleExtent([0.2, 4]).on('zoom', e => g.attr('transform', e.transform)));
 
-  // Generate Nodes and Links directly from DB
   const nodeMap = new Map();
   const links = [];
 
@@ -617,11 +644,9 @@ function buildNetwork() {
 
   const rootId = addNode('root', 'root', 'LATAM DRONE NEXUS', 25, '#ffffff');
 
-  // Extract entities
   RAW_DATA.forEach((row, i) => {
     const incId = addNode(`inc_${i}`, 'incident', row.location || 'Incident', 3, 'rgba(255,255,255,0.4)');
     
-    // Country
     if (row.country) {
       const cId = addNode(`c_${row.country}`, 'country', row.country, 12, 'var(--text-sec)');
       links.push({ source: rootId, target: cId });
@@ -630,7 +655,6 @@ function buildNetwork() {
       links.push({ source: rootId, target: incId });
     }
 
-    // Gangs
     if (row.gangs_involved) {
       row.gangs_involved.split(';').forEach(gang => {
         const gName = gang.trim();
@@ -641,7 +665,6 @@ function buildNetwork() {
       });
     }
 
-    // Supply/Ukraine
     if (row.supply_chain_origin && row.supply_chain_origin.includes('China')) {
       const pId = addNode('p_china', 'supply', 'Chinese COTS / DJI', 18, 'var(--blue)');
       links.push({ source: incId, target: pId });
@@ -653,7 +676,6 @@ function buildNetwork() {
   });
 
   const nodes = Array.from(nodeMap.values());
-  // Scale node sizes slightly by connection count for gangs/countries
   nodes.forEach(n => {
     if (n.group === 'gang' || n.group === 'country') {
       n.size = Math.min(30, n.size + (n.count * 0.5));
@@ -682,7 +704,6 @@ function buildNetwork() {
       .on('drag', e => { e.subject.fx = e.x; e.subject.fy = e.y; })
       .on('end', e => { if(!e.active) simulation.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; }));
 
-  // Tooltip
   const tooltip = d3.select('#node-tooltip');
   node.on('mouseover', (event, d) => {
     tooltip.style('opacity', 1)
@@ -691,7 +712,6 @@ function buildNetwork() {
            .style('top', (event.pageY + 15) + 'px');
   }).on('mouseout', () => tooltip.style('opacity', 0));
 
-  // Labels for major nodes
   const labels = g.append('g').selectAll('text').data(nodes.filter(d => d.group !== 'incident')).join('text')
     .text(d => d.label)
     .attr('font-size', d => d.group === 'root' ? '14px' : '11px')
