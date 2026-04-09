@@ -3,351 +3,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Criminal Drone Use in Latin America | 2022–2026</title>
+<title>LATAM Criminal Drone Intelligence | OSINT Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
   :root {
-    --bg: #0a0a08;
-    --surface: #111110;
-    --surface2: #1a1a18;
-    --surface3: #222220;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #e8e6df;
-    --text-muted: #888780;
-    --text-dim: #555552;
-    --accent: #c8f04a;
-    --accent2: #f0a030;
-    --red: #e85c3a;
-    --blue: #4a9fd4;
-    --teal: #2ab89a;
-    --font-head: 'Syne', sans-serif;
-    --font-body: 'IBM Plex Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg); color: var(--text);
-    font-family: var(--font-body); font-size: 15px;
-    line-height: 1.6; min-height: 100vh;
-  }
+    --bg-base: #050505;
+    --bg-surface: #0f1011;
+    --bg-glass: rgba(20, 22, 24, 0.75);
+    --border-light: rgba(255, 255, 255, 0.06);
+    --border-med: rgba(255, 255, 255, 0.15);
+    
+    --text-main: #f0f0f2;
+    --text-sec: #9ea2a8;
+    --text-dim: #60646a;
+    
+    --accent: #dcf763;
+    --accent-hover: #eafc92;
+    --red: #f45b5b;
+    --blue: #5ba3f4;
+    --teal: #3cd4a8;
+    --orange: #f4a25b;
 
-  /* NAV */
+    --font-sans: 'Inter', sans-serif;
+    --font-head: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg-base); color: var(--text-main); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 4px; }
+
+  /* NAVIGATION */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: rgba(10,10,8,0.92); backdrop-filter: blur(12px);
-    border-bottom: 0.5px solid var(--border);
+    background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-light);
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 2rem; height: 56px;
+    padding: 0 1.5rem; height: 60px;
   }
-  .nav-brand {
-    font-family: var(--font-head); font-size: 13px; font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+  .brand { font-family: var(--font-head); font-weight: 700; font-size: 15px; letter-spacing: 0.1em; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
+  .brand-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
+  .tabs { display: flex; gap: 4px; }
+  .tab {
+    background: transparent; border: none; color: var(--text-sec);
+    font-family: var(--font-mono); font-size: 12px; padding: 0 1rem; height: 40px;
+    border-radius: 6px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em;
   }
-  .nav-tabs { display: flex; gap: 0; }
-  .nav-tab {
-    background: none; border: none; cursor: pointer;
-    font-family: var(--font-mono); font-size: 12px;
-    color: var(--text-muted); padding: 0 1.25rem; height: 56px;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s; letter-spacing: 0.06em;
-  }
-  .nav-tab:hover { color: var(--text); }
-  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .nav-meta {
-    font-family: var(--font-mono); font-size: 11px;
-    color: var(--text-dim); letter-spacing: 0.04em;
-  }
+  .tab:hover { color: var(--text-main); background: rgba(255,255,255,0.04); }
+  .tab.active { color: var(--bg-base); background: var(--accent); font-weight: 500; }
+  .nav-stats { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
 
   /* PAGES */
-  .page { display: none; padding-top: 56px; min-height: 100vh; }
+  .page { display: none; padding-top: 60px; min-height: 100vh; animation: fade 0.3s ease; }
   .page.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* ===== LANDING ===== */
-  .hero { padding: 5rem 2rem 4rem; max-width: 900px; margin: 0 auto; border-bottom: 0.5px solid var(--border); }
-  .hero-tag {
-    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
-    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 1.5rem;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .hero-tag::before { content: ''; display: block; width: 24px; height: 1px; background: var(--accent); }
-  .hero h1 {
-    font-family: var(--font-head); font-size: clamp(2.2rem, 5vw, 3.8rem);
-    font-weight: 800; line-height: 1.08; letter-spacing: -0.02em; margin-bottom: 1.5rem;
-  }
-  .hero h1 em { font-style: normal; color: var(--accent); }
-  .hero-sub { font-size: 17px; color: var(--text-muted); max-width: 580px; line-height: 1.7; margin-bottom: 2.5rem; }
-  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  /* BUTTONS & INPUTS */
   .btn {
-    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 0 1.5rem; height: 40px; border: 0.5px solid var(--border2);
-    background: none; color: var(--text); cursor: pointer; transition: all 0.15s;
-    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 12px; padding: 0.6rem 1.2rem;
+    background: transparent; border: 1px solid var(--border-med); color: var(--text-main);
+    border-radius: 4px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
   }
-  .btn:hover { background: var(--surface2); border-color: var(--text-muted); }
-  .btn-accent { background: var(--accent); color: #0a0a08; border-color: var(--accent); }
-  .btn-accent:hover { background: #d9ff5a; border-color: #d9ff5a; }
+  .btn:hover { border-color: var(--text-sec); }
+  .btn.primary { background: var(--accent); color: var(--bg-base); border-color: var(--accent); font-weight: 500; }
+  .btn.primary:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(220, 247, 99, 0.3); }
 
-  .stats-bar {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0;
-    border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border); margin: 0;
-  }
-  .stat-cell { padding: 2rem 2rem; border-right: 0.5px solid var(--border); }
-  .stat-cell:last-child { border-right: none; }
-  .stat-num { font-family: var(--font-head); font-size: 2.4rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; }
-
-  .landing-body { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-  @media (max-width: 640px) { .landing-body { grid-template-columns: 1fr; } }
-  .info-block { border: 0.5px solid var(--border); padding: 1.75rem; }
-  .info-block h3 {
-    font-family: var(--font-head); font-size: 14px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem;
-  }
-  .info-block p { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 0.75rem; }
-  .info-block ul { list-style: none; padding: 0; }
-  .info-block ul li {
-    font-size: 13px; color: var(--text-muted); padding: 0.4rem 0;
-    border-bottom: 0.5px solid var(--border); display: flex; justify-content: space-between; align-items: center;
-  }
-  .info-block ul li:last-child { border-bottom: none; }
+  /* OVERVIEW */
+  .overview-grid { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .hero-section { grid-column: 1 / -1; margin-bottom: 2rem; }
+  .hero-section h1 { font-family: var(--font-head); font-size: 3.5rem; font-weight: 700; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -0.03em; }
+  .hero-section p { font-size: 1.1rem; color: var(--text-sec); max-width: 700px; line-height: 1.6; margin-bottom: 2rem; }
   
-  .tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 8px; letter-spacing: 0.06em; }
-  .tag-confirmed { background: rgba(200,240,74,0.12); color: var(--accent); }
-  .tag-probable { background: rgba(240,160,48,0.12); color: var(--accent2); }
-  .tag-speculative { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; grid-column: 1 / -1; }
+  .kpi-card { background: var(--bg-surface); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 8px; }
+  .kpi-val { font-family: var(--font-mono); font-size: 2.5rem; color: var(--accent); line-height: 1; margin-bottom: 0.5rem; }
+  .kpi-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; }
 
-  .country-bars { display: flex; flex-direction: column; gap: 10px; }
-  .country-bar-row { display: flex; align-items: center; gap: 10px; }
-  .country-bar-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); width: 80px; flex-shrink: 0; }
-  .country-bar-track { flex: 1; height: 6px; background: var(--surface3); position: relative; }
-  .country-bar-fill { height: 100%; background: var(--accent); transition: width 1s ease; }
-  .country-bar-count { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); width: 24px; text-align: right; }
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-light); padding: 2rem; border-radius: 8px; }
+  .panel h3 { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem; }
+  .bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+  .bar-label { width: 100px; font-family: var(--font-mono); font-size: 11px; color: var(--text-main); }
+  .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); }
+  .bar-val { width: 30px; text-align: right; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
 
-  .ukraine-assessment {
-    grid-column: 1 / -1; border: 0.5px solid rgba(200,240,74,0.25);
-    padding: 1.75rem; background: rgba(200,240,74,0.03);
-  }
-  .ukraine-assessment h3 {
-    font-family: var(--font-head); font-size: 14px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.25rem;
-  }
-  .ukraine-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-  .ukraine-item { padding: 1rem; background: var(--surface); }
-  .ukraine-item .transfer-type { font-size: 13px; color: var(--text); margin-bottom: 6px; font-weight: 500; }
-  .ukraine-item .transfer-detail { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 8px; }
-
-  /* ===== MAP ===== */
-  .map-container { height: calc(100vh - 56px); position: relative; }
-  #map { height: 100%; width: 100%; background: #0d0d0b; }
+  /* MAP */
+  #map-container { height: calc(100vh - 60px); width: 100%; background: #080808; position: relative; }
+  #map { height: 100%; width: 100%; }
   .map-legend {
-    position: absolute; bottom: 2rem; left: 1rem; z-index: 999;
-    background: rgba(10,10,8,0.92); border: 0.5px solid var(--border2);
-    padding: 1rem 1.25rem; backdrop-filter: blur(8px); min-width: 180px;
+    position: absolute; bottom: 2rem; left: 2rem; z-index: 999;
+    background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-med);
+    padding: 1.5rem; border-radius: 8px; min-width: 200px;
   }
-  .map-legend h4 {
-    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 10px;
-  }
-  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .legend-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .map-legend h4 { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--text-main); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
   
-  .leaflet-popup-content-wrapper { background: #111110 !important; border: 0.5px solid rgba(255,255,255,0.14) !important; border-radius: 0 !important; box-shadow: none !important; color: #e8e6df !important; font-family: 'IBM Plex Sans', sans-serif !important; }
-  .leaflet-popup-tip-container { display: none !important; }
-  .leaflet-popup-content { margin: 14px 16px !important; min-width: 240px; max-width: 320px; }
-  .popup-date { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #888780; margin-bottom: 4px; }
-  .popup-location { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; color: #e8e6df; }
-  .popup-gang { font-size: 12px; color: #c8f04a; margin-bottom: 6px; }
-  .popup-summary { font-size: 12px; color: #888780; line-height: 1.5; margin-bottom: 8px; }
-  .leaflet-tile { filter: brightness(0.25) saturate(0.3) hue-rotate(200deg); }
-  .leaflet-control-zoom { display: none; }
+  .leaflet-popup-content-wrapper { background: var(--bg-surface); border: 1px solid var(--border-med); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .leaflet-popup-tip { background: var(--bg-surface); border-bottom: 1px solid var(--border-med); border-right: 1px solid var(--border-med); }
+  .leaflet-popup-content { color: var(--text-main); margin: 16px; font-family: var(--font-sans); }
+  .popup-date { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-bottom: 4px; }
+  .popup-loc { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+  .popup-desc { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 10px; }
+  .popup-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; background: rgba(255,255,255,0.05); color: var(--text-main); margin-right: 4px; }
+  .leaflet-tile { filter: brightness(0.2) saturate(0.2) contrast(1.2) hue-rotate(180deg); }
+  .leaflet-control-zoom a { background: var(--bg-surface) !important; color: var(--text-main) !important; border-color: var(--border-med) !important; }
 
-  /* ===== DATABASE ===== */
-  .db-controls {
-    padding: 1.5rem 2rem; background: var(--surface); border-bottom: 0.5px solid var(--border);
-    display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;
+  /* DATABASE */
+  .db-container { display: flex; flex-direction: column; height: calc(100vh - 60px); }
+  .db-toolbar {
+    padding: 1rem 1.5rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-light);
+    display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;
   }
-  .db-search {
-    flex: 1; min-width: 200px; background: var(--surface2); border: 0.5px solid var(--border2); color: var(--text);
-    font-family: var(--font-mono); font-size: 13px; padding: 0 1rem; height: 36px; outline: none;
+  .db-input, .db-select {
+    background: var(--bg-base); border: 1px solid var(--border-med); color: var(--text-main);
+    font-family: var(--font-mono); font-size: 12px; padding: 0.5rem 1rem; border-radius: 4px; outline: none;
+    transition: border-color 0.2s;
   }
-  .db-select {
-    background: var(--surface2); border: 0.5px solid var(--border2); color: var(--text);
-    font-family: var(--font-mono); font-size: 12px; padding: 0 0.75rem; height: 36px; outline: none; cursor: pointer;
+  .db-input:focus, .db-select:focus { border-color: var(--accent); }
+  .db-input { flex: 1; min-width: 250px; }
+  .db-meta { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); }
+  .db-meta span { color: var(--accent); }
+
+  .table-wrapper { flex: 1; overflow: auto; background: var(--bg-base); }
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  thead { position: sticky; top: 0; background: rgba(15, 16, 17, 0.95); backdrop-filter: blur(8px); z-index: 10; box-shadow: 0 1px 0 var(--border-light); }
+  th {
+    padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--text-sec);
+    text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; user-select: none; white-space: nowrap;
   }
-  .db-count { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); white-space: nowrap; margin-left: auto; }
-  .db-count span { color: var(--accent); }
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead tr { border-bottom: 1px solid var(--border2); background: var(--surface); }
-  th { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); padding: 10px 14px; text-align: left; white-space: nowrap; cursor: pointer; transition: color 0.12s; }
-  th:hover { color: var(--text-muted); }
-  td { padding: 10px 14px; border-bottom: 0.5px solid var(--border); color: var(--text-muted); vertical-align: top; max-width: 240px; }
-  tr:hover td { background: var(--surface2); }
-  td.date-cell { font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); white-space: nowrap; }
-  td.location-cell { font-size: 13px; color: var(--text); }
-  td.gang-cell { font-size: 12px; color: var(--accent); }
-  td.summary-cell { font-size: 12px; line-height: 1.5; max-width: 280px; color: var(--text-muted); }
-  .mission-badge { display: inline-block; font-family: var(--font-mono); font-size: 10px; padding: 2px 7px; margin: 1px; }
-  .mission-attack { background: rgba(232,92,58,0.12); color: var(--red); }
-  .mission-surveillance { background: rgba(74,159,212,0.12); color: var(--blue); }
-  .mission-smuggling { background: rgba(240,160,48,0.12); color: var(--accent2); }
-  .mission-prison { background: rgba(42,184,154,0.12); color: var(--teal); }
-  
-  /* ===== RESEARCH/NETWORK ===== */
-  .research-header { padding: 2rem; background: var(--surface); border-bottom: 0.5px solid var(--border); }
-  .research-header h2 { font-family: var(--font-head); color: var(--accent); margin-bottom: 0.5rem; font-size: 24px; }
-  .research-header p { color: var(--text-muted); max-width: 800px; font-size: 14px; }
-  .network-container { width: 100%; height: calc(100vh - 160px); background: #0d0d0b; cursor: grab; overflow: hidden; }
-  .network-container:active { cursor: grabbing; }
-  
-  /* Overlay */
-  #upload-overlay {
-    display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(10,10,8,0.95); backdrop-filter: blur(8px); z-index: 9999;
-    align-items: center; justify-content: center; flex-direction: column; padding: 2rem; text-align: center;
+  th:hover { color: var(--text-main); }
+  .sort-icon { display: inline-block; margin-left: 6px; font-size: 10px; opacity: 0.3; }
+  th.sorted .sort-icon { opacity: 1; color: var(--accent); }
+  td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-light); color: var(--text-main); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .cell-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); white-space: nowrap; }
+  .cell-desc { max-width: 350px; font-size: 13px; color: var(--text-sec); line-height: 1.5; }
+  .cell-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+
+  /* KNOWLEDGE CLOUD */
+  .network-wrapper { height: calc(100vh - 60px); position: relative; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
+  #network-svg { width: 100%; height: 100%; cursor: grab; }
+  #network-svg:active { cursor: grabbing; }
+  .network-hud {
+    position: absolute; top: 2rem; left: 2rem; pointer-events: none; max-width: 400px;
   }
+  .network-hud h2 { font-family: var(--font-head); font-size: 1.5rem; color: var(--text-main); margin-bottom: 0.5rem; }
+  .network-hud p { font-size: 13px; color: var(--text-sec); line-height: 1.5; pointer-events: auto; }
+  .node-tooltip {
+    position: absolute; background: var(--bg-surface); border: 1px solid var(--border-med);
+    padding: 10px 14px; border-radius: 6px; font-family: var(--font-mono); font-size: 11px;
+    color: var(--text-main); pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+
+  /* UPLOAD OVERLAY */
+  #init-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
+    background: var(--bg-base); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+  }
+  #init-overlay h1 { font-family: var(--font-head); font-size: 2rem; margin-bottom: 1rem; color: var(--text-main); }
+  #init-overlay p { color: var(--text-sec); margin-bottom: 2rem; max-width: 400px; }
+  #csvFileInput { display: none; }
 </style>
 </head>
 <body>
 
-<div id="upload-overlay">
-  <h2 style="font-family:var(--font-head); color:var(--accent); margin-bottom:1rem; font-size:28px;">Local Database Access</h2>
-  <p style="color:var(--text-muted); max-width:500px; margin-bottom:2rem;">To initialize the platform in standalone mode, please select the authoritative <b>drone_criminaluse_latam_v1.csv</b> database file.</p>
-  <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleFileUpload(event)">
-  <button class="btn btn-accent" onclick="document.getElementById('csvFileInput').click()">Initialize via Database</button>
+<div id="init-overlay">
+  <div class="brand-dot" style="width:16px; height:16px; margin-bottom:1.5rem;"></div>
+  <h1>Initialize Dashboard</h1>
+  <p>To run securely in local/standalone mode, please select the authoritative <b>drone_criminaluse_latam_v1.csv</b> database.</p>
+  <button class="btn primary" onclick="document.getElementById('csvFileInput').click()">Load Dataset</button>
+  <input type="file" id="csvFileInput" accept=".csv" onchange="handleFileUpload(event)">
 </div>
 
 <nav>
-  <div class="nav-brand">Drone — LatAm</div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('landing')">Overview</button>
-    <button class="nav-tab" onclick="showPage('map')">Map</button>
-    <button class="nav-tab" onclick="showPage('database')">Database</button>
-    <button class="nav-tab" onclick="showPage('research')">Knowledge/Research</button>
+  <div class="brand"><div class="brand-dot"></div> LATAM DRONE OSINT</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab" onclick="switchTab('map')">Geospatial Map</button>
+    <button class="tab" onclick="switchTab('database')">Database</button>
+    <button class="tab" onclick="switchTab('network')">Entity Graph</button>
   </div>
-  <div class="nav-meta">2022 – 2026 &nbsp;·&nbsp; <span id="nav-count">—</span> incidents</div>
+  <div class="nav-stats">Verified DB: <span id="nav-count" style="color:var(--accent)">0</span></div>
 </nav>
 
-<div id="page-landing" class="page active">
-  <div class="hero">
-    <div class="hero-tag">OSINT Research Report</div>
-    <h1>Criminal drone use<br>in <em>Latin America</em></h1>
-    <p class="hero-sub">A documented dataset of <span id="hero-count">—</span> verified incidents in which organised criminal groups across Latin America deployed aerial, maritime, and ground unmanned systems — and the evidence trail linking this capability to the conflict in Ukraine.</p>
-    <div class="hero-actions">
-      <button class="btn btn-accent" onclick="showPage('map')">Explore map</button>
-      <button class="btn" onclick="showPage('research')">View knowledge cloud</button>
+<div id="view-overview" class="page active">
+  <div class="overview-grid">
+    <div class="hero-section">
+      <h1>Criminal Unmanned Systems:<br>Latin America Assessment</h1>
+      <p>A comprehensive OSINT database tracking the tactical adoption of drones by organized criminal groups across Latin America, bridging localized cartel warfare with procurement and technical adaptations drawn from global conflicts.</p>
+      <button class="btn primary" onclick="switchTab('map')">Explore Map</button>
+      <button class="btn" onclick="switchTab('database')">View Database</button>
     </div>
-  </div>
 
-  <div class="stats-bar">
-    <div class="stat-cell">
-      <div class="stat-num" id="stat-count">—</div>
-      <div class="stat-label">Verified incidents</div>
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-label">Verified Incidents</div></div>
+      <div class="kpi-card"><div class="kpi-val" id="kpi-countries">0</div><div class="kpi-label">Active Countries</div></div>
+      <div class="kpi-card"><div class="kpi-val" id="kpi-groups">0</div><div class="kpi-label">Criminal Entities</div></div>
+      <div class="kpi-card"><div class="kpi-val" id="kpi-ukraine">0</div><div class="kpi-label">Ukraine Doctrine Linked</div></div>
     </div>
-    <div class="stat-cell">
-      <div class="stat-num">8</div>
-      <div class="stat-label">Countries</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-num">22+</div>
-      <div class="stat-label">Criminal groups</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-num" id="ukraine-count">—</div>
-      <div class="stat-label">Ukraine-linked</div>
-    </div>
-  </div>
 
-  <div class="landing-body">
-    <div class="info-block">
-      <h3>Incidents by country</h3>
-      <div class="country-bars" id="country-bars"></div>
+    <div class="panel">
+      <h3>Incident Density by Country</h3>
+      <div id="chart-countries"></div>
     </div>
-    <div class="info-block">
-      <h3>Mission types</h3>
-      <ul id="mission-list"></ul>
-    </div>
-    <div class="info-block">
-      <h3>Methodology & Sources</h3>
-      <p>All cases are strictly corroborated by geolocation, official statements, or secondary reporting from credible outlets (AP, Reuters, InSight Crime, CSIS, War on the Rocks, etc.). Platforms searched include OSINT aggregators, Twitter/X, and Telegram.</p>
-      <p style="color:var(--red); font-size:13px; margin-top:10px;"><b>No verified activity found for:</b> MS-13, Barrio 18, PCC (Brazil), Tren de Aragua, Gulf Clan Colombia.</p>
-    </div>
-    <div class="ukraine-assessment">
-      <h3>Ukraine Tactical Transfer — Assessment</h3>
-      <div class="ukraine-grid" id="ukraine-grid"></div>
+
+    <div class="panel">
+      <h3>Dominant Mission Types</h3>
+      <div id="chart-missions"></div>
     </div>
   </div>
 </div>
 
-<div id="page-map" class="page">
-  <div class="map-container">
+<div id="view-map" class="page">
+  <div id="map-container">
     <div id="map"></div>
     <div class="map-legend">
-      <h4>Mission type</h4>
-      <div class="legend-item"><div class="legend-dot" style="background:#e85c3a"></div><div class="legend-label">Attack</div></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#4a9fd4"></div><div class="legend-label">Surveillance</div></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f0a030"></div><div class="legend-label">Smuggling</div></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#2ab89a"></div><div class="legend-label">Prison Drops</div></div>
+      <h4>Mission Classification</h4>
+      <div class="legend-item"><div class="dot" style="background:var(--red)"></div> Weaponized Attack</div>
+      <div class="legend-item"><div class="dot" style="background:var(--blue)"></div> Surveillance / ISR</div>
+      <div class="legend-item"><div class="dot" style="background:var(--orange)"></div> Border Smuggling</div>
+      <div class="legend-item"><div class="dot" style="background:var(--teal)"></div> Prison Contraband</div>
+      <div class="legend-item"><div class="dot" style="background:#888"></div> Unspecified</div>
     </div>
   </div>
 </div>
 
-<div id="page-database" class="page db-page">
-  <div class="db-controls">
-    <input type="text" class="db-search" id="db-search" placeholder="Search incidents, locations, gangs..." oninput="filterTable()">
-    <select class="db-select" id="filter-country" onchange="filterTable()">
-      <option value="">All countries</option>
-    </select>
-    <div class="db-count">Showing <span id="db-shown">—</span> of <span id="db-total">—</span></div>
-  </div>
-  <div class="table-wrap">
-    <table id="db-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Country</th>
-          <th>Location</th>
-          <th>Group(s)</th>
-          <th>Summary</th>
-          <th>Mission</th>
-          <th>Model</th>
-        </tr>
-      </thead>
-      <tbody id="db-body"></tbody>
-    </table>
+<div id="view-database" class="page">
+  <div class="db-container">
+    <div class="db-toolbar">
+      <input type="text" class="db-input" id="search-input" placeholder="Search incidents, gangs, locations..." oninput="applyFilters()">
+      <select class="db-select" id="filter-country" onchange="applyFilters()">
+        <option value="">All Countries</option>
+      </select>
+      <select class="db-select" id="filter-mission" onchange="applyFilters()">
+        <option value="">All Mission Types</option>
+        <option value="attack">Weaponized Attack</option>
+        <option value="surveillance">Surveillance</option>
+        <option value="smuggling">Smuggling</option>
+        <option value="prison">Prison Drops</option>
+      </select>
+      <div class="db-meta">Showing <span id="db-shown">0</span> of <span id="db-total">0</span> entries</div>
+    </div>
+    <div class="table-wrapper">
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('date')">Date <span class="sort-icon">▼</span></th>
+            <th onclick="sortTable('country')">Country <span class="sort-icon">▼</span></th>
+            <th onclick="sortTable('location')">Location <span class="sort-icon">▼</span></th>
+            <th onclick="sortTable('gangs_involved')">Entity <span class="sort-icon">▼</span></th>
+            <th onclick="sortTable('mission_type')">Mission <span class="sort-icon">▼</span></th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="db-body"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<div id="page-research" class="page">
-  <div class="research-header">
-    <h2>Knowledge Cloud & Research Network</h2>
-    <p>A dynamically generated D3 radial network fusing verified database incidents with broader OSINT research subjects. Maps tactical adoption, procurement channels, the Ukraine knowledge transfer, and explicitly flags organizations with <i>no verified</i> drone operations to date.</p>
+<div id="view-network" class="page">
+  <div class="network-wrapper">
+    <div class="network-hud">
+      <h2>Entity Relationship Graph</h2>
+      <p>This force-directed graph is generated directly from the authoritative dataset. It maps relationships between specific <b>Criminal Groups</b>, <b>Countries of Operation</b>, and hardware <b>Procurement origins</b> (like DJI/China or Ukraine tactics). Hover over nodes to explore connections.</p>
+    </div>
+    <div id="network-svg"></div>
+    <div id="node-tooltip" class="node-tooltip"></div>
   </div>
-  <div class="network-container" id="research-network"></div>
 </div>
 
 <script>
-let DATA = [];
-let leafletMap;
+let RAW_DATA = [];
+let FILTERED_DATA = [];
+let sortCol = 'date';
+let sortAsc = false;
+let leafletMap = null;
+let networkRendered = false;
 
-// 1. Initializer - Load CSV
-window.onload = async function() {
+// Initialization / Upload
+window.onload = async () => {
   try {
     const res = await fetch('drone_criminaluse_latam_v1.csv');
     if (res.ok) {
       const text = await res.text();
-      document.getElementById('upload-overlay').style.display = 'none';
-      processData(text);
-    } 
-    // If not OK, the overlay remains visible asking the user to upload it manually.
+      initApp(text);
+    }
   } catch(e) {
-    // Fails locally due to CORS
+    // Await manual upload if fetch fails
   }
 };
 
@@ -355,29 +306,23 @@ function handleFileUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
-    document.getElementById('upload-overlay').style.display = 'none';
-    processData(e.target.result);
-  };
+  reader.onload = (e) => initApp(e.target.result);
   reader.readAsText(file);
 }
 
-// Basic robust CSV to JSON converter handling quoted text
-function csvJSON(csv) {
+function parseCSV(csv) {
   const lines = [];
-  let row = [];
-  let cell = '';
-  let insideQuote = false;
+  let row = [], cell = '', inside = false;
+  // Clean AI injection sources if present
+  csv = csv.replace(/\\s*/g, '');
   
   for (let i = 0; i < csv.length; i++) {
-    const char = csv[i];
-    const nextChar = csv[i+1];
+    const char = csv[i], next = csv[i+1];
     if (char === '"') {
-      if (insideQuote && nextChar === '"') { cell += '"'; i++; }
-      else { insideQuote = !insideQuote; }
-    } else if (char === ',' && !insideQuote) {
+      if (inside && next === '"') { cell += '"'; i++; } else { inside = !inside; }
+    } else if (char === ',' && !inside) {
       row.push(cell.trim()); cell = '';
-    } else if (char === '\n' && !insideQuote) {
+    } else if (char === '\n' && !inside) {
       row.push(cell.trim()); lines.push(row); row = []; cell = '';
     } else if (char !== '\r') {
       cell += char;
@@ -386,308 +331,372 @@ function csvJSON(csv) {
   if (cell || row.length) { row.push(cell.trim()); lines.push(row); }
   
   const headers = lines[0];
-  const result = [];
+  const data = [];
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].length < headers.length - 2) continue; // skip invalid short lines
+    if (lines[i].length < headers.length - 2) continue;
     const obj = {};
     for (let j = 0; j < headers.length; j++) {
-      obj[headers[j]] = lines[i][j];
+      obj[headers[j]] = lines[i][j] || '';
     }
-    result.push(obj);
+    // Only accept if verification is NOT unverified (as per instructions in md)
+    if ((obj.verification_status || '').toUpperCase() !== 'UNVERIFIED') {
+      data.push(obj);
+    }
   }
-  return result;
+  return data;
 }
 
-function processData(text) {
-  // Clear any possible tags if fetched via AI proxy 
-  text = text.replace(/\\s*/g, '');
-  DATA = csvJSON(text);
+function initApp(csvText) {
+  document.getElementById('init-overlay').style.display = 'none';
+  RAW_DATA = parseCSV(csvText);
+  FILTERED_DATA = [...RAW_DATA];
+  
+  // Header Meta
+  document.getElementById('nav-count').textContent = RAW_DATA.length;
+  document.getElementById('db-total').textContent = RAW_DATA.length;
+  
+  // Overview KPIs
+  document.getElementById('kpi-total').textContent = RAW_DATA.length;
+  const countries = [...new Set(RAW_DATA.map(d => d.country).filter(Boolean))];
+  document.getElementById('kpi-countries').textContent = countries.length;
+  
+  const gangs = new Set();
+  RAW_DATA.forEach(d => {
+    (d.gangs_involved||'').split(';').forEach(g => {
+      const gClean = g.trim();
+      if(gClean && !gClean.toLowerCase().includes('unspecified')) gangs.add(gClean);
+    });
+  });
+  document.getElementById('kpi-groups').textContent = gangs.size;
+  document.getElementById('kpi-ukraine').textContent = RAW_DATA.filter(d => (d.ukraine_link||'').toUpperCase() === 'TRUE').length;
 
-  // Apply accurate database counts to UI headers
-  const total = DATA.length;
-  document.getElementById('nav-count').textContent = total;
-  document.getElementById('hero-count').textContent = total;
-  document.getElementById('stat-count').textContent = total;
-
-  buildLanding();
-  buildTable();
-  showPage('landing');
+  buildOverviewCharts();
+  populateDropdowns(countries);
+  applyFilters(); // Renders Table
+  
+  switchTab('overview');
 }
 
-// 2. Navigation
-function showPage(name) {
+function switchTab(tabId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  
-  document.getElementById('page-' + name).classList.add('active');
-  const btn = document.querySelector(`button[onclick="showPage('${name}')"]`);
-  if(btn) btn.classList.add('active');
-  
-  if (name === 'map') {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + tabId).classList.add('active');
+  document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+
+  if (tabId === 'map') {
     if (!leafletMap) initMap();
     else leafletMap.invalidateSize();
   }
-  if (name === 'research') {
-    if (!document.querySelector('#research-network svg')) {
-      setTimeout(buildResearch, 50); // slight delay allowing display block paint
-    }
+  if (tabId === 'network' && !networkRendered) {
+    setTimeout(buildNetwork, 50);
+    networkRendered = true;
   }
 }
 
-// 3. UI Builders (Adapted from original logic)
-function buildLanding() {
-  const uCount = DATA.filter(d => (d.ukraine_link||'').toUpperCase() === 'TRUE').length;
-  document.getElementById('ukraine-count').textContent = uCount;
-
-  const countryCounts = {};
-  DATA.forEach(d => { if(d.country) countryCounts[d.country] = (countryCounts[d.country] || 0) + 1; });
-  const sortedC = Object.entries(countryCounts).sort((a,b) => b[1]-a[1]);
-  const max = sortedC[0][1];
+// Charts
+function buildOverviewCharts() {
+  // Countries
+  const cCounts = {};
+  RAW_DATA.forEach(d => { if(d.country) cCounts[d.country] = (cCounts[d.country] || 0) + 1; });
+  const sortedC = Object.entries(cCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const maxC = sortedC[0][1];
   
-  const bars = document.getElementById('country-bars');
-  bars.innerHTML = '';
-  sortedC.forEach(([c, n]) => {
-    bars.innerHTML += `<div class="country-bar-row">
-      <div class="country-bar-label">${c}</div>
-      <div class="country-bar-track"><div class="country-bar-fill" style="width:${Math.round(n/max*100)}%"></div></div>
-      <div class="country-bar-count">${n}</div>
-    </div>`;
+  document.getElementById('chart-countries').innerHTML = sortedC.map(([c, n]) => `
+    <div class="bar-row">
+      <div class="bar-label">${c}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxC)*100}%"></div></div>
+      <div class="bar-val">${n}</div>
+    </div>
+  `).join('');
+
+  // Missions
+  const mCounts = { 'Attack':0, 'Surveillance':0, 'Smuggling':0, 'Prison Drops':0 };
+  RAW_DATA.forEach(d => {
+    const m = (d.mission_type||'').toLowerCase();
+    if(m.includes('attack') || m.includes('explosive')) mCounts['Attack']++;
+    if(m.includes('surv') || m.includes('isr')) mCounts['Surveillance']++;
+    if(m.includes('smug') || m.includes('drug')) mCounts['Smuggling']++;
+    if(m.includes('prison') || m.includes('contraband')) mCounts['Prison Drops']++;
   });
+  const sortedM = Object.entries(mCounts).sort((a,b) => b[1]-a[1]);
+  const maxM = sortedM[0][1] || 1;
 
-  const mList = document.getElementById('mission-list');
-  mList.innerHTML = `
-    <li><div><span class="tag tag-confirmed" style="background:rgba(232,92,58,0.12); color:var(--red)">Attack (Explosive/Kamikaze)</span></div></li>
-    <li><div><span class="tag tag-confirmed" style="background:rgba(74,159,212,0.12); color:var(--blue)">Surveillance & ISR</span></div></li>
-    <li><div><span class="tag tag-confirmed" style="background:rgba(240,160,48,0.12); color:var(--accent2)">Drug/Border Smuggling</span></div></li>
-    <li><div><span class="tag tag-confirmed" style="background:rgba(42,184,154,0.12); color:var(--teal)">Prison Contraband Drops</span></div></li>
-  `;
-
-  document.getElementById('ukraine-grid').innerHTML = `
-    <div class="ukraine-item"><div class="transfer-type">Confirmed Transfers</div><div class="transfer-detail">CJNG, Sinaloa, CV operatives confirmed leveraging Intl Legion fronts to secure FPV doctrine.</div></div>
-    <div class="ukraine-item"><div class="transfer-type">Hardware Origin</div><div class="transfer-detail">No confirmed hardware transfers directly from Ukraine; nearly all sourcing remains Chinese (DJI/COTS).</div></div>
-  `;
+  document.getElementById('chart-missions').innerHTML = sortedM.map(([m, n]) => `
+    <div class="bar-row">
+      <div class="bar-label">${m}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxM)*100}%; background:var(--${m==='Attack'?'red':m==='Surveillance'?'blue':m==='Smuggling'?'orange':'teal'})"></div></div>
+      <div class="bar-val">${n}</div>
+    </div>
+  `).join('');
 }
 
-// 4. Mapping
+// Map Logic (Enhanced Geocoding to capture all CSV locations)
 function getCoords(row) {
-  const loc = row.location || ''; const country = row.country || '';
-  const l = loc.toLowerCase();
-  if (country === 'Brazil') {
-    if (l.includes('rio')||l.includes('penha')||l.includes('bangu')||l.includes('rocinha')) return [-22.9068, -43.1729];
+  const loc = (row.location || '').toLowerCase();
+  const c = (row.country || '').toLowerCase();
+  
+  // Brazil
+  if (c === 'brazil') {
+    if (loc.includes('rio') || loc.includes('penha') || loc.includes('bangu') || loc.includes('quitungo') || loc.includes('maré') || loc.includes('rocinha') || loc.includes('cidade de deus')) return [-22.9068 + (Math.random()-0.5)*0.08, -43.1729 + (Math.random()-0.5)*0.08];
     return [-15.8, -47.9];
   }
-  if (country === 'Colombia') {
-    if (l.includes('catatumbo')||l.includes('norte')) return [8.5, -73.0];
-    if (l.includes('nariño')||l.includes('cauca')) return [1.5, -77.0];
+  // Mexico
+  if (c === 'mexico') {
+    if (loc.includes('michoacán') || loc.includes('tepalcatepec')) return [19.1, -102.3 + (Math.random()-0.5)*0.2];
+    if (loc.includes('sinaloa')) return [24.8, -107.4];
+    if (loc.includes('tamaulipas') || loc.includes('nuevo laredo')) return [27.4, -99.5];
+    if (loc.includes('jalisco') || loc.includes('guadalajara')) return [20.6, -103.3];
+    if (loc.includes('baja california') || loc.includes('tijuana')) return [32.5, -117.0];
+    if (loc.includes('sonora')) return [29.0, -110.9];
+    if (loc.includes('chiapas')) return [16.7, -93.1];
+    if (loc.includes('guerrero')) return [17.5, -99.5];
+    if (loc.includes('guanajuato')) return [21.0, -101.2];
+    return [23.6 + (Math.random()-0.5)*2, -102.5 + (Math.random()-0.5)*2];
+  }
+  // Colombia
+  if (c === 'colombia') {
+    if (loc.includes('catatumbo') || loc.includes('norte de santander')) return [8.5 + (Math.random()-0.5)*0.2, -73.0 + (Math.random()-0.5)*0.2];
+    if (loc.includes('cauca') || loc.includes('cali') || loc.includes('valle')) return [3.4 + (Math.random()-0.5)*0.3, -76.5 + (Math.random()-0.5)*0.3];
+    if (loc.includes('nariño')) return [1.5, -77.0];
+    if (loc.includes('antioquia') || loc.includes('medellín')) return [6.2, -75.5];
+    if (loc.includes('arauca')) return [7.0, -70.7];
+    if (loc.includes('putumayo')) return [1.1, -76.6];
     return [4.5, -74.0];
   }
-  if (country === 'Mexico') {
-    if (l.includes('michoacán')||l.includes('jalisco')) return [19.2, -101.9];
-    if (l.includes('sinaloa')) return [24.8, -107.4];
-    return [23.6, -102.5];
-  }
-  if (country === 'Ecuador') {
-    if (l.includes('guayaquil')) return [-2.2, -79.9];
+  // Ecuador
+  if (c === 'ecuador') {
+    if (loc.includes('guayaquil') || loc.includes('durán') || loc.includes('guayas') || loc.includes('litoral')) return [-2.2 + (Math.random()-0.5)*0.1, -79.9 + (Math.random()-0.5)*0.1];
+    if (loc.includes('esmeraldas')) return [0.9, -79.6];
+    if (loc.includes('cotopaxi')) return [-0.9, -78.6];
+    if (loc.includes('manabí')) return [-1.0, -80.4];
     return [-1.8, -78.1];
   }
-  if (country === 'United States' || l.includes('el paso')) return [31.7, -106.4];
-  if (country === 'Panama') return [8.9, -79.5];
-  return null;
+  // Others
+  if (loc.includes('el paso') || loc.includes('texas')) return [31.7, -106.4];
+  if (c === 'panama') return [8.9, -79.5];
+  if (c === 'honduras') return [14.0, -87.2];
+  if (c === 'guatemala') return [15.7, -90.2];
+  if (c === 'venezuela') return [6.4, -66.5];
+  if (c === 'peru') return [-9.1, -75.0];
+  
+  // Safe Fallback based on typical regions
+  if (c.includes('us') || c.includes('states')) return [31.5, -106.0];
+  
+  return [10 + (Math.random()-0.5)*10, -80 + (Math.random()-0.5)*10]; 
 }
 
 function initMap() {
-  leafletMap = L.map('map', { zoomControl: false, attributionControl: false }).setView([10, -80], 4);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+  leafletMap = L.map('map', { zoomControl: true, attributionControl: false }).setView([12, -85], 4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(leafletMap);
   
-  DATA.forEach(row => {
+  RAW_DATA.forEach(row => {
     const coords = getCoords(row);
     if (!coords) return;
-    const m = (row.mission_type||'').toLowerCase();
-    let col = '#555';
-    if(m.includes('attack')) col = '#e85c3a';
-    else if(m.includes('surveillance')) col = '#4a9fd4';
-    else if(m.includes('smug')) col = '#f0a030';
-    else if(m.includes('prison')) col = '#2ab89a';
-
-    const jitter = [coords[0] + (Math.random()-0.5)*0.3, coords[1] + (Math.random()-0.5)*0.3];
-    const marker = L.circleMarker(jitter, { radius: 6, fillColor: col, color: '#111', weight: 1, fillOpacity: 0.9 }).addTo(leafletMap);
-    marker.bindPopup(`
-      <div class="popup-date">${row.date || ''}</div>
-      <div class="popup-location">${row.location || ''}</div>
-      <div class="popup-gang">${row.gangs_involved || ''}</div>
-      <div class="popup-summary">${row.summary_of_case || ''}</div>
-    `);
-  });
-}
-
-// 5. Database 
-function buildTable() {
-  const countries = [...new Set(DATA.map(d => d.country).filter(x => x))].sort();
-  const cSel = document.getElementById('filter-country');
-  if (cSel.options.length === 1) {
-    countries.forEach(c => { const o = document.createElement('option'); o.value=c; o.textContent=c; cSel.appendChild(o); });
-  }
-  document.getElementById('db-total').textContent = DATA.length;
-  filterTable();
-}
-
-function filterTable() {
-  const query = document.getElementById('db-search').value.toLowerCase();
-  const cFilter = document.getElementById('filter-country').value;
-  
-  let html = '';
-  let shown = 0;
-  
-  DATA.forEach(row => {
-    if (cFilter && row.country !== cFilter) return;
-    const combined = Object.values(row).join(' ').toLowerCase();
-    if (query && !combined.includes(query)) return;
     
-    shown++;
-    const ms = (row.mission_type||'').split(';').map(m => `<span class="mission-badge" style="background:#222">${m.trim()}</span>`).join('');
-    html += `<tr>
-      <td class="date-cell">${row.date||'—'}</td>
-      <td>${row.country||'—'}</td>
-      <td class="location-cell">${(row.location||'').split(',')[0]}</td>
-      <td class="gang-cell">${(row.gangs_involved||'—').split(';')[0]}</td>
-      <td class="summary-cell">${(row.summary_of_case||'').substring(0, 100)}...</td>
-      <td>${ms}</td>
-      <td style="font-family:var(--font-mono); font-size:11px;">${row.drone_model||'—'}</td>
-    </tr>`;
+    const m = (row.mission_type||'').toLowerCase();
+    let col = '#888';
+    if(m.includes('attack') || m.includes('explosive')) col = 'var(--red)';
+    else if(m.includes('surv') || m.includes('isr')) col = 'var(--blue)';
+    else if(m.includes('smug')) col = 'var(--orange)';
+    else if(m.includes('prison') || m.includes('contraband')) col = 'var(--teal)';
+
+    L.circleMarker(coords, { radius: 6, fillColor: col, color: '#000', weight: 1, fillOpacity: 0.85 })
+     .addTo(leafletMap)
+     .bindPopup(`
+       <div class="popup-date">${row.date || 'Unknown Date'}</div>
+       <div class="popup-loc">${row.location || row.country}</div>
+       <div style="margin-bottom:6px;">
+         <span class="popup-badge" style="color:${col}; border:1px solid ${col}">${row.mission_type || 'Unspecified'}</span>
+         <span class="popup-badge">${row.gangs_involved ? row.gangs_involved.split(';')[0] : 'Unknown'}</span>
+       </div>
+       <div class="popup-desc">${row.summary_of_case || ''}</div>
+     `);
   });
-  document.getElementById('db-body').innerHTML = html;
-  document.getElementById('db-shown').textContent = shown;
 }
 
-// 6. Knowledge / Research Network (D3.js)
-function buildResearch() {
-  const container = document.getElementById('research-network');
+// Database Filter & Sort
+function populateDropdowns(countries) {
+  const cSel = document.getElementById('filter-country');
+  countries.sort().forEach(c => {
+    const opt = document.createElement('option'); opt.value = c; opt.textContent = c; cSel.appendChild(opt);
+  });
+}
+
+function applyFilters() {
+  const term = document.getElementById('search-input').value.toLowerCase();
+  const cFilt = document.getElementById('filter-country').value;
+  const mFilt = document.getElementById('filter-mission').value;
+
+  FILTERED_DATA = RAW_DATA.filter(row => {
+    const matchC = !cFilt || row.country === cFilt;
+    const matchM = !mFilt || (row.mission_type||'').toLowerCase().includes(mFilt);
+    const matchT = !term || Object.values(row).join(' ').toLowerCase().includes(term);
+    return matchC && matchM && matchT;
+  });
+
+  renderTable();
+}
+
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  
+  // Update UI headers
+  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
+  const th = document.querySelector(`th[onclick="sortTable('${col}')"]`);
+  if(th) {
+    th.classList.add('sorted');
+    th.querySelector('.sort-icon').textContent = sortAsc ? '▲' : '▼';
+  }
+
+  FILTERED_DATA.sort((a, b) => {
+    let valA = a[col] || ''; let valB = b[col] || '';
+    if (col === 'date') { // Basic string sort works for YYYY-MM-DD
+      if(valA === 'Unknown') valA = '0000';
+      if(valB === 'Unknown') valB = '0000';
+    }
+    valA = valA.toString().toLowerCase(); valB = valB.toString().toLowerCase();
+    if(valA < valB) return sortAsc ? -1 : 1;
+    if(valA > valB) return sortAsc ? 1 : -1;
+    return 0;
+  });
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('db-body');
+  document.getElementById('db-shown').textContent = FILTERED_DATA.length;
+  
+  if (FILTERED_DATA.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem; color:var(--text-dim);">No incidents match the current filters.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = FILTERED_DATA.map(row => {
+    const g = (row.gangs_involved || 'Unknown').split(';')[0];
+    const summary = (row.summary_of_case || '').substring(0, 150) + ((row.summary_of_case||'').length > 150 ? '...' : '');
+    return `<tr>
+      <td class="cell-date">${row.date || '—'}</td>
+      <td>${row.country || '—'}</td>
+      <td class="cell-tag">${(row.location || '').split(',')[0]}</td>
+      <td style="font-weight:500;">${g}</td>
+      <td style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase;">${row.mission_type || '—'}</td>
+      <td class="cell-desc">${summary}</td>
+    </tr>`;
+  }).join('');
+}
+
+// Sensible Data-Driven Network (D3)
+function buildNetwork() {
+  const container = document.getElementById('network-svg');
   const width = container.clientWidth;
   const height = container.clientHeight;
+  const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+  const g = svg.append('g');
+  
+  // Setup Zoom
+  svg.call(d3.zoom().scaleExtent([0.2, 4]).on('zoom', e => g.attr('transform', e.transform)));
 
-  const nodes = [
-    {id: 'root', group: 0, label: 'LatAm Drone Use', val: 32},
-    // Themes
-    {id: 'theme_attack', group: 1, label: 'Weaponized Attacks', val: 18},
-    {id: 'theme_surv', group: 1, label: 'Surveillance / ISR', val: 18},
-    {id: 'theme_smug', group: 1, label: 'Border Smuggling', val: 18},
-    {id: 'theme_prison', group: 1, label: 'Prison Contraband', val: 18},
-    // Core Verified Groups
-    {id: 'grp_cjng', group: 2, label: 'CJNG', val: 16},
-    {id: 'grp_sin', group: 2, label: 'Sinaloa Cartel', val: 16},
-    {id: 'grp_cv', group: 2, label: 'Comando Vermelho', val: 16},
-    {id: 'grp_eln', group: 2, label: 'ELN', val: 16},
-    {id: 'grp_farc', group: 2, label: 'ex-FARC', val: 16},
-    {id: 'grp_ecu', group: 2, label: 'Choneros / Lobos', val: 16},
-    // Research Focus / No Verified Activity
-    {id: 'theme_noverif', group: 3, label: 'NO VERIFIED DRONE ACTIVITY', val: 22},
-    {id: 'grp_ms13', group: 3, label: 'MS-13', val: 12},
-    {id: 'grp_pcc', group: 3, label: 'PCC (Brazil)', val: 12},
-    {id: 'grp_tda', group: 3, label: 'Tren de Aragua', val: 12},
-    // Ukraine Transfer & Procurement
-    {id: 'theme_ukr', group: 4, label: 'Ukraine Tactical Transfer', val: 22},
-    {id: 'ukr_legion', group: 4, label: 'Intl Legion Infiltration', val: 14},
-    {id: 'theme_proc', group: 5, label: 'Procurement Channels', val: 20},
-    {id: 'proc_dji', group: 5, label: 'Chinese COTS (DJI)', val: 15},
-    {id: 'proc_fpv', group: 5, label: 'Custom FPV Hubs', val: 14}
-  ];
+  // Generate Nodes and Links directly from DB
+  const nodeMap = new Map();
+  const links = [];
 
-  const links = [
-    {source: 'root', target: 'theme_attack'}, {source: 'root', target: 'theme_surv'},
-    {source: 'root', target: 'theme_smug'}, {source: 'root', target: 'theme_prison'},
-    {source: 'root', target: 'theme_noverif'}, {source: 'root', target: 'theme_ukr'},
-    {source: 'root', target: 'theme_proc'},
-    
-    // Group Links
-    {source: 'theme_attack', target: 'grp_cjng'}, {source: 'theme_attack', target: 'grp_cv'},
-    {source: 'theme_attack', target: 'grp_eln'}, {source: 'theme_attack', target: 'grp_farc'},
-    {source: 'theme_surv', target: 'grp_cjng'}, {source: 'theme_surv', target: 'grp_sin'},
-    {source: 'theme_smug', target: 'grp_sin'}, {source: 'theme_prison', target: 'grp_ecu'},
-    
-    // No verifications
-    {source: 'theme_noverif', target: 'grp_ms13'}, {source: 'theme_noverif', target: 'grp_pcc'},
-    {source: 'theme_noverif', target: 'grp_tda'},
-    
-    // Ukraine & Procurement
-    {source: 'theme_ukr', target: 'ukr_legion'}, {source: 'ukr_legion', target: 'grp_cjng'},
-    {source: 'ukr_legion', target: 'grp_cv'}, {source: 'ukr_legion', target: 'grp_eln'},
-    {source: 'theme_proc', target: 'proc_dji'}, {source: 'theme_proc', target: 'proc_fpv'},
-    {source: 'proc_dji', target: 'grp_cv'}, {source: 'proc_dji', target: 'grp_ecu'},
-    {source: 'proc_fpv', target: 'grp_cjng'}
-  ];
+  function addNode(id, group, label, size, color) {
+    if (!nodeMap.has(id)) nodeMap.set(id, { id, group, label, size, color, count: 0 });
+    nodeMap.get(id).count++;
+    return id;
+  }
 
-  // Dynamically blend specific incidents from DB
-  DATA.forEach((row, i) => {
-    const incId = 'inc_' + i;
-    const g = (row.gangs_involved || '').toLowerCase();
-    const m = (row.mission_type || '').toLowerCase();
-    
-    nodes.push({ id: incId, group: 10, label: (row.location||'').split(',')[0], val: 4, desc: row.summary_of_case });
-    
-    let isLinked = false;
-    if (g.includes('cjng')) { links.push({source: incId, target: 'grp_cjng'}); isLinked=true; }
-    else if (g.includes('vermelho')||g.includes('cv')) { links.push({source: incId, target: 'grp_cv'}); isLinked=true; }
-    else if (g.includes('sinaloa')) { links.push({source: incId, target: 'grp_sin'}); isLinked=true; }
-    else if (g.includes('eln')) { links.push({source: incId, target: 'grp_eln'}); isLinked=true; }
-    else if (g.includes('farc')) { links.push({source: incId, target: 'grp_farc'}); isLinked=true; }
-    else if (g.includes('choneros')||g.includes('lobos')) { links.push({source: incId, target: 'grp_ecu'}); isLinked=true; }
+  const rootId = addNode('root', 'root', 'LATAM DRONE NEXUS', 25, '#ffffff');
 
-    if(!isLinked) {
-      if(m.includes('attack')) links.push({source: incId, target: 'theme_attack'});
-      else if(m.includes('prison')) links.push({source: incId, target: 'theme_prison'});
-      else links.push({source: incId, target: 'root'});
+  // Extract entities
+  RAW_DATA.forEach((row, i) => {
+    const incId = addNode(`inc_${i}`, 'incident', row.location || 'Incident', 3, 'rgba(255,255,255,0.4)');
+    
+    // Country
+    if (row.country) {
+      const cId = addNode(`c_${row.country}`, 'country', row.country, 12, 'var(--text-sec)');
+      links.push({ source: rootId, target: cId });
+      links.push({ source: cId, target: incId });
+    } else {
+      links.push({ source: rootId, target: incId });
+    }
+
+    // Gangs
+    if (row.gangs_involved) {
+      row.gangs_involved.split(';').forEach(gang => {
+        const gName = gang.trim();
+        if(gName && !gName.toLowerCase().includes('unspecified')) {
+          const gId = addNode(`g_${gName}`, 'gang', gName, 15, 'var(--accent)');
+          links.push({ source: gId, target: incId });
+        }
+      });
+    }
+
+    // Supply/Ukraine
+    if (row.supply_chain_origin && row.supply_chain_origin.includes('China')) {
+      const pId = addNode('p_china', 'supply', 'Chinese COTS / DJI', 18, 'var(--blue)');
+      links.push({ source: incId, target: pId });
+    }
+    if ((row.ukraine_link || '').toUpperCase() === 'TRUE') {
+      const uId = addNode('p_ukr', 'supply', 'Ukraine Tactical Doctrine', 18, 'var(--red)');
+      links.push({ source: incId, target: uId });
     }
   });
 
-  const nodeData = nodes.map(d => Object.assign({}, d));
-  const linkData = links.map(d => Object.assign({}, d));
+  const nodes = Array.from(nodeMap.values());
+  // Scale node sizes slightly by connection count for gangs/countries
+  nodes.forEach(n => {
+    if (n.group === 'gang' || n.group === 'country') {
+      n.size = Math.min(30, n.size + (n.count * 0.5));
+    }
+  });
 
-  const svg = d3.select('#research-network').append('svg')
-    .attr('width', width).attr('height', height)
-    .call(d3.zoom().on("zoom", (e) => { svgGroup.attr("transform", e.transform); }));
-    
-  const svgGroup = svg.append('g');
-
-  const simulation = d3.forceSimulation(nodeData)
-    .force('link', d3.forceLink(linkData).id(d => d.id).distance(l => {
-      const gS = typeof l.source==='object' ? l.source.group : nodes.find(n=>n.id===l.source).group;
-      const gT = typeof l.target==='object' ? l.target.group : nodes.find(n=>n.id===l.target).group;
-      if (gS === 0) return 150;
-      if (gT === 10) return 30;
-      return 90;
+  const simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
+      if(d.source.group === 'root') return 150;
+      if(d.source.group === 'country' && d.target.group === 'incident') return 60;
+      return 100;
     }))
-    .force('charge', d3.forceManyBody().strength(d => d.group === 10 ? -20 : -350))
+    .force('charge', d3.forceManyBody().strength(d => d.group === 'incident' ? -15 : -250))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collide', d3.forceCollide().radius(d => d.val + 8));
+    .force('collide', d3.forceCollide().radius(d => d.size + 10));
 
-  const link = svgGroup.append('g').selectAll('line').data(linkData).join('line')
-    .attr('stroke', 'rgba(255,255,255,0.1)').attr('stroke-width', 1);
+  const link = g.append('g').selectAll('line').data(links).join('line')
+    .attr('stroke', 'rgba(255,255,255,0.08)').attr('stroke-width', 1);
 
-  const colors = { 0:'#c8f04a', 1:'#4a9fd4', 2:'#e85c3a', 3:'#888780', 4:'#f0a030', 5:'#2ab89a', 10:'rgba(255,255,255,0.3)' };
-
-  const node = svgGroup.append('g').selectAll('circle').data(nodeData).join('circle')
-    .attr('r', d => d.val)
-    .attr('fill', d => colors[d.group] || '#999')
-    .attr('stroke', '#111').attr('stroke-width', 1.5)
+  const node = g.append('g').selectAll('circle').data(nodes).join('circle')
+    .attr('r', d => d.size)
+    .attr('fill', d => d.color)
+    .attr('stroke', '#000').attr('stroke-width', 1.5)
     .call(d3.drag()
-      .on('start', e => { if (!e.active) simulation.alphaTarget(0.3).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
+      .on('start', e => { if(!e.active) simulation.alphaTarget(0.3).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
       .on('drag', e => { e.subject.fx = e.x; e.subject.fy = e.y; })
-      .on('end', e => { if (!e.active) simulation.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; }));
+      .on('end', e => { if(!e.active) simulation.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; }));
 
-  node.append('title').text(d => d.desc ? `${d.label}\n\n${d.desc}` : d.label);
+  // Tooltip
+  const tooltip = d3.select('#node-tooltip');
+  node.on('mouseover', (event, d) => {
+    tooltip.style('opacity', 1)
+           .html(`<b>${d.label}</b><br><span style="color:var(--text-dim)">Type: ${d.group.toUpperCase()}</span>`)
+           .style('left', (event.pageX + 15) + 'px')
+           .style('top', (event.pageY + 15) + 'px');
+  }).on('mouseout', () => tooltip.style('opacity', 0));
 
-  const label = svgGroup.append('g').selectAll('text').data(nodeData.filter(d => d.group !== 10)).join('text')
+  // Labels for major nodes
+  const labels = g.append('g').selectAll('text').data(nodes.filter(d => d.group !== 'incident')).join('text')
     .text(d => d.label)
-    .attr('font-size', d => d.group === 0 ? '16px' : '11px')
-    .attr('fill', d => d.group === 3 ? '#888780' : '#e8e6df')
+    .attr('font-size', d => d.group === 'root' ? '14px' : '11px')
+    .attr('fill', 'var(--text-main)')
     .attr('text-anchor', 'middle')
-    .attr('dy', d => d.val + 14)
-    .style('font-family', 'IBM Plex Mono');
+    .attr('dy', d => d.size + 14)
+    .style('font-family', 'var(--font-mono)')
+    .style('pointer-events', 'none');
 
   simulation.on('tick', () => {
     link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
     node.attr('cx', d => d.x).attr('cy', d => d.y);
-    label.attr('x', d => d.x).attr('y', d => d.y);
+    labels.attr('x', d => d.x).attr('y', d => d.y);
   });
 }
 </script>
