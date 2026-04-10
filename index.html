@@ -3,947 +3,1439 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LATAM Criminal Drone Intelligence | OSINT Dashboard</title>
+<title>Criminal Drone Intelligence | OSINT Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
-  :root {
-    --bg-base: #050505;
-    --bg-surface: #0f1011;
-    --bg-glass: rgba(20, 22, 24, 0.75);
-    --border-light: rgba(255, 255, 255, 0.06);
-    --border-med: rgba(255, 255, 255, 0.15);
-    
-    --text-main: #f0f0f2;
-    --text-sec: #9ea2a8;
-    --text-dim: #60646a;
-    
-    --accent: #dcf763;
-    --accent-hover: #eafc92;
-    --red: #f45b5b;
-    --blue: #5ba3f4;
-    --teal: #3cd4a8;
-    --orange: #f4a25b;
+:root {
+  --bg: #08090a;
+  --bg1: #0d0f11;
+  --bg2: #131618;
+  --bg3: #1a1d21;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8eaed;
+  --text2: #8b9199;
+  --text3: #4f555d;
+  --accent: #c8f135;
+  --accent2: #a0c420;
+  --red: #ef4b4b;
+  --red2: rgba(239,75,75,0.12);
+  --blue: #4a9eff;
+  --teal: #2dd4a0;
+  --amber: #f5a623;
+  --sans: 'IBM Plex Sans', sans-serif;
+  --head: 'Syne', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --radius: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.55;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
 
-    --font-sans: 'Inter', sans-serif;
-    --font-head: 'Space Grotesk', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-  }
-  
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg-base); color: var(--text-main); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; min-height: 100vh; overflow-x: hidden; }
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: var(--bg-base); }
-  ::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 4px; }
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  height:56px;display:flex;align-items:center;
+  background:rgba(8,9,10,0.92);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 1.5rem;gap:1.5rem;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.brand-mark{width:24px;height:24px;border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;transform:rotate(45deg)}
+.brand-mark::before{content:'';width:8px;height:8px;background:var(--accent)}
+.brand-text{font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text)}
+.theater-toggle{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:3px}
+.theater-btn{
+  background:transparent;border:none;color:var(--text2);
+  font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:3px;
+  cursor:pointer;transition:all .15s;letter-spacing:0.04em;white-space:nowrap;
+}
+.theater-btn.active{background:var(--bg3);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.tab-strip{display:flex;gap:0;margin-left:auto}
+.tab{
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--text2);font-family:var(--mono);font-size:11px;letter-spacing:0.06em;
+  text-transform:uppercase;padding:0 1rem;height:56px;cursor:pointer;
+  transition:all .15s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-end{display:flex;align-items:center;gap:1rem;margin-left:1rem;flex-shrink:0}
+.verified-toggle{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text2);cursor:pointer}
+.toggle-pill{width:32px;height:18px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;position:relative;transition:background .2s;cursor:pointer}
+.toggle-pill.on{background:var(--accent2)}
+.toggle-dot{width:12px;height:12px;background:var(--text2);border-radius:50%;position:absolute;top:2px;left:2px;transition:all .2s}
+.toggle-pill.on .toggle-dot{left:16px;background:#fff}
+.nav-count{font-family:var(--mono);font-size:11px;color:var(--text3)}
+.nav-count span{color:var(--accent)}
 
-  /* NAVIGATION */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-    background: var(--bg-glass); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border-light);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 1.5rem; height: 60px;
-  }
-  .brand { font-family: var(--font-head); font-weight: 700; font-size: 15px; letter-spacing: 0.1em; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-  .brand-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); }
-  .tabs { display: flex; gap: 4px; }
-  .tab {
-    background: transparent; border: none; color: var(--text-sec);
-    font-family: var(--font-mono); font-size: 12px; padding: 0 1rem; height: 40px;
-    border-radius: 6px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em;
-  }
-  .tab:hover { color: var(--text-main); background: rgba(255,255,255,0.04); }
-  .tab.active { color: var(--bg-base); background: var(--accent); font-weight: 500; }
-  .nav-stats { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+/* ── INIT OVERLAY ── */
+#init-overlay{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem;
+}
+.init-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  border:1px solid var(--border2);border-radius:var(--radius);
+  overflow:hidden;max-width:640px;width:100%;margin:2rem auto;
+}
+.init-cell{background:var(--bg1);padding:1.5rem;text-align:left}
+.init-cell .label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem}
+.init-cell .val{font-family:var(--head);font-size:1.6rem;font-weight:700;color:var(--text)}
+.init-cell .val span{color:var(--accent)}
+#csvFileInput{display:none}
 
-  /* PAGES */
-  .page { display: none; padding-top: 60px; min-height: 100vh; animation: fade 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* ── PAGES ── */
+.page{display:none;padding-top:56px;min-height:100vh}
+.page.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 
-  /* BUTTONS & INPUTS */
-  .btn {
-    font-family: var(--font-mono); font-size: 12px; padding: 0.6rem 1.2rem;
-    background: transparent; border: 1px solid var(--border-med); color: var(--text-main);
-    border-radius: 4px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
-  }
-  .btn:hover { border-color: var(--text-sec); }
-  .btn.primary { background: var(--accent); color: var(--bg-base); border-color: var(--accent); font-weight: 500; }
-  .btn.primary:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(220, 247, 99, 0.3); }
+/* ── BUTTONS ── */
+.btn{
+  font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  padding:.55rem 1.2rem;border-radius:var(--radius);border:1px solid var(--border2);
+  background:transparent;color:var(--text);cursor:pointer;transition:all .15s;
+  text-decoration:none;display:inline-block;
+}
+.btn:hover{border-color:var(--text2)}
+.btn.primary{background:var(--accent);color:#0a0a0a;border-color:var(--accent);font-weight:600}
+.btn.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn.danger{border-color:rgba(239,75,75,.3);color:var(--red)}
 
-  /* OVERVIEW */
-  .overview-grid { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-  .hero-section { grid-column: 1 / -1; margin-bottom: 2rem; }
-  .hero-section h1 { font-family: var(--font-head); font-size: 3.5rem; font-weight: 700; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -0.03em; }
-  .hero-section p { font-size: 1.1rem; color: var(--text-sec); max-width: 700px; line-height: 1.6; margin-bottom: 2rem; }
-  
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; grid-column: 1 / -1; }
-  .kpi-card { background: var(--bg-surface); border: 1px solid var(--border-light); padding: 1.5rem; border-radius: 8px; }
-  .kpi-val { font-family: var(--font-mono); font-size: 2.5rem; color: var(--accent); line-height: 1; margin-bottom: 0.5rem; }
-  .kpi-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; }
+/* ── SHARED PANEL ── */
+.panel{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.panel-title{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1.2rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+.panel.warn{border-color:rgba(239,75,75,.25);background:rgba(239,75,75,.03)}
+.panel.gap-panel{border-color:rgba(75,158,255,.2);background:rgba(75,158,255,.03)}
 
-  .panel { background: var(--bg-surface); border: 1px solid var(--border-light); padding: 2rem; border-radius: 8px; }
-  .panel h3 { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem; }
-  
-  .bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
-  .bar-label { width: 100px; font-family: var(--font-mono); font-size: 11px; color: var(--text-main); }
-  .bar-track { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
-  .bar-fill { height: 100%; background: var(--accent); }
-  .bar-val { width: 30px; text-align: right; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+/* ── OVERVIEW ── */
+.overview-wrap{max-width:1280px;margin:0 auto;padding:2.5rem 2rem}
+.hero{margin-bottom:2.5rem}
+.hero h1{font-family:var(--head);font-size:clamp(2rem,4vw,3.2rem);font-weight:800;line-height:1.08;letter-spacing:-.03em;margin-bottom:.8rem}
+.hero p{font-size:1rem;color:var(--text2);max-width:600px;line-height:1.65;margin-bottom:1.5rem}
+.hero-actions{display:flex;gap:.6rem;flex-wrap:wrap}
 
-  #chart-timeline { height: 200px; width: 100%; }
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem}
+.kpi{background:var(--bg1);padding:1.25rem 1.5rem}
+.kpi-n{font-family:var(--head);font-size:2.2rem;font-weight:800;line-height:1;color:var(--accent);margin-bottom:.3rem}
+.kpi-l{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
 
-  /* MAP */
-  #map-container { height: calc(100vh - 60px); width: 100%; background: #080808; position: relative; }
-  #map { height: 100%; width: 100%; }
-  
-  .map-controls {
-    position: absolute; top: 1.5rem; right: 1.5rem; z-index: 1000;
-    background: var(--bg-glass); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--border-med); padding: 0.75rem; border-radius: 8px;
-    display: flex; gap: 0.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  }
-  .map-controls .db-select {
-    background: var(--bg-surface); border: 1px solid var(--border-light); color: var(--text-main);
-    font-family: var(--font-mono); font-size: 12px; padding: 0.5rem 1rem; border-radius: 4px; outline: none;
-  }
+.ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.ov-grid.wide{grid-template-columns:1fr}
 
-  .map-legend {
-    position: absolute; bottom: 2rem; left: 2rem; z-index: 999;
-    background: var(--bg-glass); backdrop-filter: blur(10px); border: 1px solid var(--border-med);
-    padding: 1.5rem; border-radius: 8px; min-width: 200px;
-  }
-  .map-legend h4 { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
-  .legend-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: var(--text-main); }
-  .dot { width: 10px; height: 10px; border-radius: 50%; }
-  
-  .leaflet-popup-content-wrapper { background: var(--bg-surface); border: 1px solid var(--border-med); border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-  .leaflet-popup-tip { background: var(--bg-surface); border-bottom: 1px solid var(--border-med); border-right: 1px solid var(--border-med); }
-  .leaflet-popup-content { color: var(--text-main); margin: 16px; font-family: var(--font-sans); }
-  .popup-date { font-family: var(--font-mono); font-size: 11px; color: var(--accent); margin-bottom: 4px; }
-  .popup-loc { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
-  .popup-desc { font-size: 13px; color: var(--text-sec); line-height: 1.5; margin-bottom: 10px; }
-  .popup-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; background: rgba(255,255,255,0.05); color: var(--text-main); margin-right: 4px; }
-  .leaflet-tile { filter: brightness(0.6) saturate(0.2) contrast(1.2) hue-rotate(180deg); }
-  .leaflet-control-zoom a { background: var(--bg-surface) !important; color: var(--text-main) !important; border-color: var(--border-med) !important; }
+/* confidence banner */
+.confidence-banner{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem}
+.conf-cell{background:var(--bg1);padding:1.2rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.conf-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.conf-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:.2rem}
+.conf-n{font-family:var(--head);font-size:1.8rem;font-weight:700;line-height:1}
 
-  /* DATABASE & MODAL */
-  .db-container { display: flex; flex-direction: column; height: calc(100vh - 60px); }
-  .db-toolbar {
-    padding: 1rem 1.5rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-light);
-    display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; z-index: 20;
-  }
-  .db-input, .db-select {
-    background: var(--bg-base); border: 1px solid var(--border-med); color: var(--text-main);
-    font-family: var(--font-mono); font-size: 12px; padding: 0.5rem 1rem; border-radius: 4px; outline: none; transition: border-color 0.2s;
-  }
-  .db-input:focus, .db-select:focus { border-color: var(--accent); }
-  .db-input { flex: 1; min-width: 250px; }
-  .db-meta { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); }
-  .db-meta span { color: var(--accent); }
+/* bar charts */
+.bar-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.7rem}
+.bar-lbl{width:130px;font-family:var(--mono);font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px;transition:width .6s ease}
+.bar-val{width:28px;text-align:right;font-family:var(--mono);font-size:10px;color:var(--text3)}
 
-  .table-wrapper { 
-    flex: 1; 
-    overflow: auto; 
-    background-color: var(--bg-base);
-    background-image: linear-gradient(rgba(2, 2, 2, 0.5), rgba(2, 2, 2, 0.65)), url('drone_backdrop.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-  }
-  table { width: 100%; border-collapse: collapse; text-align: left; position: relative; }
-  thead { position: sticky; top: 0; background: rgba(15, 16, 17, 0.95); backdrop-filter: blur(8px); z-index: 10; box-shadow: 0 1px 0 var(--border-light); }
-  th { padding: 1rem 1.5rem; font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; white-space: nowrap; }
-  th:hover { color: var(--text-main); }
-  .sort-icon { display: inline-block; margin-left: 6px; font-size: 10px; opacity: 0.3; }
-  th.sorted .sort-icon { opacity: 1; color: var(--accent); }
-  td { padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); vertical-align: top; }
-  .clickable-row { cursor: pointer; transition: background 0.1s; }
-  .clickable-row:hover td { background: rgba(255,255,255,0.08); }
-  .cell-date { font-family: var(--font-mono); font-size: 12px; color: var(--text-sec); white-space: nowrap; }
-  .cell-desc { max-width: 350px; font-size: 13px; color: var(--text-sec); line-height: 1.5; }
-  .cell-tag { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+/* transfer matrix */
+.transfer-table{width:100%;border-collapse:collapse;font-size:13px}
+.transfer-table th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:.5rem .75rem;text-align:left;border-bottom:1px solid var(--border)}
+.transfer-table td{padding:.6rem .75rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;line-height:1.5}
+.transfer-table tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.04em}
+.badge.confirmed{background:rgba(200,241,53,.12);color:var(--accent)}
+.badge.probable{background:rgba(245,166,35,.12);color:var(--amber)}
+.badge.unconfirmed{background:rgba(255,255,255,.05);color:var(--text2)}
+.badge.red{background:rgba(239,75,75,.12);color:var(--red)}
 
-  /* DB MODAL */
-  .modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-    z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s;
-  }
-  .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  .modal-content {
-    background: var(--bg-surface); border: 1px solid var(--border-med); border-radius: 8px;
-    width: 90%; max-width: 600px; padding: 2rem; position: relative; transform: translateY(20px); transition: transform 0.2s; box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-  }
-  .modal-overlay.active .modal-content { transform: translateY(0); }
-  .modal-close { position: absolute; top: 1.5rem; right: 1.5rem; font-size: 1.5rem; color: var(--text-sec); cursor: pointer; line-height: 1; }
-  .modal-close:hover { color: var(--text-main); }
+/* policy table */
+.policy-table{width:100%;border-collapse:collapse;font-size:12px}
+.policy-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:.5rem .6rem;border-bottom:1px solid var(--border);white-space:nowrap}
+.policy-table td{padding:.55rem .6rem;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:top;color:var(--text2);line-height:1.4}
+.policy-table td:first-child{color:var(--text);font-weight:500}
+.policy-table tr:last-child td{border-bottom:none}
+.policy-table tr:hover td{background:rgba(255,255,255,.02)}
 
-  /* KNOWLEDGE CLOUD */
-  .network-wrapper { height: calc(100vh - 60px); position: relative; background: radial-gradient(circle at center, #111 0%, #050505 100%); overflow: hidden; }
-  #network-svg { width: 100%; height: 100%; cursor: grab; }
-  #network-svg:active { cursor: grabbing; }
-  
-  .network-hud { position: absolute; top: 2rem; left: 2rem; pointer-events: none; max-width: 400px; z-index: 10; }
-  .network-hud h2 { font-family: var(--font-head); font-size: 1.5rem; color: var(--text-main); margin-bottom: 0.5rem; }
-  .network-hud p { font-size: 13px; color: var(--text-sec); line-height: 1.5; pointer-events: auto; }
-  
-  .network-toggle { position: absolute; top: 2rem; right: 2rem; z-index: 10; display: flex; align-items: center; gap: 10px; background: var(--bg-glass); padding: 0.5rem; border: 1px solid var(--border-med); border-radius: 6px; backdrop-filter: blur(8px); }
-  .network-toggle label { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); text-transform: uppercase; margin-right: 4px; }
-  
-  .network-legend { position: absolute; bottom: 2rem; left: 2rem; z-index: 10; background: var(--bg-glass); padding: 1.2rem; border: 1px solid var(--border-med); border-radius: 6px; backdrop-filter: blur(8px); pointer-events: auto; }
-  .network-legend h4 { font-family: var(--font-mono); font-size: 11px; color: var(--text-sec); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+/* timeline svg */
+#chart-timeline{width:100%;height:190px}
 
-  .network-sidebar {
-    position: absolute; top: 0; right: 0; width: 350px; height: 100%; background: var(--bg-glass); backdrop-filter: blur(16px);
-    border-left: 1px solid var(--border-med); padding: 2rem; transform: translateX(100%); transition: transform 0.3s ease; z-index: 20; box-shadow: -10px 0 30px rgba(0,0,0,0.5); overflow-y: auto;
-  }
-  .network-sidebar.active { transform: translateX(0); }
-  .sidebar-close { font-size: 18px; color: var(--text-sec); cursor: pointer; float: right; }
-  .sidebar-close:hover { color: var(--text-main); }
-  .sidebar-title { font-family: var(--font-head); font-size: 1.5rem; margin-top: 1rem; margin-bottom: 0.5rem; color: var(--text-main); }
-  .sidebar-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-family: var(--font-mono); font-size: 10px; background: rgba(255,255,255,0.05); color: var(--accent); margin-bottom: 1.5rem; }
+/* small multiples */
+.small-multiples{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.sm-chart{border:1px solid var(--border);border-radius:var(--radius);padding:1rem;background:var(--bg2)}
+.sm-title{font-family:var(--mono);font-size:10px;color:var(--text2);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.05em}
+.sm-svg{width:100%;height:70px}
 
-  /* UPLOAD OVERLAY */
-  #init-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;
-    background: var(--bg-base); display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 2rem;
-  }
-  #init-overlay h1 { font-family: var(--font-head); font-size: 2rem; margin-bottom: 1rem; color: var(--text-main); }
-  #init-overlay p { color: var(--text-sec); margin-bottom: 2rem; max-width: 400px; }
-  #csvFileInput { display: none; }
+/* gap box */
+.gap-list{list-style:none}
+.gap-list li{display:flex;align-items:flex-start;gap:.6rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:13px;color:var(--text2)}
+.gap-list li::before{content:'○';color:var(--text3);font-size:10px;margin-top:2px;flex-shrink:0}
+
+/* ── MAP ── */
+#map-page{padding-top:0}
+#map-container{position:relative;height:calc(100vh - 56px);background:#080a0c}
+#map{height:100%;width:100%}
+.map-overlay{
+  position:absolute;top:1rem;left:1rem;z-index:800;
+  background:rgba(8,9,10,.9);backdrop-filter:blur(12px);
+  border:1px solid var(--border2);border-radius:var(--radius);
+  padding:1rem;min-width:220px;
+}
+.map-overlay h3{font-family:var(--head);font-size:.9rem;font-weight:700;margin-bottom:.8rem}
+.filter-row{margin-bottom:.5rem}
+.filter-row label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);display:block;margin-bottom:.25rem}
+.map-select{
+  width:100%;background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:.4rem .6rem;border-radius:3px;outline:none;
+}
+.map-select:focus{border-color:var(--accent)}
+.map-legend{margin-top:.8rem;padding-top:.8rem;border-top:1px solid var(--border)}
+.legend-row{display:flex;align-items:center;gap:.5rem;font-size:12px;color:var(--text2);margin-bottom:.35rem}
+.ldot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.map-controls-right{position:absolute;top:1rem;right:1rem;z-index:800;display:flex;gap:.4rem}
+.map-info-box{
+  position:absolute;bottom:1rem;right:1rem;z-index:800;
+  background:rgba(8,9,10,.85);backdrop-filter:blur(10px);
+  border:1px solid var(--border2);border-radius:var(--radius);
+  padding:.75rem 1rem;font-family:var(--mono);font-size:11px;color:var(--text2);
+  max-width:200px;line-height:1.5;
+}
+.leaflet-tile{filter:brightness(.55) saturate(.15) contrast(1.3)}
+.leaflet-popup-content-wrapper{background:var(--bg1);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 8px 24px rgba(0,0,0,.6)}
+.leaflet-popup-tip{background:var(--bg1)}
+.leaflet-popup-content{color:var(--text);margin:14px;font-family:var(--sans)}
+.popup-date{font-family:var(--mono);font-size:10px;color:var(--accent);margin-bottom:3px}
+.popup-loc{font-family:var(--head);font-size:15px;font-weight:700;margin-bottom:6px}
+.popup-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.popup-badges{display:flex;gap:4px;flex-wrap:wrap}
+.leaflet-control-zoom a{background:var(--bg1)!important;color:var(--text)!important;border-color:var(--border2)!important}
+.leaflet-control-zoom a:hover{background:var(--bg2)!important}
+
+/* ── DATABASE ── */
+.db-wrap{display:flex;flex-direction:column;height:calc(100vh - 56px)}
+.db-toolbar{
+  padding:.75rem 1.5rem;background:var(--bg1);border-bottom:1px solid var(--border);
+  display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
+}
+.db-input,.db-select{
+  background:var(--bg2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:.4rem .75rem;border-radius:3px;outline:none;
+  transition:border-color .15s;
+}
+.db-input:focus,.db-select:focus{border-color:var(--accent2)}
+.db-input{flex:1;min-width:220px}
+.db-meta{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.db-meta span{color:var(--accent)}
+.table-wrap{flex:1;overflow:auto}
+table{width:100%;border-collapse:collapse;text-align:left}
+thead{position:sticky;top:0;background:rgba(13,15,17,.97);backdrop-filter:blur(8px);z-index:10;box-shadow:0 1px 0 var(--border)}
+th{padding:.75rem 1rem;font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap;user-select:none}
+th:hover{color:var(--text2)}
+th.sorted{color:var(--accent)}
+.sort-ic{font-size:9px;opacity:.4;margin-left:4px}
+th.sorted .sort-ic{opacity:1}
+td{padding:.65rem 1rem;border-bottom:1px solid rgba(255,255,255,.025);vertical-align:top}
+.row-click{cursor:pointer;transition:background .1s}
+.row-click:hover td{background:rgba(255,255,255,.04)}
+.td-date{font-family:var(--mono);font-size:11px;color:var(--text2);white-space:nowrap}
+.td-desc{max-width:300px;font-size:12px;color:var(--text2);line-height:1.45}
+.td-mono{font-family:var(--mono);font-size:11px}
+.td-country{font-size:12px;color:var(--text)}
+
+/* ── MODAL ── */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+  z-index:9990;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-bg.open{opacity:1;pointer-events:auto}
+.modal{
+  background:var(--bg1);border:1px solid var(--border2);border-radius:var(--radius);
+  width:92%;max-width:580px;padding:2rem;position:relative;
+  transform:translateY(16px);transition:transform .2s;box-shadow:0 16px 40px rgba(0,0,0,.7);
+  max-height:85vh;overflow-y:auto;
+}
+.modal-bg.open .modal{transform:translateY(0)}
+.modal-x{position:absolute;top:1.2rem;right:1.2rem;font-size:18px;color:var(--text3);cursor:pointer;line-height:1;background:none;border:none}
+.modal-x:hover{color:var(--text)}
+.modal-loc{font-family:var(--head);font-size:1.4rem;font-weight:700;margin-bottom:.2rem}
+.modal-date{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:1.2rem}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
+.modal-field label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);display:block;margin-bottom:.3rem}
+.modal-field p{font-size:13px;color:var(--text);line-height:1.5}
+.modal-summary{font-size:13.5px;color:var(--text2);line-height:1.7;padding-top:1.2rem;border-top:1px solid var(--border)}
+.modal-actions{margin-top:1.2rem;display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* ── ANALYSIS ── */
+.analysis-wrap{max-width:1280px;margin:0 auto;padding:2.5rem 2rem}
+.analysis-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.analysis-grid.three{grid-template-columns:1fr 1fr 1fr}
+
+/* entity graph */
+.network-wrap{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;height:520px}
+#net-svg{width:100%;height:100%;cursor:grab}
+#net-svg:active{cursor:grabbing}
+.net-controls{position:absolute;top:.75rem;right:.75rem;display:flex;gap:.4rem}
+.net-sidebar{
+  position:absolute;top:0;right:0;width:280px;height:100%;
+  background:rgba(13,15,17,.95);backdrop-filter:blur(12px);border-left:1px solid var(--border2);
+  padding:1.5rem;transform:translateX(100%);transition:transform .25s;overflow-y:auto;
+}
+.net-sidebar.open{transform:translateX(0)}
+.net-sb-title{font-family:var(--head);font-size:1.1rem;font-weight:700;margin-top:.75rem;margin-bottom:.3rem}
+.net-sb-content{font-size:12px;color:var(--text2);line-height:1.6}
+
+/* ukraine callout */
+.ukraine-callout{
+  background:rgba(239,75,75,.05);border:1px solid rgba(239,75,75,.2);
+  border-radius:var(--radius);padding:1.2rem 1.5rem;margin-bottom:1.5rem;
+  display:flex;gap:1rem;align-items:flex-start;
+}
+.callout-icon{font-size:1.2rem;flex-shrink:0;margin-top:.1rem}
+.callout-text{font-size:13px;color:var(--text2);line-height:1.6}
+.callout-text strong{color:var(--text);display:block;margin-bottom:.25rem;font-size:13.5px}
 </style>
 </head>
 <body>
 
+<!-- INIT OVERLAY -->
 <div id="init-overlay">
-  <div class="brand-dot" style="width:16px; height:16px; margin-bottom:1.5rem;"></div>
-  <h1>Initialize Dashboard</h1>
-  <p>To run securely in local/standalone mode, please select the authoritative <b>drone_criminaluse_latam_v1.csv</b> database.</p>
-  <button class="btn primary" onclick="document.getElementById('csvFileInput').click()">Load Dataset</button>
+  <div style="font-family:var(--head);font-size:2rem;font-weight:800;margin-bottom:.5rem">Criminal Drone OSINT</div>
+  <p style="color:var(--text2);font-size:.9rem;max-width:380px;line-height:1.6;margin-bottom:.5rem">
+    Load the authoritative CSV to initialize the dashboard. Both theaters (LATAM and Europe/Ukraine) share this schema.
+  </p>
+  <div class="init-grid">
+    <div class="init-cell"><div class="label">Database</div><div class="val"><span>v2.0</span></div></div>
+    <div class="init-cell"><div class="label">Coverage</div><div class="val">2022<span>–</span>26</div></div>
+    <div class="init-cell"><div class="label">Theaters</div><div class="val"><span>2</span></div></div>
+    <div class="init-cell"><div class="label">Schema</div><div class="val">22 <span>fields</span></div></div>
+  </div>
+  <button class="btn primary" style="font-size:13px;padding:.75rem 2rem" onclick="document.getElementById('csvFileInput').click()">Load Dataset →</button>
   <input type="file" id="csvFileInput" accept=".csv" onchange="handleFileUpload(event)">
+  <p style="margin-top:1rem;font-family:var(--mono);font-size:10px;color:var(--text3)">drone_criminaluse_latam_v1.csv</p>
 </div>
 
+<!-- NAV -->
 <nav>
-  <div class="brand"><div class="brand-dot"></div> LATAM DRONE OSINT</div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('overview')">Overview</button>
-    <button class="tab" onclick="switchTab('map')">Geospatial Map</button>
-    <button class="tab" onclick="switchTab('database')">Database</button>
-    <button class="tab" onclick="switchTab('network')">Entity Graph</button>
+  <a class="brand" href="#">
+    <div class="brand-mark"></div>
+    <span class="brand-text">Drone Intel</span>
+  </a>
+
+  <div class="theater-toggle">
+    <button class="theater-btn active" id="btn-latam" onclick="switchTheater('latam')">LATAM</button>
+    <button class="theater-btn" id="btn-europe" onclick="switchTheater('europe')">Europe / Ukraine</button>
   </div>
-  <div class="nav-stats">Verified DB: <span id="nav-count" style="color:var(--accent)">0</span></div>
+
+  <div class="tab-strip">
+    <button class="tab active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab" onclick="switchTab('map')">Map</button>
+    <button class="tab" onclick="switchTab('database')">Database</button>
+    <button class="tab" onclick="switchTab('analysis')">Analysis</button>
+  </div>
+
+  <div class="nav-end">
+    <div class="verified-toggle" onclick="toggleVerified()">
+      <div class="toggle-pill on" id="verified-pill"><div class="toggle-dot"></div></div>
+      <span id="verified-label">Verified only</span>
+    </div>
+    <div class="nav-count">n=<span id="nav-n">0</span></div>
+  </div>
 </nav>
 
-<div id="view-overview" class="page active">
-  <div class="overview-grid">
-    <div class="hero-section">
-      <h1>Criminal Unmanned Systems:<br>Latin America Assessment</h1>
-      <p>A comprehensive OSINT database tracking the tactical adoption of drones by organized criminal groups across Latin America, bridging localized cartel warfare with procurement and technical adaptations drawn from global conflicts.</p>
-      <button class="btn primary" onclick="switchTab('map')">Explore Map</button>
-      <button class="btn" onclick="switchTab('database')">View Database</button>
-    </div>
+<!-- ───────────────── OVERVIEW ───────────────── -->
+<div id="page-overview" class="page active">
+<div class="overview-wrap">
 
-    <div class="kpi-row">
-      <div class="kpi-card"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-label">Verified Incidents</div></div>
-      <div class="kpi-card"><div class="kpi-val" id="kpi-countries">0</div><div class="kpi-label">Active Countries</div></div>
-      <div class="kpi-card"><div class="kpi-val" id="kpi-groups">0</div><div class="kpi-label">Criminal Entities</div></div>
-      <div class="kpi-card"><div class="kpi-val" id="kpi-ukraine">0</div><div class="kpi-label">Ukraine Doctrine Linked</div></div>
+  <div class="hero">
+    <h1 id="ov-title">Criminal Unmanned Systems<br>Latin America Assessment</h1>
+    <p id="ov-desc">Incident-level OSINT database tracking tactical drone adoption by organized criminal groups. Evidence standards: Confirmed &gt; Probable &gt; Speculative. Ukraine-transfer links classified separately.</p>
+    <div class="hero-actions">
+      <button class="btn primary" onclick="switchTab('map')">Geospatial Map</button>
+      <button class="btn" onclick="switchTab('database')">Database</button>
+      <button class="btn" onclick="switchTab('analysis')">Analysis</button>
     </div>
+  </div>
 
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-n" id="kpi-total">0</div><div class="kpi-l">Verified Incidents</div></div>
+    <div class="kpi"><div class="kpi-n" id="kpi-countries">0</div><div class="kpi-l">Active Countries</div></div>
+    <div class="kpi"><div class="kpi-n" id="kpi-groups">0</div><div class="kpi-l">Criminal Entities</div></div>
+    <div class="kpi"><div class="kpi-n" id="kpi-ukraine">0</div><div class="kpi-l">Ukraine-Transfer Linked</div></div>
+  </div>
+
+  <!-- Confidence Banner -->
+  <div class="confidence-banner">
+    <div class="conf-cell">
+      <div class="conf-dot" style="background:var(--accent)"></div>
+      <div>
+        <div class="conf-label">Confirmed</div>
+        <div class="conf-n" id="conf-confirmed" style="color:var(--accent)">0</div>
+      </div>
+    </div>
+    <div class="conf-cell">
+      <div class="conf-dot" style="background:var(--amber)"></div>
+      <div>
+        <div class="conf-label">Probable</div>
+        <div class="conf-n" id="conf-probable" style="color:var(--amber)">0</div>
+      </div>
+    </div>
+    <div class="conf-cell">
+      <div class="conf-dot" style="background:var(--text3)"></div>
+      <div>
+        <div class="conf-label">Speculative / Unconfirmed</div>
+        <div class="conf-n" id="conf-spec" style="color:var(--text3)">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ov-grid">
     <div class="panel">
-      <h3>Incident Density by Country</h3>
+      <div class="panel-title">Incident Density by Country</div>
       <div id="chart-countries"></div>
     </div>
-
     <div class="panel">
-      <h3>Temporal Trajectory & 2026 Projection</h3>
-      <div id="chart-timeline"></div>
+      <div class="panel-title">Temporal Trajectory & 2026 Projection</div>
+      <svg id="chart-timeline"></svg>
     </div>
+  </div>
 
+  <div class="ov-grid">
     <div class="panel">
-      <h3>Dominant Mission Types</h3>
+      <div class="panel-title">Mission Classification</div>
       <div id="chart-missions"></div>
     </div>
-
     <div class="panel">
-      <h3>Payload Typology</h3>
+      <div class="panel-title">Payload Typology</div>
       <div id="chart-payloads"></div>
     </div>
-
-    <div class="panel" style="grid-column: 1 / -1;">
-      <h3>Supply Chain & Procurement Channels</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-        <div style="border-left: 2px solid var(--blue); padding-left: 1rem;">
-          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Chinese E-Commerce</h4>
-          <p style="color:var(--text-sec); font-size:12px;">Direct imports via AliExpress & Banggood for FPV components with minimal export restrictions.</p>
-        </div>
-        <div style="border-left: 2px solid var(--accent); padding-left: 1rem;">
-          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Local Cartel Workshops</h4>
-          <p style="color:var(--text-sec); font-size:12px;">CJNG and Sinaloa commission local engineers to build/modify UAVs (grenade droppers) from imported parts.</p>
-        </div>
-        <div style="border-left: 2px solid var(--orange); padding-left: 1rem;">
-          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Grey Market Brokers</h4>
-          <p style="color:var(--text-sec); font-size:12px;">Intermediaries in the US and Mexico bulk-buy commercial DJI models (Mavic, Matrice) to evade forensic tracking.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="panel" style="grid-column: 1 / -1; border-color: rgba(244,91,91,0.3); background: rgba(244,91,91,0.02);">
-      <h3 style="color: var(--red);">Ukraine Conflict Proliferation & Tactical Transfer</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-        <div style="border-left: 2px solid var(--red); padding-left: 1rem;">
-          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Operators & Knowledge Transfer</h4>
-          <p style="color:var(--text-sec); font-size:12px;">Cartel operatives (notably CJNG & Sinaloa) have established communications with foreign fighters and smugglers via International Legion fronts. Telegram channels act as primary conduits for FPV piloting manuals and assembly tutorials.</p>
-        </div>
-        <div style="border-left: 2px solid var(--red); padding-left: 1rem;">
-          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Proliferated Technologies</h4>
-          <p style="color:var(--text-sec); font-size:12px;">Adoption of analog FPV kamikaze drones to bypass localized jamming. Replication of Ukrainian 3D-printed payload release mechanisms and the strapping of RPG-7 warheads or improvised mortar rounds to heavy-lift hexacopters.</p>
-        </div>
-        <div style="border-left: 2px solid var(--red); padding-left: 1rem;">
-          <h4 style="color:var(--text-main); font-family:var(--font-mono); font-size:12px;">Methods & Doctrine</h4>
-          <p style="color:var(--text-sec); font-size:12px;">Shift from mere surveillance to integrated offensive operations: using drones to flush out rivals before ground assaults, targeting armored vehicles (monstruos) with top-down shaped charges, and recording strikes for propaganda.</p>
-        </div>
-      </div>
-    </div>
   </div>
+
+  <!-- Small multiples: incident freq by group -->
+  <div class="panel" style="margin-bottom:1.5rem">
+    <div class="panel-title">Incident Frequency by Major Group</div>
+    <div class="small-multiples" id="small-multiples-wrap"></div>
+  </div>
+
+  <!-- Critical Gaps -->
+  <div class="panel gap-panel" style="margin-bottom:1.5rem">
+    <div class="panel-title" style="color:var(--blue)">What This Database Does Not Confirm</div>
+    <ul class="gap-list" id="gap-list"></ul>
+  </div>
+
+</div>
 </div>
 
-<div id="view-map" class="page">
-  <div id="map-container">
-    <div id="map"></div>
-    
-    <div class="map-controls">
-      <select class="db-select" id="map-filter-country" onchange="applyFilters('map')">
+<!-- ───────────────── MAP ───────────────── -->
+<div id="page-map" class="page" style="padding-top:0">
+<div id="map-container">
+  <div id="map"></div>
+
+  <div class="map-overlay">
+    <h3>Filter Incidents</h3>
+    <div class="filter-row">
+      <label>Country</label>
+      <select class="map-select" id="map-country" onchange="applyFilters('map')">
         <option value="">All Countries</option>
       </select>
-      <select class="db-select" id="map-filter-mission" onchange="applyFilters('map')">
-        <option value="">All Mission Types</option>
+    </div>
+    <div class="filter-row">
+      <label>Mission Type</label>
+      <select class="map-select" id="map-mission" onchange="applyFilters('map')">
+        <option value="">All Missions</option>
         <option value="attack">Weaponized Attack</option>
-        <option value="surveillance">Surveillance</option>
-        <option value="smuggling">Smuggling</option>
-        <option value="prison">Prison Drops</option>
+        <option value="surveillance">Surveillance / ISR</option>
+        <option value="smuggling">Drug Smuggling</option>
+        <option value="prison">Prison Contraband</option>
       </select>
     </div>
-
+    <div class="filter-row">
+      <label>Ukraine Link</label>
+      <select class="map-select" id="map-ukraine" onchange="applyFilters('map')">
+        <option value="">All</option>
+        <option value="true">Ukraine-linked only</option>
+        <option value="false">Non-linked only</option>
+      </select>
+    </div>
     <div class="map-legend">
-      <h4>Mission Classification</h4>
-      <div class="legend-item"><div class="dot" style="background:var(--red)"></div> Weaponized Attack</div>
-      <div class="legend-item"><div class="dot" style="background:var(--blue)"></div> Surveillance / ISR</div>
-      <div class="legend-item"><div class="dot" style="background:var(--orange)"></div> Border Smuggling</div>
-      <div class="legend-item"><div class="dot" style="background:var(--teal)"></div> Prison Contraband</div>
-      <div class="legend-item"><div class="dot" style="background:#888"></div> Unspecified</div>
+      <div class="legend-row"><div class="ldot" style="background:var(--red)"></div> Weaponized Attack</div>
+      <div class="legend-row"><div class="ldot" style="background:var(--blue)"></div> Surveillance / ISR</div>
+      <div class="legend-row"><div class="ldot" style="background:var(--amber)"></div> Drug Smuggling</div>
+      <div class="legend-row"><div class="ldot" style="background:var(--teal)"></div> Prison Contraband</div>
+      <div class="legend-row"><div class="ldot" style="background:var(--text3)"></div> Other / Unspecified</div>
+      <div style="margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--border)">
+        <div class="legend-row"><div style="width:8px;height:8px;border:2px solid var(--red);border-radius:50%;flex-shrink:0"></div> Ukraine-linked</div>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="view-database" class="page">
-  <div class="db-container">
-    <div class="db-toolbar">
-      <input type="text" class="db-input" id="search-input" placeholder="Search incidents, gangs, locations..." oninput="applyFilters('db')">
-      <select class="db-select" id="filter-country" onchange="applyFilters('db')">
-        <option value="">All Countries</option>
-      </select>
-      <select class="db-select" id="filter-mission" onchange="applyFilters('db')">
-        <option value="">All Mission Types</option>
-        <option value="attack">Weaponized Attack</option>
-        <option value="surveillance">Surveillance</option>
-        <option value="smuggling">Smuggling</option>
-        <option value="prison">Prison Drops</option>
-      </select>
-      <div class="db-meta">Showing <span id="db-shown">0</span> of <span id="db-total">0</span> entries</div>
-    </div>
-    <div class="table-wrapper">
-      <table id="data-table">
-        <thead>
-          <tr>
-            <th onclick="sortTable('date')">Date <span class="sort-icon">▼</span></th>
-            <th onclick="sortTable('country')">Country <span class="sort-icon">▼</span></th>
-            <th onclick="sortTable('location')">Location <span class="sort-icon">▼</span></th>
-            <th onclick="sortTable('gangs_involved')">Entity <span class="sort-icon">▼</span></th>
-            <th onclick="sortTable('mission_type')">Mission <span class="sort-icon">▼</span></th>
-            <th>Summary</th>
-          </tr>
-        </thead>
-        <tbody id="db-body"></tbody>
-      </table>
-    </div>
+  <div class="map-info-box">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-bottom:.3rem">NOTE</div>
+    Coordinates approximated from location fields. Add lat/lon columns to CSV for exact placement.
+  </div>
+
+  <div class="map-controls-right">
+    <button class="btn" onclick="if(leafletMap)leafletMap.setView([12,-85],4)">Reset View</button>
+    <button class="btn" id="map-export-btn" onclick="exportFiltered()">Export CSV</button>
   </div>
 </div>
-
-<div id="incident-modal" class="modal-overlay" onclick="if(event.target===this) closeDBModal()">
-  <div class="modal-content">
-    <span class="modal-close" onclick="closeDBModal()">&times;</span>
-    <div id="modal-body"></div>
-  </div>
 </div>
 
-<div id="view-network" class="page">
-  <div class="network-wrapper">
-    <div class="network-hud">
-      <h2>Entity Relationship Graph</h2>
-      <p>Maps systemic relationships directly from the authoritative dataset. Click any node to isolate its operational network.</p>
-    </div>
-    
-    <div class="network-toggle">
-      <label>Analysis Level:</label>
-      <button id="btn-detailed" class="btn primary" onclick="setNetworkMode(false)">Detailed (All Incidents)</button>
-      <button id="btn-macro" class="btn" onclick="setNetworkMode(true)">Macro (Aggregated)</button>
-    </div>
+<!-- ───────────────── DATABASE ───────────────── -->
+<div id="page-database" class="page">
+<div class="db-wrap">
+  <div class="db-toolbar">
+    <input type="text" class="db-input" id="db-search" placeholder="Search incidents, entities, locations…" oninput="applyFilters('db')">
+    <select class="db-select" id="db-country" onchange="applyFilters('db')">
+      <option value="">All Countries</option>
+    </select>
+    <select class="db-select" id="db-mission" onchange="applyFilters('db')">
+      <option value="">All Missions</option>
+      <option value="attack">Attack</option>
+      <option value="surveillance">Surveillance</option>
+      <option value="smuggling">Smuggling</option>
+      <option value="prison">Prison</option>
+    </select>
+    <select class="db-select" id="db-ukraine" onchange="applyFilters('db')">
+      <option value="">All Ukraine Links</option>
+      <option value="TRUE">Ukraine-linked</option>
+      <option value="FALSE">Not linked</option>
+    </select>
+    <select class="db-select" id="db-confidence" onchange="applyFilters('db')">
+      <option value="">All Confidence</option>
+      <option value="Confirmed">Confirmed</option>
+      <option value="Probable">Probable</option>
+    </select>
+    <div class="db-meta">Showing <span id="db-shown">0</span> of <span id="db-total">0</span></div>
+    <button class="btn" onclick="exportFiltered()" style="flex-shrink:0">Export CSV</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortBy('date')">Date <span class="sort-ic">▼</span></th>
+          <th onclick="sortBy('country')">Country <span class="sort-ic">▼</span></th>
+          <th onclick="sortBy('location')">Location <span class="sort-ic">▼</span></th>
+          <th onclick="sortBy('gangs_involved')">Entity <span class="sort-ic">▼</span></th>
+          <th onclick="sortBy('mission_type')">Mission <span class="sort-ic">▼</span></th>
+          <th onclick="sortBy('ukraine_link')">Ukraine <span class="sort-ic">▼</span></th>
+          <th onclick="sortBy('evidence_quality')">Confidence <span class="sort-ic">▼</span></th>
+          <th>Summary</th>
+        </tr>
+      </thead>
+      <tbody id="db-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
 
-    <div class="network-legend">
-      <h4>Graph Legend</h4>
-      <div class="legend-item"><div class="dot" style="background:#fff"></div> Root Node</div>
-      <div class="legend-item"><div class="dot" style="background:var(--accent)"></div> Criminal Entity</div>
-      <div class="legend-item"><div class="dot" style="background:var(--text-sec)"></div> Target Country</div>
-      <div class="legend-item"><div class="dot" style="background:var(--blue)"></div> Supply Chain / DJI</div>
-      <div class="legend-item"><div class="dot" style="background:var(--red)"></div> Ukraine Transfer Link</div>
-      <div class="legend-item"><div class="dot" style="background:rgba(255,255,255,0.4)"></div> Specific Incident</div>
-    </div>
+<!-- ───────────────── ANALYSIS ───────────────── -->
+<div id="page-analysis" class="page">
+<div class="analysis-wrap">
 
-    <div id="network-svg"></div>
+  <div class="hero" style="margin-bottom:2rem">
+    <h1 style="font-size:clamp(1.5rem,3vw,2.2rem)">Analytical Assessment</h1>
+    <p>Technology transfer classification, group-level escalation, policy response benchmarks, and entity relationships derived directly from the authoritative dataset.</p>
+  </div>
 
-    <div id="network-sidebar" class="network-sidebar">
-      <span class="sidebar-close" onclick="closeNetworkSidebar()">&#10005;</span>
-      <h3 class="sidebar-title" id="sb-title">Node Title</h3>
-      <div class="sidebar-badge" id="sb-badge">CATEGORY</div>
-      <div id="sb-content" style="color:var(--text-sec); font-size:13px; line-height:1.6;"></div>
+  <!-- Ukraine transfer note -->
+  <div class="ukraine-callout" id="ukraine-callout">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-text">
+      <strong>Technology Transfer: Confirmed vs. Claimed</strong>
+      Direct Ukraine-to-LATAM transfer is confirmed in two cases: the Águila-7 FPV training (Lviv, March 2024) and fiber-optic drones reaching Mexican cartel hands (GI-TOC, October 2025). No equivalent European criminal adoption is documented as of April 2026. The transfer typology below reflects evidence classification — not assumed diffusion.
     </div>
+  </div>
+
+  <!-- Transfer matrix -->
+  <div class="panel" style="margin-bottom:1.5rem">
+    <div class="panel-title">Technology Transfer Matrix — Ukraine War → Criminal Networks</div>
+    <table class="transfer-table" id="transfer-table">
+      <thead>
+        <tr>
+          <th>Actor / Group</th>
+          <th>Platform Type</th>
+          <th>Transfer Mechanism</th>
+          <th>Evidence Level</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody id="transfer-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Small multiples + entity graph side by side -->
+  <div class="analysis-grid" style="margin-bottom:1.5rem">
+    <div class="panel">
+      <div class="panel-title">Incident Escalation by Group (Annual)</div>
+      <div id="escalation-wrap"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Supply Chain Procurement Profile</div>
+      <div id="chart-supply"></div>
+    </div>
+  </div>
+
+  <!-- Entity graph full width -->
+  <div class="panel" style="margin-bottom:1.5rem;padding:1.5rem">
+    <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Entity Relationship Graph</span>
+      <div style="display:flex;gap:.4rem">
+        <button class="btn primary" id="net-btn-detail" onclick="setNetMode(false)">Detailed</button>
+        <button class="btn" id="net-btn-macro" onclick="setNetMode(true)">Macro</button>
+      </div>
+    </div>
+    <div class="network-wrap">
+      <div id="net-svg"></div>
+      <div id="net-sidebar" class="net-sidebar">
+        <button class="btn" onclick="closeNetSidebar()" style="font-size:10px;padding:.3rem .6rem">✕ Close</button>
+        <div class="net-sb-title" id="net-sb-title">—</div>
+        <div class="badge unconfirmed" id="net-sb-badge">—</div>
+        <div class="net-sb-content" id="net-sb-content" style="margin-top:.8rem"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Policy table -->
+  <div class="panel" style="margin-bottom:1.5rem">
+    <div class="panel-title">Counter-Drone Policy Response Benchmark</div>
+    <table class="policy-table">
+      <thead>
+        <tr>
+          <th>Country</th>
+          <th>Key Legislation</th>
+          <th>Interdiction Authority</th>
+          <th>US Coordination</th>
+          <th>Critical Gaps</th>
+        </tr>
+      </thead>
+      <tbody id="policy-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <div id="modal-inner"></div>
   </div>
 </div>
 
 <script>
-let RAW_DATA = [];
-let FILTERED_DATA = [];
-let sortCol = 'date';
-let sortAsc = false;
-let leafletMap = null;
-let markerLayer = null;
-let networkRendered = false;
-let isMacroMode = false;
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let RAW = [], FILTERED = [];
+let currentTab = 'overview';
+let currentTheater = 'latam';
+let verifiedOnly = true;
+let sortCol = 'date', sortAsc = false;
+let leafletMap = null, markerLayer = null;
+let netRendered = false, netMacro = false;
 
-// Initialization / Upload
+// ═══════════════════════════════════════════════════════
+// CSV LOAD
+// ═══════════════════════════════════════════════════════
 window.onload = async () => {
   try {
-    const res = await fetch('drone_criminaluse_latam_v1.csv');
-    if (res.ok) {
-      const text = await res.text();
-      initApp(text);
-    }
-  } catch(e) { } // Fallback to manual overlay
+    const r = await fetch('drone_criminaluse_latam_v1.csv');
+    if (r.ok) initApp(await r.text());
+  } catch(e) {}
 };
 
 function handleFileUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+  const f = e.target.files[0];
+  if (!f) return;
   const reader = new FileReader();
-  reader.onload = (e) => initApp(e.target.result);
-  reader.readAsText(file);
+  reader.onload = ev => initApp(ev.target.result);
+  reader.readAsText(f);
 }
 
 function parseCSV(csv) {
   const lines = [];
   let row = [], cell = '', inside = false;
-  csv = csv.replace(/\\s*/g, '');
-  
+  // Normalize line endings
+  csv = csv.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
   for (let i = 0; i < csv.length; i++) {
-    const char = csv[i], next = csv[i+1];
-    if (char === '"') {
-      if (inside && next === '"') { cell += '"'; i++; } else { inside = !inside; }
-    } else if (char === ',' && !inside) {
+    const c = csv[i], nx = csv[i+1];
+    if (c === '"') {
+      if (inside && nx === '"') { cell += '"'; i++; }
+      else { inside = !inside; }
+    } else if (c === ',' && !inside) {
       row.push(cell.trim()); cell = '';
-    } else if (char === '\n' && !inside) {
+    } else if (c === '\n' && !inside) {
       row.push(cell.trim()); lines.push(row); row = []; cell = '';
-    } else if (char !== '\r') {
-      cell += char;
+    } else {
+      cell += c;
     }
   }
   if (cell || row.length) { row.push(cell.trim()); lines.push(row); }
-  
-  const headers = lines[0];
+
+  const headers = lines[0].map(h => h.toLowerCase().replace(/\s+/g,'_'));
   const data = [];
   for (let i = 1; i < lines.length; i++) {
-    if (lines[i].length < headers.length - 2) continue;
+    if (lines[i].length < 3) continue;
     const obj = {};
-    for (let j = 0; j < headers.length; j++) {
-      obj[headers[j]] = lines[i][j] || '';
-    }
-    if ((obj.verification_status || '').toUpperCase() !== 'UNVERIFIED') data.push(obj);
+    headers.forEach((h, j) => { obj[h] = (lines[i][j] || '').trim(); });
+    data.push(obj);
   }
   return data;
 }
 
+function cleanUrl(u) {
+  if (!u) return '';
+  u = u.trim();
+  if (u.startsWith('ps://') || u.startsWith('tps://')) u = 'htt' + u;
+  if (!u.startsWith('http')) u = 'https://' + u;
+  return u;
+}
+
 function initApp(csvText) {
   document.getElementById('init-overlay').style.display = 'none';
-  RAW_DATA = parseCSV(csvText);
-  FILTERED_DATA = [...RAW_DATA];
-  
-  // Header Meta
-  document.getElementById('nav-count').textContent = RAW_DATA.length;
-  document.getElementById('db-total').textContent = RAW_DATA.length;
-  
-  // Overview KPIs
-  document.getElementById('kpi-total').textContent = RAW_DATA.length;
-  const countries = [...new Set(RAW_DATA.map(d => d.country).filter(Boolean))];
+  RAW = parseCSV(csvText).map(r => {
+    // clean URLs
+    r.url_primary_source = cleanUrl(r.url_primary_source);
+    return r;
+  });
+  applyVerifiedFilter();
+  buildAll();
+}
+
+function applyVerifiedFilter() {
+  FILTERED = verifiedOnly
+    ? RAW.filter(r => (r.verification_status||'').toUpperCase() !== 'UNVERIFIED')
+    : [...RAW];
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function switchTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + t).classList.add('active');
+  document.querySelectorAll('.tab').forEach(b => {
+    if (b.textContent.toLowerCase().trim().startsWith(t === 'overview' ? 'over' : t === 'map' ? 'map' : t === 'database' ? 'data' : 'anal')) {
+      b.classList.add('active');
+    }
+  });
+
+  if (t === 'map') {
+    if (!leafletMap) initMap();
+    setTimeout(() => leafletMap && leafletMap.invalidateSize(), 120);
+  }
+  if (t === 'analysis' && !netRendered) {
+    setTimeout(() => { buildNetwork(); netRendered = true; }, 60);
+  }
+}
+
+function switchTheater(th) {
+  currentTheater = th;
+  document.getElementById('btn-latam').classList.toggle('active', th === 'latam');
+  document.getElementById('btn-europe').classList.toggle('active', th === 'europe');
+
+  if (th === 'europe') {
+    document.getElementById('ov-title').innerHTML = 'Criminal Unmanned Systems<br>Europe & Ukraine Assessment';
+    document.getElementById('ov-desc').textContent = 'Incident-level OSINT covering prison contraband, drug trafficking, surveillance, and technology transfer from the Ukraine war to European criminal networks (2022–2026).';
+    document.getElementById('ukraine-callout').style.display = 'flex';
+    renderEuropeGaps();
+    renderEuropeStats();
+  } else {
+    document.getElementById('ov-title').innerHTML = 'Criminal Unmanned Systems<br>Latin America Assessment';
+    document.getElementById('ov-desc').textContent = 'Incident-level OSINT database tracking tactical drone adoption by organized criminal groups. Evidence standards: Confirmed > Probable > Speculative. Ukraine-transfer links classified separately.';
+    document.getElementById('ukraine-callout').style.display = 'flex';
+    renderLatamGaps();
+    buildOverviewCharts();
+  }
+}
+
+function toggleVerified() {
+  verifiedOnly = !verifiedOnly;
+  document.getElementById('verified-pill').classList.toggle('on', verifiedOnly);
+  document.getElementById('verified-label').textContent = verifiedOnly ? 'Verified only' : 'All incidents';
+  applyVerifiedFilter();
+  buildAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// BUILD ALL
+// ═══════════════════════════════════════════════════════
+function buildAll() {
+  const data = FILTERED;
+  document.getElementById('nav-n').textContent = data.length;
+  document.getElementById('kpi-total').textContent = data.length;
+
+  const countries = [...new Set(data.map(d => d.country).filter(Boolean))];
   document.getElementById('kpi-countries').textContent = countries.length;
-  
+
   const gangs = new Set();
-  RAW_DATA.forEach(d => {
+  data.forEach(d => {
     (d.gangs_involved||'').split(';').forEach(g => {
-      const gClean = g.trim();
-      if(gClean && !gClean.toLowerCase().includes('unspecified')) gangs.add(gClean);
+      const gc = g.trim();
+      if (gc && !gc.toLowerCase().includes('unspecified') && !gc.toLowerCase().includes('unknown')) gangs.add(gc);
     });
   });
   document.getElementById('kpi-groups').textContent = gangs.size;
-  document.getElementById('kpi-ukraine').textContent = RAW_DATA.filter(d => (d.ukraine_link||'').toUpperCase() === 'TRUE').length;
+  document.getElementById('kpi-ukraine').textContent = data.filter(d => (d.ukraine_link||'').toUpperCase() === 'TRUE').length;
+
+  // Confidence counts
+  const confirmed = data.filter(d => (d.evidence_quality||'').toLowerCase().includes('confirm')).length;
+  const probable = data.filter(d => (d.evidence_quality||d.ukraine_link_classification||'').toLowerCase().includes('probable')).length;
+  document.getElementById('conf-confirmed').textContent = confirmed;
+  document.getElementById('conf-probable').textContent = probable;
+  document.getElementById('conf-spec').textContent = data.length - confirmed - probable;
 
   buildOverviewCharts();
+  buildSmallMultiples();
   populateDropdowns(countries);
-  applyFilters('db');
-  
-  switchTab('overview');
+  renderTable(data);
+  renderTransferMatrix();
+  renderEscalationCharts();
+  renderSupplyChain();
+  renderPolicyTable();
+  renderLatamGaps();
+
+  if (markerLayer) updateMarkers();
+  if (netRendered) { document.getElementById('net-svg').innerHTML=''; buildNetwork(); }
 }
 
-function switchTab(tabId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + tabId).classList.add('active');
-  document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
-
-  if (tabId === 'map') {
-    if (!leafletMap) initMap();
-    setTimeout(() => { if(leafletMap) leafletMap.invalidateSize(); }, 100);
+// ═══════════════════════════════════════════════════════
+// OVERVIEW CHARTS
+// ═══════════════════════════════════════════════════════
+function renderBar(containerId, pairs, maxVal) {
+  const colors = {
+    'attack':      'var(--red)',
+    'surv':        'var(--blue)',
+    'smug':        'var(--amber)',
+    'prison':      'var(--teal)',
+    'drug':        'var(--amber)',
+    'explosives':  'var(--red)',
+    'contraband':  'var(--teal)',
+    'optical':     'var(--blue)',
+  };
+  function getColor(label) {
+    const l = label.toLowerCase();
+    for (const k in colors) if (l.includes(k)) return colors[k];
+    return 'var(--accent)';
   }
-  if (tabId === 'network' && !networkRendered) {
-    setTimeout(buildNetwork, 50);
-    networkRendered = true;
-  }
-}
-
-// ================= OVERVIEW CHARTS =================
-function renderBarChart(elementId, sortedData, maxVal, colorOverride) {
-  document.getElementById(elementId).innerHTML = sortedData.map(([label, n]) => {
-    let color = colorOverride || 'var(--accent)';
-    if (!colorOverride) {
-      const l = label.toLowerCase();
-      if(l.includes('attack')||l.includes('explosive')) color = 'var(--red)';
-      else if(l.includes('surv')||l.includes('optic')) color = 'var(--blue)';
-      else if(l.includes('smug')||l.includes('contraband')) color = 'var(--orange)';
-      else if(l.includes('prison')) color = 'var(--teal)';
-    }
-    return `
-      <div class="bar-row">
-        <div class="bar-label">${label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${(n/maxVal)*100}%; background:${color}"></div></div>
-        <div class="bar-val">${n}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderTimelineD3() {
-  const container = document.getElementById('chart-timeline');
-  container.innerHTML = '';
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-  const margin = {top: 20, right: 30, bottom: 30, left: 40};
-
-  // Extract Data
-  const yrCounts = { '2022': 0, '2023': 0, '2024': 0, '2025': 0 };
-  RAW_DATA.forEach(d => {
-    const match = (d.date||'').match(/^(202[2-5])/);
-    if(match) yrCounts[match[1]]++;
-  });
-  
-  // Calculate a projected spike for 2026 based on trend (just illustrative projection)
-  const val24 = yrCounts['2024'];
-  const val25 = yrCounts['2025'];
-  yrCounts['2026 (Proj.)'] = Math.floor(val25 * 1.6); 
-
-  const data = Object.entries(yrCounts).map(([year, count]) => ({year, count}));
-
-  const svg = d3.select(container).append('svg')
-    .attr('width', width).attr('height', height);
-
-  const x = d3.scalePoint()
-    .domain(data.map(d => d.year))
-    .range([margin.left, width - margin.right])
-    .padding(0.1);
-
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.count) * 1.1])
-    .range([height - margin.bottom, margin.top]);
-
-  // X Axis
-  svg.append('g')
-    .attr('transform', `translate(0,${height - margin.bottom})`)
-    .call(d3.axisBottom(x).tickSize(0))
-    .attr('color', 'var(--text-sec)')
-    .attr('font-family', 'var(--font-mono)')
-    .selectAll('text').style('font-size', '11px').attr('dy', '1em');
-  svg.selectAll('.domain').attr('stroke', 'var(--border-med)');
-
-  // Y Axis
-  svg.append('g')
-    .attr('transform', `translate(${margin.left},0)`)
-    .call(d3.axisLeft(y).ticks(4).tickSize(0))
-    .attr('color', 'var(--text-sec)')
-    .attr('font-family', 'var(--font-mono)')
-    .selectAll('text').style('font-size', '10px').attr('dx', '-0.5em');
-  svg.selectAll('.domain').remove();
-
-  // Draw Grid Lines
-  svg.append('g').attr('class', 'grid')
-    .selectAll('line').data(y.ticks(4)).join('line')
-    .attr('x1', margin.left).attr('x2', width - margin.right)
-    .attr('y1', d => y(d)).attr('y2', d => y(d))
-    .attr('stroke', 'var(--border-light)').attr('stroke-dasharray', '3,3');
-
-  // Split data into real and projected
-  const realData = data.slice(0, 4); // 2022 to 2025
-  const projData = data.slice(3, 5); // 2025 to 2026
-
-  const line = d3.line()
-    .x(d => x(d.year))
-    .y(d => y(d.count))
-    .curve(d3.curveMonotoneX);
-
-  // Real Path
-  svg.append('path')
-    .datum(realData)
-    .attr('fill', 'none')
-    .attr('stroke', 'var(--teal)')
-    .attr('stroke-width', 3)
-    .attr('d', line);
-
-  // Projected Path
-  svg.append('path')
-    .datum(projData)
-    .attr('fill', 'none')
-    .attr('stroke', 'var(--accent)')
-    .attr('stroke-width', 2)
-    .attr('stroke-dasharray', '6,6')
-    .attr('d', line);
-
-  // Points
-  svg.selectAll('.dot').data(data).join('circle')
-    .attr('cx', d => x(d.year))
-    .attr('cy', d => y(d.count))
-    .attr('r', 4)
-    .attr('fill', 'var(--bg-surface)')
-    .attr('stroke', d => d.year.includes('Proj') ? 'var(--accent)' : 'var(--teal)')
-    .attr('stroke-width', 2);
+  document.getElementById(containerId).innerHTML = pairs.map(([lbl, n]) => `
+    <div class="bar-row">
+      <div class="bar-lbl" title="${lbl}">${lbl}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(n/maxVal)*100}%;background:${getColor(lbl)}"></div></div>
+      <div class="bar-val">${n}</div>
+    </div>
+  `).join('');
 }
 
 function buildOverviewCharts() {
-  // 1. Countries
-  const cCounts = {};
-  RAW_DATA.forEach(d => { if(d.country) cCounts[d.country] = (cCounts[d.country] || 0) + 1; });
-  const sortedC = Object.entries(cCounts).sort((a,b) => b[1]-a[1]).slice(0, 8);
-  renderBarChart('chart-countries', sortedC, sortedC[0][1], 'var(--accent)');
+  const data = FILTERED;
 
-  // 2. Timeline (Spike) - D3 Graph
-  renderTimelineD3();
-  window.addEventListener('resize', () => {
-    if(document.getElementById('view-overview').classList.contains('active')) renderTimelineD3();
-  });
+  // Countries
+  const cc = {};
+  data.forEach(d => { if(d.country) cc[d.country]=(cc[d.country]||0)+1; });
+  const sc = Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if (sc.length) renderBar('chart-countries', sc, sc[0][1]);
 
-  // 3. Missions
-  const mCounts = { 'Weaponized Attack':0, 'Surveillance / ISR':0, 'Border Smuggling':0, 'Prison Contraband':0 };
-  RAW_DATA.forEach(d => {
-    const m = (d.mission_type||'').toLowerCase();
-    if(m.includes('attack') || m.includes('explosive')) mCounts['Weaponized Attack']++;
-    if(m.includes('surv') || m.includes('isr')) mCounts['Surveillance / ISR']++;
-    if(m.includes('smug') || m.includes('drug')) mCounts['Border Smuggling']++;
-    if(m.includes('prison') || m.includes('contraband')) mCounts['Prison Contraband']++;
-  });
-  const sortedM = Object.entries(mCounts).sort((a,b) => b[1]-a[1]);
-  renderBarChart('chart-missions', sortedM, sortedM[0][1], null);
+  // Timeline
+  buildTimeline();
 
-  // 4. Payload Typology
-  const pCounts = { 'Explosives / IEDs':0, 'Contraband / Narcotics':0, 'Optical / Surveillance':0 };
-  RAW_DATA.forEach(d => {
-    const p = (d.payload_type||'').toLowerCase();
-    if(p.includes('explosive') || p.includes('ied') || p.includes('grenade')) pCounts['Explosives / IEDs']++;
-    else if(p.includes('contraband') || p.includes('drug') || p.includes('phone') || p.includes('weapon')) pCounts['Contraband / Narcotics']++;
-    else if(p.includes('surv') || p.includes('optic') || p.includes('camera') || p.includes('none')) pCounts['Optical / Surveillance']++;
+  // Missions
+  const mc = {'Weaponized Attack':0,'Surveillance / ISR':0,'Drug Smuggling':0,'Prison Contraband':0,'Other':0};
+  data.forEach(d => {
+    const m=(d.mission_type||'').toLowerCase();
+    if(m.includes('attack')||m.includes('kamikaze')) mc['Weaponized Attack']++;
+    else if(m.includes('surv')||m.includes('isr')) mc['Surveillance / ISR']++;
+    else if(m.includes('smug')||m.includes('drug')) mc['Drug Smuggling']++;
+    else if(m.includes('prison')||m.includes('contraband')) mc['Prison Contraband']++;
+    else mc['Other']++;
   });
-  const sortedP = Object.entries(pCounts).sort((a,b) => b[1]-a[1]);
-  renderBarChart('chart-payloads', sortedP, sortedP[0][1], null);
+  const sm = Object.entries(mc).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+  if (sm.length) renderBar('chart-missions', sm, sm[0][1]);
+
+  // Payloads
+  const pc = {'Explosives / IEDs':0,'Contraband / Narcotics':0,'Surveillance Only':0,'Other':0};
+  data.forEach(d => {
+    const p=(d.payload_type||'').toLowerCase();
+    if(p.includes('explos')||p.includes('ied')||p.includes('grenade')) pc['Explosives / IEDs']++;
+    else if(p.includes('drug')||p.includes('contraband')||p.includes('phone')) pc['Contraband / Narcotics']++;
+    else if(p.includes('surv')||p.includes('camera')||p.includes('none')) pc['Surveillance Only']++;
+    else pc['Other']++;
+  });
+  const sp = Object.entries(pc).filter(e=>e[1]>0).sort((a,b)=>b[1]-a[1]);
+  if (sp.length) renderBar('chart-payloads', sp, sp[0][1]);
 }
 
-// ================= GEOSPATIAL MAP =================
+function buildTimeline() {
+  const data = FILTERED;
+  const svg = document.getElementById('chart-timeline');
+  svg.innerHTML = '';
+  const W = svg.getBoundingClientRect().width || 480;
+  const H = 190;
+  const m = {top:20, right:30, bottom:28, left:36};
+
+  const yrC = {'2022':0,'2023':0,'2024':0,'2025':0};
+  data.forEach(d => {
+    const match = (d.date||'').match(/^(202[2-5])/);
+    if (match) yrC[match[1]]++;
+  });
+  const v25 = yrC['2025'];
+  const proj = Math.max(Math.floor(v25 * 1.55), v25 + 2);
+  const allPts = [
+    ...Object.entries(yrC).map(([y,n])=>({y,n,proj:false})),
+    {y:'2026 (proj)',n:proj,proj:true}
+  ];
+  const real = allPts.slice(0,4);
+  const projLine = allPts.slice(3,5);
+
+  const x = d3.scalePoint().domain(allPts.map(d=>d.y)).range([m.left, W-m.right]).padding(.15);
+  const y = d3.scaleLinear().domain([0, d3.max(allPts,d=>d.n)*1.15]).range([H-m.bottom, m.top]);
+
+  const svgSel = d3.select(svg).attr('width',W).attr('height',H);
+
+  // Grid
+  svgSel.append('g').selectAll('line').data(y.ticks(4)).join('line')
+    .attr('x1',m.left).attr('x2',W-m.right)
+    .attr('y1',d=>y(d)).attr('y2',d=>y(d))
+    .attr('stroke','rgba(255,255,255,.05)').attr('stroke-dasharray','3,4');
+
+  // Axes
+  svgSel.append('g').attr('transform',`translate(0,${H-m.bottom})`)
+    .call(d3.axisBottom(x).tickSize(0))
+    .call(g=>{g.select('.domain').remove(); g.selectAll('text').style('font-family','var(--mono)').style('font-size','10px').attr('fill','var(--text3)').attr('dy','1.2em');});
+  svgSel.append('g').attr('transform',`translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(0))
+    .call(g=>{g.select('.domain').remove(); g.selectAll('text').style('font-family','var(--mono)').style('font-size','9px').attr('fill','var(--text3)').attr('dx','-4px');});
+
+  const line = d3.line().x(d=>x(d.y)).y(d=>y(d.n)).curve(d3.curveMonotoneX);
+
+  svgSel.append('path').datum(real).attr('fill','none').attr('stroke','var(--teal)').attr('stroke-width',2.5).attr('d',line);
+  svgSel.append('path').datum(projLine).attr('fill','none').attr('stroke','var(--accent)').attr('stroke-width',2).attr('stroke-dasharray','6,5').attr('d',line);
+
+  svgSel.selectAll('circle').data(allPts).join('circle')
+    .attr('cx',d=>x(d.y)).attr('cy',d=>y(d.n)).attr('r',4)
+    .attr('fill','var(--bg)').attr('stroke',d=>d.proj?'var(--accent)':'var(--teal)').attr('stroke-width',2);
+
+  // Value labels
+  svgSel.selectAll('.vl').data(allPts).join('text').attr('class','vl')
+    .attr('x',d=>x(d.y)).attr('y',d=>y(d.n)-9)
+    .attr('text-anchor','middle').style('font-family','var(--mono)').style('font-size','10px')
+    .attr('fill',d=>d.proj?'var(--accent)':'var(--teal)').text(d=>d.n);
+}
+
+function buildSmallMultiples() {
+  const data = FILTERED;
+  const wrap = document.getElementById('small-multiples-wrap');
+  // Collect top 6 groups by incident count
+  const gc = {};
+  data.forEach(d => {
+    (d.gangs_involved||'').split(';').forEach(g => {
+      const gt = g.trim();
+      if (gt && !gt.toLowerCase().includes('unspecified') && !gt.toLowerCase().includes('unknown')) {
+        gc[gt] = (gc[gt]||0) + 1;
+      }
+    });
+  });
+  const top = Object.entries(gc).sort((a,b)=>b[1]-a[1]).slice(0,6).map(e=>e[0]);
+
+  wrap.innerHTML = top.map(group => {
+    const yrC = {'2022':0,'2023':0,'2024':0,'2025':0};
+    data.forEach(d => {
+      if ((d.gangs_involved||'').includes(group)) {
+        const m = (d.date||'').match(/^(202[2-5])/);
+        if (m) yrC[m[1]]++;
+      }
+    });
+    const pts = Object.entries(yrC);
+    return `<div class="sm-chart" data-group="${group}">
+      <div class="sm-title">${group}</div>
+      <svg class="sm-svg" data-pts='${JSON.stringify(pts)}'></svg>
+    </div>`;
+  }).join('');
+
+  // Render each mini sparkline
+  wrap.querySelectorAll('.sm-svg').forEach(el => {
+    const pts = JSON.parse(el.dataset.pts);
+    const W = el.getBoundingClientRect().width || 180;
+    const H = 70;
+    const m = {t:6,r:8,b:18,l:24};
+    const maxV = Math.max(...pts.map(p=>p[1]),1);
+    const x = d3.scalePoint().domain(pts.map(p=>p[0])).range([m.l,W-m.r]).padding(.2);
+    const y = d3.scaleLinear().domain([0,maxV]).range([H-m.b,m.t]);
+    const svg = d3.select(el).attr('width',W).attr('height',H);
+    svg.append('g').attr('transform',`translate(0,${H-m.b})`)
+      .call(d3.axisBottom(x).tickSize(0))
+      .call(g=>{g.select('.domain').remove();g.selectAll('text').style('font-family','var(--mono)').style('font-size','8px').attr('fill','var(--text3)').attr('dy','1.2em');});
+    svg.append('g').attr('transform',`translate(${m.l},0)`)
+      .call(d3.axisLeft(y).ticks(3).tickSize(0))
+      .call(g=>{g.select('.domain').remove();g.selectAll('text').style('font-family','var(--mono)').style('font-size','8px').attr('fill','var(--text3)').attr('dx','-3px');});
+    const lineF = d3.line().x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveMonotoneX);
+    svg.append('path').datum(pts).attr('fill','none').attr('stroke','var(--accent)').attr('stroke-width',1.5).attr('d',lineF);
+    svg.selectAll('c').data(pts).join('circle').attr('cx',d=>x(d[0])).attr('cy',d=>y(d[1])).attr('r',2.5).attr('fill','var(--accent)');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// GAPS
+// ═══════════════════════════════════════════════════════
+function renderLatamGaps() {
+  const gaps = [
+    'No confirmed cases of military drone diversion to criminal networks within Ukraine (open sources, 2022–2026).',
+    'No documented looting-gang or urban drone reconnaissance cases within Ukraine outside the border-smuggling context.',
+    'Europe: zero FPV or fiber-optic drones documented in EU criminal hands as of April 2026.',
+    'European veteran-to-criminal pipeline: no named individual transfers confirmed (Mexico cases do not transfer to EU).',
+    'Outside UK, France, and Spain, European aggregate data lacks incident-level detail; Europol EMPACT reports strategic concern without granular seizure counts.',
+    'Exact operational dates unavailable for a significant share of incidents; many are reported post-hoc via judicial proceedings.',
+    'No verified drone use documented for MS-13, Barrio 18, PCC, Gulf Clan, Tren de Aragua, or Los Choneros in the reviewed period.',
+  ];
+  document.getElementById('gap-list').innerHTML = gaps.map(g => `<li>${g}</li>`).join('');
+}
+
+function renderEuropeGaps() {
+  const gaps = [
+    'No FPV or fiber-optic drones documented in EU criminal hands (confirmed transfers remain Mexico-specific).',
+    'Tactical similarity between European operations and Ukraine methods cannot be attributed to direct diffusion; parallel innovation remains plausible.',
+    'Belgium jihadist drone-bomb plot (Oct 2025) has no confirmed operational Ukraine link.',
+    'Italy, Netherlands, Germany, Sweden, Poland data are aggregate-level; incident-level detail is limited outside UK, France, and Spain.',
+    'Hezbollah component procurement network (Spain, Germany, France, UK) is organized crime supply-chain evidence, not Ukraine-origin.',
+  ];
+  document.getElementById('gap-list').innerHTML = gaps.map(g => `<li>${g}</li>`).join('');
+}
+
+function renderEuropeStats() {
+  document.getElementById('kpi-total').textContent = '3,712+';
+  document.getElementById('kpi-countries').textContent = '11';
+  document.getElementById('kpi-groups').textContent = '8+';
+  document.getElementById('kpi-ukraine').textContent = '2';
+  document.getElementById('conf-confirmed').textContent = '3';
+  document.getElementById('conf-probable').textContent = '1';
+  document.getElementById('conf-spec').textContent = '2';
+  document.getElementById('nav-n').textContent = '—';
+  // Static bar chart
+  const euData = [['UK (prisons)',1712],['France (prisons)',1000],['Belgium',30000],['Germany',500],['Spain',18],['Italy',30]];
+  if (document.getElementById('chart-countries')) renderBar('chart-countries', euData.slice(0,6), 30000);
+}
+
+// ═══════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════
 function getCoords(row) {
-  const loc = (row.location || '').toLowerCase();
-  const c = (row.country || '').toLowerCase();
-  
-  if (c === 'brazil') {
-    if (loc.includes('rio') || loc.includes('penha') || loc.includes('bangu') || loc.includes('quitungo') || loc.includes('maré') || loc.includes('rocinha') || loc.includes('cidade de deus')) return [-22.9068 + (Math.random()-0.5)*0.08, -43.1729 + (Math.random()-0.5)*0.08];
-    return [-15.8, -47.9];
+  // If lat/lon present in data, use them
+  if (row.lat && row.lon) return [parseFloat(row.lat), parseFloat(row.lon)];
+  const loc = (row.location||'').toLowerCase();
+  const c = (row.country||'').toLowerCase();
+  const jit = () => (Math.random()-.5)*.12;
+
+  if (c==='brazil') {
+    if(loc.includes('penha')||loc.includes('alemão')||loc.includes('bangu')||loc.includes('quitungo')||loc.includes('maré')||loc.includes('rocinha')||loc.includes('cidade de deus')||loc.includes('rio')) return [-22.91+jit(),-43.17+jit()];
+    return [-15.8+jit(),-48+jit()];
   }
-  if (c === 'mexico') {
-    if (loc.includes('michoacán') || loc.includes('tepalcatepec')) return [19.1, -102.3 + (Math.random()-0.5)*0.2];
-    if (loc.includes('sinaloa')) return [24.8, -107.4];
-    if (loc.includes('tamaulipas') || loc.includes('nuevo laredo')) return [27.4, -99.5];
-    if (loc.includes('jalisco') || loc.includes('guadalajara')) return [20.6, -103.3];
-    if (loc.includes('baja california') || loc.includes('tijuana')) return [32.5, -117.0];
-    if (loc.includes('sonora')) return [29.0, -110.9];
-    if (loc.includes('chiapas')) return [16.7, -93.1];
-    if (loc.includes('guerrero')) return [17.5, -99.5];
-    if (loc.includes('guanajuato')) return [21.0, -101.2];
-    return [23.6 + (Math.random()-0.5)*2, -102.5 + (Math.random()-0.5)*2];
+  if (c==='mexico') {
+    if(loc.includes('michoacán')||loc.includes('tepalcatepec')||loc.includes('tierra caliente')) return [19.1+jit(),-102.3+jit()];
+    if(loc.includes('sinaloa')||loc.includes('culiacán')) return [24.8+jit(),-107.4+jit()];
+    if(loc.includes('tamaulipas')||loc.includes('nuevo laredo')) return [27.5+jit(),-99.5+jit()];
+    if(loc.includes('jalisco')||loc.includes('guadalajara')) return [20.6+jit(),-103.3+jit()];
+    if(loc.includes('baja')||loc.includes('tijuana')) return [32.5+jit(),-117.0+jit()];
+    if(loc.includes('sonora')) return [29.0+jit(),-110.9+jit()];
+    if(loc.includes('guerrero')) return [17.5+jit(),-99.5+jit()];
+    if(loc.includes('guanajuato')) return [21.0+jit(),-101.2+jit()];
+    if(loc.includes('chiapas')) return [16.7+jit(),-93.1+jit()];
+    return [23.6+jit(),-102.5+jit()];
   }
-  if (c === 'colombia') {
-    if (loc.includes('catatumbo') || loc.includes('norte de santander')) return [8.5 + (Math.random()-0.5)*0.2, -73.0 + (Math.random()-0.5)*0.2];
-    if (loc.includes('cauca') || loc.includes('cali') || loc.includes('valle')) return [3.4 + (Math.random()-0.5)*0.3, -76.5 + (Math.random()-0.5)*0.3];
-    if (loc.includes('nariño')) return [1.5, -77.0];
-    if (loc.includes('antioquia') || loc.includes('medellín')) return [6.2, -75.5];
-    if (loc.includes('arauca')) return [7.0, -70.7];
-    if (loc.includes('putumayo')) return [1.1, -76.6];
-    return [4.5, -74.0];
+  if (c==='colombia') {
+    if(loc.includes('catatumbo')||loc.includes('norte de santander')) return [8.5+jit(),-73.0+jit()];
+    if(loc.includes('cauca')||loc.includes('cali')||loc.includes('valle')) return [3.4+jit(),-76.5+jit()];
+    if(loc.includes('nariño')) return [1.5+jit(),-77.0+jit()];
+    if(loc.includes('antioquia')||loc.includes('medellín')) return [6.2+jit(),-75.5+jit()];
+    if(loc.includes('arauca')) return [7.0+jit(),-70.7+jit()];
+    if(loc.includes('putumayo')) return [1.1+jit(),-76.6+jit()];
+    return [4.5+jit(),-74.0+jit()];
   }
-  if (c === 'ecuador') {
-    if (loc.includes('guayaquil') || loc.includes('durán') || loc.includes('guayas') || loc.includes('litoral')) return [-2.2 + (Math.random()-0.5)*0.1, -79.9 + (Math.random()-0.5)*0.1];
-    if (loc.includes('esmeraldas')) return [0.9, -79.6];
-    if (loc.includes('cotopaxi')) return [-0.9, -78.6];
-    if (loc.includes('manabí')) return [-1.0, -80.4];
-    return [-1.8, -78.1];
+  if (c==='ecuador') {
+    if(loc.includes('guayaquil')||loc.includes('durán')||loc.includes('guayas')) return [-2.2+jit(),-79.9+jit()];
+    if(loc.includes('esmeraldas')) return [0.9+jit(),-79.6+jit()];
+    return [-1.8+jit(),-78.1+jit()];
   }
-  if (loc.includes('el paso') || loc.includes('texas')) return [31.7, -106.4];
-  if (c === 'panama') return [8.9, -79.5];
-  if (c === 'honduras') return [14.0, -87.2];
-  if (c === 'guatemala') return [15.7, -90.2];
-  if (c === 'venezuela') return [6.4, -66.5];
-  if (c === 'peru') return [-9.1, -75.0];
-  
-  if (c.includes('us') || c.includes('states')) return [31.5, -106.0];
-  return [10 + (Math.random()-0.5)*10, -80 + (Math.random()-0.5)*10]; 
+  if (loc.includes('el paso')||loc.includes('texas')) return [31.7+jit(),-106.4+jit()];
+  if (c==='panama') return [8.9+jit(),-79.5+jit()];
+  if (c==='honduras') return [14.0+jit(),-87.2+jit()];
+  if (c==='guatemala') return [15.7+jit(),-90.2+jit()];
+  if (c==='venezuela') return [6.4+jit(),-66.5+jit()];
+  if (c==='peru') return [-9.1+jit(),-75.0+jit()];
+  if (c==='united states'||c.includes('us')) return [32.0+jit(),-106.5+jit()];
+  return null;
+}
+
+function missionColor(mission) {
+  const m = (mission||'').toLowerCase();
+  if (m.includes('attack')||m.includes('kamikaze')) return '#ef4b4b';
+  if (m.includes('surv')||m.includes('isr')) return '#4a9eff';
+  if (m.includes('smug')||m.includes('drug')) return '#f5a623';
+  if (m.includes('prison')||m.includes('contraband')) return '#2dd4a0';
+  return '#4f555d';
 }
 
 function initMap() {
-  leafletMap = L.map('map', { zoomControl: true, attributionControl: false }).setView([12, -85], 4);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+  leafletMap = L.map('map', {zoomControl:true, attributionControl:false}).setView([12,-85],4);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(leafletMap);
   markerLayer = L.layerGroup().addTo(leafletMap);
-  updateMapMarkers();
+  updateMarkers();
 }
 
-function updateMapMarkers() {
+function updateMarkers() {
   if (!markerLayer) return;
   markerLayer.clearLayers();
-  
-  FILTERED_DATA.forEach(row => {
+  const filterD = getFilteredData();
+  filterD.forEach(row => {
     const coords = getCoords(row);
     if (!coords) return;
-    
-    const m = (row.mission_type||'').toLowerCase();
-    let col = '#888';
-    if(m.includes('attack') || m.includes('explosive')) col = 'var(--red)';
-    else if(m.includes('surv') || m.includes('isr')) col = 'var(--blue)';
-    else if(m.includes('smug')) col = 'var(--orange)';
-    else if(m.includes('prison') || m.includes('contraband')) col = 'var(--teal)';
-
-    L.circleMarker(coords, { radius: 6, fillColor: col, color: '#000', weight: 1, fillOpacity: 0.85 })
-     .addTo(markerLayer)
-     .bindPopup(`
-       <div class="popup-date">${row.date || 'Unknown Date'}</div>
-       <div class="popup-loc">${row.location || row.country}</div>
-       <div style="margin-bottom:6px;">
-         <span class="popup-badge" style="color:${col}; border:1px solid ${col}">${row.mission_type || 'Unspecified'}</span>
-         <span class="popup-badge">${row.gangs_involved ? row.gangs_involved.split(';')[0] : 'Unknown'}</span>
-       </div>
-       <div class="popup-desc">${row.summary_of_case || ''}</div>
-     `);
+    const col = missionColor(row.mission_type);
+    const isUkr = (row.ukraine_link||'').toUpperCase() === 'TRUE';
+    const marker = L.circleMarker(coords, {
+      radius: isUkr ? 8 : 6,
+      fillColor: col,
+      color: isUkr ? '#ef4b4b' : '#000',
+      weight: isUkr ? 2 : 1,
+      fillOpacity: .85
+    }).addTo(markerLayer);
+    marker.bindPopup(`
+      <div class="popup-date">${row.date||'Unknown'}</div>
+      <div class="popup-loc">${row.location||row.country||'Unknown'}</div>
+      <div class="popup-desc">${(row.summary_of_case||'').substring(0,160)}${(row.summary_of_case||'').length>160?'…':''}</div>
+      <div class="popup-badges">
+        <span class="badge ${isUkr?'red':'unconfirmed'}">${row.mission_type||'—'}</span>
+        <span class="badge unconfirmed">${(row.gangs_involved||'').split(';')[0]||'Unknown'}</span>
+        ${isUkr?'<span class="badge red">Ukraine-linked</span>':''}
+      </div>
+      ${row.url_primary_source?`<div style="margin-top:.6rem"><a href="${row.url_primary_source}" target="_blank" style="color:var(--accent);font-family:var(--mono);font-size:10px;">View source →</a></div>`:''}
+    `);
   });
 }
 
-// ================= DB FILTER, SORT, AND MODAL =================
+// ═══════════════════════════════════════════════════════
+// DATABASE FILTER / SORT / RENDER
+// ═══════════════════════════════════════════════════════
 function populateDropdowns(countries) {
-  const cSel = document.getElementById('filter-country');
-  const mSel = document.getElementById('map-filter-country');
-  countries.sort().forEach(c => {
-    const opt = document.createElement('option'); opt.value = c; opt.textContent = c; cSel.appendChild(opt);
-    const opt2 = document.createElement('option'); opt2.value = c; opt2.textContent = c; mSel.appendChild(opt2);
+  ['db-country','map-country'].forEach(id => {
+    const sel = document.getElementById(id);
+    // Remove old dynamic options
+    while (sel.options.length > 1) sel.remove(1);
+    countries.sort().forEach(c => {
+      const o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+    });
   });
 }
 
-function applyFilters(source = 'db') {
-  let term = document.getElementById('search-input').value.toLowerCase();
-  let cFilt, mFilt;
+function getFilteredData() {
+  const search = (document.getElementById('db-search')||{}).value||'';
+  const country = document.getElementById(currentTab==='map'?'map-country':'db-country')?.value||'';
+  const mission = document.getElementById(currentTab==='map'?'map-mission':'db-mission')?.value||'';
+  const ukraine = document.getElementById(currentTab==='map'?'map-ukraine':'db-ukraine')?.value||'';
+  const conf = document.getElementById('db-confidence')?.value||'';
+  const term = search.toLowerCase();
 
-  if (source === 'map') {
-    cFilt = document.getElementById('map-filter-country').value;
-    mFilt = document.getElementById('map-filter-mission').value;
-    document.getElementById('filter-country').value = cFilt;
-    document.getElementById('filter-mission').value = mFilt;
+  return FILTERED.filter(r => {
+    const mc = !country || r.country===country;
+    const mm = !mission || (r.mission_type||'').toLowerCase().includes(mission);
+    const mu = !ukraine || (r.ukraine_link||'').toUpperCase()===ukraine.toUpperCase();
+    const mq = !conf || (r.evidence_quality||'').toLowerCase().includes(conf.toLowerCase());
+    const mt = !term || Object.values(r).join(' ').toLowerCase().includes(term);
+    return mc && mm && mu && mq && mt;
+  });
+}
+
+function applyFilters(src) {
+  const result = getFilteredData();
+  if (src === 'map') {
+    updateMarkers();
   } else {
-    cFilt = document.getElementById('filter-country').value;
-    mFilt = document.getElementById('filter-mission').value;
-    document.getElementById('map-filter-country').value = cFilt;
-    document.getElementById('map-filter-mission').value = mFilt;
+    renderTable(result);
   }
-
-  FILTERED_DATA = RAW_DATA.filter(row => {
-    const matchC = !cFilt || row.country === cFilt;
-    const matchM = !mFilt || (row.mission_type||'').toLowerCase().includes(mFilt);
-    const matchT = !term || Object.values(row).join(' ').toLowerCase().includes(term);
-    return matchC && matchM && matchT;
-  });
-
-  renderTable();
-  updateMapMarkers();
+  document.getElementById('db-shown').textContent = result.length;
 }
 
-function sortTable(col) {
-  if (sortCol === col) sortAsc = !sortAsc;
-  else { sortCol = col; sortAsc = true; }
-  
-  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
-  const th = document.querySelector(`th[onclick="sortTable('${col}')"]`);
-  if(th) {
-    th.classList.add('sorted');
-    th.querySelector('.sort-icon').textContent = sortAsc ? '▲' : '▼';
-  }
-
-  FILTERED_DATA.sort((a, b) => {
-    let valA = a[col] || ''; let valB = b[col] || '';
-    if (col === 'date') { 
-      if(valA === 'Unknown') valA = '0000';
-      if(valB === 'Unknown') valB = '0000';
+function sortBy(col) {
+  if (sortCol===col) sortAsc=!sortAsc; else {sortCol=col; sortAsc=true;}
+  document.querySelectorAll('th').forEach(t=>t.classList.remove('sorted'));
+  document.querySelectorAll('th').forEach(t=>{
+    if(t.getAttribute('onclick')===`sortBy('${col}')`) {
+      t.classList.add('sorted');
+      t.querySelector('.sort-ic').textContent = sortAsc?'▲':'▼';
     }
-    valA = valA.toString().toLowerCase(); valB = valB.toString().toLowerCase();
-    if(valA < valB) return sortAsc ? -1 : 1;
-    if(valA > valB) return sortAsc ? 1 : -1;
-    return 0;
   });
-  renderTable();
+  FILTERED.sort((a,b)=>{
+    let va=a[col]||'', vb=b[col]||'';
+    if(col==='date'){va=va==='Unknown'?'0':va; vb=vb==='Unknown'?'0':vb;}
+    va=va.toLowerCase(); vb=vb.toLowerCase();
+    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+  renderTable(FILTERED);
 }
 
-function renderTable() {
+function renderTable(data) {
+  document.getElementById('db-total').textContent = FILTERED.length;
+  document.getElementById('db-shown').textContent = data.length;
   const tbody = document.getElementById('db-body');
-  document.getElementById('db-shown').textContent = FILTERED_DATA.length;
-  
-  if (FILTERED_DATA.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem; color:var(--text-dim);">No incidents match the current filters.</td></tr>`;
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text3)">No incidents match the current filters.</td></tr>`;
     return;
   }
-
-  tbody.innerHTML = FILTERED_DATA.map((row, i) => {
-    const g = (row.gangs_involved || 'Unknown').split(';')[0];
-    const summary = (row.summary_of_case || '').substring(0, 120) + ((row.summary_of_case||'').length > 120 ? '...' : '');
-    return `<tr class="clickable-row" onclick="openDBModal(${i})">
-      <td class="cell-date">${row.date || '—'}</td>
-      <td>${row.country || '—'}</td>
-      <td class="cell-tag">${(row.location || '').split(',')[0]}</td>
-      <td style="font-weight:500;">${g}</td>
-      <td style="font-family:var(--font-mono); font-size:11px; text-transform:uppercase;">${row.mission_type || '—'}</td>
-      <td class="cell-desc">${summary}</td>
+  tbody.innerHTML = data.map((r,i) => {
+    const entity = (r.gangs_involved||'Unknown').split(';')[0].trim();
+    const isUkr = (r.ukraine_link||'').toUpperCase()==='TRUE';
+    const conf = (r.evidence_quality||'');
+    const confBadge = conf.toLowerCase().includes('confirm')
+      ? '<span class="badge confirmed">Confirmed</span>'
+      : conf.toLowerCase().includes('probable')
+      ? '<span class="badge probable">Probable</span>'
+      : '<span class="badge unconfirmed">—</span>';
+    const summary = (r.summary_of_case||'').substring(0,110)+((r.summary_of_case||'').length>110?'…':'');
+    return `<tr class="row-click" onclick="openModal(${i},${JSON.stringify(data).length>0?'data':''})">
+      <td class="td-date">${r.date||'—'}</td>
+      <td class="td-country">${r.country||'—'}</td>
+      <td class="td-mono" style="font-size:11px;color:var(--text2)">${(r.location||'').split(',')[0]}</td>
+      <td style="font-size:12px;font-weight:500">${entity}</td>
+      <td class="td-mono" style="font-size:10px;text-transform:uppercase;color:${missionColor(r.mission_type)}">${r.mission_type||'—'}</td>
+      <td style="text-align:center">${isUkr?'<span class="badge red">TRUE</span>':'<span style="color:var(--text3);font-family:var(--mono);font-size:10px">—</span>'}</td>
+      <td>${confBadge}</td>
+      <td class="td-desc">${summary}</td>
     </tr>`;
   }).join('');
+
+  // Rebind click with correct index into the local data array
+  tbody.querySelectorAll('.row-click').forEach((tr, i) => {
+    tr.onclick = () => openModal(i, data);
+  });
 }
 
-function openDBModal(index) {
-  const row = FILTERED_DATA[index];
-  const b = document.getElementById('modal-body');
-  
-  let sourceBtn = '';
-  if (row.url_primary_source) {
-    sourceBtn = `<a href="${row.url_primary_source}" target="_blank" class="btn primary" style="text-decoration:none; display:inline-block; margin-top:1rem;">View Primary Source</a>`;
-  }
-  
-  b.innerHTML = `
-    <h2 style="font-family:var(--font-head); font-size:24px; color:var(--text-main); margin-bottom:0.25rem">${row.location || row.country}</h2>
-    <div style="color:var(--accent); font-family:var(--font-mono); font-size:12px; margin-bottom:1.5rem">${row.date || 'Unknown Date'}</div>
-    
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; font-size:13px;">
-      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Criminal Entity</strong> ${row.gangs_involved || 'Unspecified'}</div>
-      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Platform/Origin</strong> ${row.drone_category || 'Unknown'} <br> <span style="color:var(--text-dim)">${row.supply_chain_origin || ''}</span></div>
-      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">Mission & Payload</strong> ${row.mission_type || 'Unspecified'} <br> <span style="color:var(--text-dim)">${row.payload_type || ''}</span></div>
-      <div><strong style="color:var(--text-sec); display:block; margin-bottom:4px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase;">OSINT Verification</strong> ${row.verification_status || 'Unspecified'} <br> <span style="color:var(--text-dim)">Quality: ${row.evidence_quality || ''}</span></div>
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(i, data) {
+  const r = data[i];
+  const isUkr = (r.ukraine_link||'').toUpperCase()==='TRUE';
+  const srcUrl = r.url_primary_source;
+  document.getElementById('modal-inner').innerHTML = `
+    <div class="modal-loc">${r.location||r.country||'Unknown Location'}</div>
+    <div class="modal-date">${r.date||'Unknown Date'} · ${r.country||''}</div>
+    <div class="modal-grid">
+      <div class="modal-field"><label>Criminal Entity</label><p>${r.gangs_involved||'Unspecified'}</p></div>
+      <div class="modal-field"><label>Mission / Payload</label><p>${r.mission_type||'—'}<br><span style="color:var(--text3);font-size:12px">${r.payload_type||''}</span></p></div>
+      <div class="modal-field"><label>Platform / Origin</label><p>${r.drone_category||r.drone_model||'Unknown'}<br><span style="color:var(--text3);font-size:12px">${r.supply_chain_origin||''}</span></p></div>
+      <div class="modal-field"><label>Confidence</label><p>${r.evidence_quality||'—'}<br><span style="color:var(--text3);font-size:12px">Verification: ${r.verification_status||'—'}</span></p></div>
+      <div class="modal-field"><label>Ukraine Link</label><p>${isUkr?`<span class="badge red">${r.ukraine_link_classification||'TRUE'}</span>`:'<span style="color:var(--text3)">Not linked</span>'}</p></div>
+      <div class="modal-field"><label>Procurement</label><p style="font-size:12px;color:var(--text2)">${r.procurement_method||'—'}</p></div>
     </div>
-    
-    <div style="color:var(--text-main); font-size:14px; line-height:1.7; padding-top:1.5rem; border-top:1px solid var(--border-light);">
-      ${row.summary_of_case || 'No detailed summary provided.'}
+    <div class="modal-summary">${r.summary_of_case||'No summary available.'}</div>
+    <div class="modal-actions">
+      ${srcUrl?`<a href="${srcUrl}" target="_blank" class="btn primary">View Primary Source →</a>`:''}
+      <button class="btn" onclick="closeModal()">Close</button>
     </div>
-    ${sourceBtn}
   `;
-  document.getElementById('incident-modal').classList.add('active');
+  document.getElementById('modal-bg').classList.add('open');
 }
-function closeDBModal() { document.getElementById('incident-modal').classList.remove('active'); }
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
 
-// ================= ENTITY GRAPH (D3) =================
-function setNetworkMode(macro) {
-  isMacroMode = macro;
-  document.getElementById('btn-macro').classList.toggle('primary', macro);
-  document.getElementById('btn-detailed').classList.toggle('primary', !macro);
-  document.getElementById('network-svg').innerHTML = '';
+// ═══════════════════════════════════════════════════════
+// ANALYSIS: TRANSFER MATRIX
+// ═══════════════════════════════════════════════════════
+function renderTransferMatrix() {
+  const rows = [
+    {actor:'Águila-7 (Mexican cartel op.)', platform:'FPV combat drone', mechanism:'International Legion embed, Lviv training (Mar 2024)', level:'confirmed', source:'Intelligence Online / Cronkite News'},
+    {actor:'Mexican cartel (unnamed, Oct 2025)', platform:'FPV drone', mechanism:'International Legion, intent to transfer skills to cartel', level:'confirmed', source:'GI-TOC Oct 2025'},
+    {actor:'Mexican cartel (unquantified)', platform:'Fiber-optic drone', mechanism:'Supply chain unknown; possession confirmed', level:'confirmed', source:'GI-TOC Oct 2025'},
+    {actor:'CJNG / Sinaloa', platform:'Custom FPV (analog)', mechanism:'Telegram channels; independent procurement', level:'probable', source:'CSIS; War on the Rocks'},
+    {actor:'Colombian ELN / ex-FARC', platform:'Kamikaze UAS (first confirmed Apr 2025)', mechanism:'Tactical mimicry; classified Probable by OSINT', level:'probable', source:'War on the Rocks'},
+    {actor:'Comando Vermelho (Brazil)', platform:'Commercial COTS (DJI)', mechanism:'Ex-Navy advisor "Mota" adapting Ukraine videos', level:'confirmed', source:'G1 / Folha Oct 2025'},
+    {actor:'European organized crime (general)', platform:'FPV / advanced UAS', mechanism:'No documented transfer pathway', level:'unconfirmed', source:'GI-TOC Oct 2025 (risk assessment)'},
+    {actor:'EU criminal veterans (hypothetical)', platform:'Unknown', mechanism:'Veteran-to-crime pipeline — no named cases', level:'unconfirmed', source:'LSE Apr 2025 (speculative framework)'},
+  ];
+  document.getElementById('transfer-tbody').innerHTML = rows.map(r=>`<tr>
+    <td style="font-size:12px;color:var(--text)">${r.actor}</td>
+    <td style="font-size:12px;color:var(--text2)">${r.platform}</td>
+    <td style="font-size:12px;color:var(--text2)">${r.mechanism}</td>
+    <td><span class="badge ${r.level}">${r.level.charAt(0).toUpperCase()+r.level.slice(1)}</span></td>
+    <td style="font-size:11px;color:var(--text3)">${r.source}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYSIS: ESCALATION CHARTS
+// ═══════════════════════════════════════════════════════
+function renderEscalationCharts() {
+  const data = FILTERED;
+  const wrap = document.getElementById('escalation-wrap');
+  const gc = {};
+  data.forEach(d => {
+    (d.gangs_involved||'').split(';').forEach(g => {
+      const gt = g.trim();
+      if (gt && !gt.toLowerCase().includes('unspecified') && !gt.toLowerCase().includes('unknown')) {
+        gc[gt] = (gc[gt]||0) + 1;
+      }
+    });
+  });
+  const top4 = Object.entries(gc).sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+
+  wrap.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">` +
+    top4.map(group => {
+      const yrC = {'2022':0,'2023':0,'2024':0,'2025':0};
+      data.forEach(d => {
+        if((d.gangs_involved||'').includes(group)) {
+          const m=(d.date||'').match(/^(202[2-5])/);
+          if(m) yrC[m[1]]++;
+        }
+      });
+      return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:.75rem">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:.4rem">${group}</div>
+        <svg width="100%" height="60" data-group="${group}" data-pts='${JSON.stringify(Object.entries(yrC))}'></svg>
+      </div>`;
+    }).join('') + '</div>';
+
+  wrap.querySelectorAll('svg').forEach(el => {
+    const pts = JSON.parse(el.dataset.pts);
+    const W = el.getBoundingClientRect().width||160;
+    const H = 60;
+    const m = {t:4,r:4,b:16,l:20};
+    const maxV = Math.max(...pts.map(p=>p[1]),1);
+    const x = d3.scalePoint().domain(pts.map(p=>p[0])).range([m.l,W-m.r]).padding(.2);
+    const y = d3.scaleLinear().domain([0,maxV]).range([H-m.b,m.t]);
+    const svg = d3.select(el).attr('height',H);
+    svg.append('g').attr('transform',`translate(0,${H-m.b})`).call(d3.axisBottom(x).tickSize(0))
+      .call(g=>{g.select('.domain').remove();g.selectAll('text').style('font-family','var(--mono)').style('font-size','8px').attr('fill','var(--text3)').attr('dy','1.2em');});
+    svg.append('g').attr('transform',`translate(${m.l},0)`).call(d3.axisLeft(y).ticks(2).tickSize(0))
+      .call(g=>{g.select('.domain').remove();g.selectAll('text').style('font-family','var(--mono)').style('font-size','7px').attr('fill','var(--text3)').attr('dx','-3px');});
+    const lf = d3.line().x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveMonotoneX);
+    svg.append('path').datum(pts).attr('fill','none').attr('stroke','var(--accent)').attr('stroke-width',1.5).attr('d',lf);
+    svg.selectAll('c').data(pts).join('circle').attr('cx',d=>x(d[0])).attr('cy',d=>y(d[1])).attr('r',2.5).attr('fill','var(--accent)');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ANALYSIS: SUPPLY CHAIN
+// ═══════════════════════════════════════════════════════
+function renderSupplyChain() {
+  const data = FILTERED;
+  const sc = {};
+  data.forEach(d => {
+    let s = (d.supply_chain_origin||d.procurement_method||'').trim();
+    if(!s||s.toLowerCase()==='not specified'||s.toLowerCase()==='unknown') s='Unknown';
+    else if(s.toLowerCase().includes('china')) s='China (DJI/COTS)';
+    else if(s.toLowerCase().includes('grey')||s.toLowerCase().includes('gray')) s='Grey Market';
+    else if(s.toLowerCase().includes('battlefield')||s.toLowerCase().includes('ukraine')) s='Battlefield Adaptation';
+    else if(s.toLowerCase().includes('black')) s='Black Market';
+    else if(s.toLowerCase().includes('legal')) s='Legal Retail';
+    sc[s]=(sc[s]||0)+1;
+  });
+  const pairs = Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  if (pairs.length) renderBar('chart-supply', pairs, pairs[0][1]);
+}
+
+// ═══════════════════════════════════════════════════════
+// POLICY TABLE
+// ═══════════════════════════════════════════════════════
+function renderPolicyTable() {
+  const rows = [
+    {c:'Mexico',leg:'2024 reforms; registry pending; 40yr sentence for criminal drone use',auth:'Yes — military and law enforcement',coord:'DEA Project Portero; CBP; DHS; SOUTHCOM; LOCUST laser demos',gaps:'Registry not implemented; training gaps; protocol lapses'},
+    {c:'Brazil',leg:'RBAC-E 94; RBAC 100 proposed',auth:'No explicit authority; legal gray area',coord:'SOUTHCOM (UNITAS, Southern Vanguard); DEA',gaps:'No C-UAS doctrine; no dedicated counter-drone unit'},
+    {c:'Colombia',leg:'Resolution 4201/2018; new bill pending; 1,500+ anti-drone systems deployed',auth:'Yes — military and police',coord:'SOUTHCOM; DEA bilateral ops',gaps:'Civilian legal gap; reliance on tech imports'},
+    {c:'Ecuador',leg:'2024 law; emergency decrees',auth:'Yes — military and police',coord:'SOUTHCOM; DEA; US gave ~$20M for drones (Sep 2025)',gaps:'Tech procurement lag; implementation ongoing'},
+    {c:'Venezuela',leg:'2012 law',auth:'Yes — military shoot-down',coord:'DEA (limited); SOUTHCOM minimal',gaps:'No transparency; civilian oversight absent'},
+    {c:'United Kingdom',leg:'Jan 2024: 400m no-fly zone; 10-year max sentence',auth:'Yes — law enforcement',coord:'Five Eyes intelligence; £40M prison security',gaps:'No cross-border counter-drone agreement with EU post-Brexit'},
+    {c:'France',leg:'SPAD programme; €12M+ countermeasures',auth:'Yes — DGSI; Gendarmerie',coord:'Europol EMPACT',gaps:'Detection outpaces interdiction; rural coverage thin'},
+    {c:'Spain',leg:'PEGASO unit formed 2025',auth:'Yes — Guardia Civil',coord:'Europol; FRONTEX',gaps:'Long-range narco-drones outpace current tech'},
+  ];
+  document.getElementById('policy-tbody').innerHTML = rows.map(r=>`<tr>
+    <td>${r.c}</td>
+    <td>${r.leg}</td>
+    <td><span class="badge ${r.auth.startsWith('Yes')?'confirmed':'unconfirmed'}">${r.auth.startsWith('Yes')?'Yes':'No'}</span></td>
+    <td>${r.coord}</td>
+    <td style="color:var(--red);font-size:11px">${r.gaps}</td>
+  </tr>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// ENTITY GRAPH
+// ═══════════════════════════════════════════════════════
+function setNetMode(macro) {
+  netMacro = macro;
+  document.getElementById('net-btn-macro').classList.toggle('primary', macro);
+  document.getElementById('net-btn-detail').classList.toggle('primary', !macro);
+  document.getElementById('net-svg').innerHTML = '';
   buildNetwork();
 }
 
 function buildNetwork() {
-  const container = document.getElementById('network-svg');
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-  const svg = d3.select(container).append('svg').attr('width', width).attr('height', height);
+  const container = document.getElementById('net-svg');
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+  const svg = d3.select(container).append('svg').attr('width',W).attr('height',H);
   const g = svg.append('g');
-  
-  svg.call(d3.zoom().scaleExtent([0.2, 4]).on('zoom', e => g.attr('transform', e.transform)));
+  svg.call(d3.zoom().scaleExtent([.15,5]).on('zoom', e => g.attr('transform', e.transform)));
 
   const nodeMap = new Map();
   const links = [];
-  const linkSet = new Set(); // Prevent duplicates in macro mode
+  const linkSet = new Set();
 
   function addNode(id, group, label, size, color) {
-    if (!nodeMap.has(id)) nodeMap.set(id, { id, group, label, size, color, count: 0 });
+    if (!nodeMap.has(id)) nodeMap.set(id, {id,group,label,size,color,count:0});
     nodeMap.get(id).count++;
-    return id;
   }
-  
-  function safeLink(s, t) {
-    const key = s < t ? s+'-'+t : t+'-'+s;
-    if(!linkSet.has(key)) { linkSet.add(key); links.push({source: s, target: t}); }
+  function safeLink(s,t) {
+    const k = s<t?s+'|'+t:t+'|'+s;
+    if(!linkSet.has(k)){linkSet.add(k);links.push({source:s,target:t});}
   }
 
-  const rootId = addNode('root', 'root', 'LATAM DRONE NEXUS', 25, '#ffffff');
+  const rootId = 'ROOT';
+  addNode(rootId,'root','DRONE NEXUS',22,'#ffffff');
 
-  RAW_DATA.forEach((row, i) => {
+  FILTERED.forEach((row,i) => {
     let incId = null;
-    if (!isMacroMode) {
-      incId = addNode(`inc_${i}`, 'incident', row.location || 'Incident', 3, 'rgba(255,255,255,0.4)');
+    if (!netMacro) {
+      incId = 'inc_'+i;
+      addNode(incId,'incident',row.location||'Incident',3,'rgba(255,255,255,.3)');
     }
-    
-    let cId = null;
-    if (row.country) {
-      cId = addNode(`c_${row.country}`, 'country', row.country, 12, 'var(--text-sec)');
-      safeLink(rootId, cId);
-      if (!isMacroMode) safeLink(cId, incId);
-    } else if (!isMacroMode) {
-      safeLink(rootId, incId);
+    let cId=null;
+    if(row.country){
+      cId='c_'+row.country;
+      addNode(cId,'country',row.country,11,'var(--text2)');
+      safeLink(rootId,cId);
+      if(!netMacro&&incId) safeLink(cId,incId);
+    } else if(!netMacro&&incId) safeLink(rootId,incId);
+
+    let uId=null,pId=null;
+    if((row.ukraine_link||'').toUpperCase()==='TRUE'){
+      uId='UKR_LINK';
+      addNode(uId,'ukraine','Ukraine Doctrine',16,'var(--red)');
+      if(!netMacro&&incId) safeLink(incId,uId);
+    }
+    if((row.supply_chain_origin||'').toLowerCase().includes('china')){
+      pId='CHINA_COTS';
+      addNode(pId,'supply','China / DJI',14,'var(--blue)');
+      if(!netMacro&&incId) safeLink(incId,pId);
     }
 
-    let pId = null, uId = null;
-    if (row.supply_chain_origin && row.supply_chain_origin.includes('China')) {
-      pId = addNode('p_china', 'supply', 'Chinese COTS / DJI', 18, 'var(--blue)');
-      if (!isMacroMode) safeLink(incId, pId);
-    }
-    if ((row.ukraine_link || '').toUpperCase() === 'TRUE') {
-      uId = addNode('p_ukr', 'supply', 'Ukraine Tactical Doctrine', 18, 'var(--red)');
-      if (!isMacroMode) safeLink(incId, uId);
-    }
-
-    if (row.gangs_involved) {
-      row.gangs_involved.split(';').forEach(gang => {
-        const gName = gang.trim();
-        if(gName && !gName.toLowerCase().includes('unspecified')) {
-          const gId = addNode(`g_${gName}`, 'gang', gName, 15, 'var(--accent)');
-          if (!isMacroMode) {
-            safeLink(gId, incId);
-          } else {
-            if (cId) safeLink(gId, cId);
-            if (pId) safeLink(gId, pId);
-            if (uId) safeLink(gId, uId);
+    if(row.gangs_involved){
+      row.gangs_involved.split(';').forEach(gang=>{
+        const gn=gang.trim();
+        if(gn&&!gn.toLowerCase().includes('unspecified')&&!gn.toLowerCase().includes('unknown')){
+          const gId='g_'+gn;
+          addNode(gId,'gang',gn,13,'var(--accent)');
+          if(!netMacro&&incId) safeLink(gId,incId);
+          else {
+            if(cId) safeLink(gId,cId);
+            if(uId) safeLink(gId,uId);
+            if(pId) safeLink(gId,pId);
           }
         }
       });
@@ -951,96 +1443,99 @@ function buildNetwork() {
   });
 
   const nodes = Array.from(nodeMap.values());
-  nodes.forEach(n => {
-    if (n.group === 'gang' || n.group === 'country') {
-      n.size = Math.min(30, n.size + (n.count * (isMacroMode ? 0.2 : 0.5)));
-    }
+  nodes.forEach(n=>{
+    if(n.group==='gang'||n.group==='country') n.size=Math.min(28, n.size+(n.count*(netMacro?.25:.5)));
   });
 
-  const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id(d => d.id).distance(d => {
-      if(isMacroMode) return 180;
-      if(d.source.group === 'root') return 150;
-      if(d.source.group === 'country' && d.target.group === 'incident') return 60;
-      return 100;
-    }))
-    .force('charge', d3.forceManyBody().strength(d => d.group === 'incident' ? -15 : (isMacroMode ? -500 : -250)))
-    .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collide', d3.forceCollide().radius(d => d.size + 15));
+  const sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id(d=>d.id).distance(netMacro?170:80))
+    .force('charge', d3.forceManyBody().strength(d=>d.group==='incident'?-12:(netMacro?-450:-220)))
+    .force('center', d3.forceCenter(W/2,H/2))
+    .force('collide', d3.forceCollide().radius(d=>d.size+12));
 
   const link = g.append('g').selectAll('line').data(links).join('line')
-    .attr('stroke', isMacroMode ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)')
-    .attr('stroke-width', isMacroMode ? 2 : 1);
+    .attr('stroke', netMacro?'rgba(255,255,255,.18)':'rgba(255,255,255,.07)')
+    .attr('stroke-width', netMacro?1.5:1);
 
   const node = g.append('g').selectAll('circle').data(nodes).join('circle')
-    .attr('r', d => d.size)
-    .attr('fill', d => d.color)
-    .attr('stroke', '#000').attr('stroke-width', 1.5)
+    .attr('r',d=>d.size).attr('fill',d=>d.color)
+    .attr('stroke','#000').attr('stroke-width',1.2)
     .call(d3.drag()
-      .on('start', e => { if(!e.active) simulation.alphaTarget(0.3).restart(); e.subject.fx = e.subject.x; e.subject.fy = e.subject.y; })
-      .on('drag', e => { e.subject.fx = e.x; e.subject.fy = e.y; })
-      .on('end', e => { if(!e.active) simulation.alphaTarget(0); e.subject.fx = null; e.subject.fy = null; }));
+      .on('start',e=>{if(!e.active)sim.alphaTarget(.3).restart();e.subject.fx=e.subject.x;e.subject.fy=e.subject.y;})
+      .on('drag',e=>{e.subject.fx=e.x;e.subject.fy=e.y;})
+      .on('end',e=>{if(!e.active)sim.alphaTarget(0);e.subject.fx=null;e.subject.fy=null;}));
 
-  // CLICK TO ISOLATE & SIDEBAR LOGIC
-  node.on('click', (event, d) => {
-    event.stopPropagation();
-    
-    // Setup Sidebar
-    document.getElementById('sb-title').textContent = d.label;
-    document.getElementById('sb-badge').textContent = d.group.toUpperCase();
-    
-    // Find connections
-    const connected = new Set();
-    connected.add(d.id);
-    links.forEach(l => {
-      if (l.source.id === d.id) connected.add(l.target.id);
-      if (l.target.id === d.id) connected.add(l.source.id);
-    });
-    
-    document.getElementById('sb-content').innerHTML = `
-      <p style="margin-bottom:10px"><b style="color:var(--text-main)">Direct Graph Connections:</b> ${connected.size - 1}</p>
-      <p style="margin-bottom:10px"><b style="color:var(--text-main)">Total Dataset Occurrences:</b> ${d.count}</p>
-      <p style="margin-top:20px; font-style:italic;">Click on the background to reset map view and close sidebar.</p>
-    `;
-    document.getElementById('network-sidebar').classList.add('active');
-
-    // Isolate Visuals
-    node.style('opacity', n => connected.has(n.id) ? 1 : 0.1)
-        .attr('stroke', n => n.id === d.id ? 'var(--text-main)' : '#000');
-    link.style('opacity', l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05);
+  node.on('click',(ev,d)=>{
+    ev.stopPropagation();
+    const conn=new Set([d.id]);
+    links.forEach(l=>{if(l.source.id===d.id)conn.add(l.target.id);if(l.target.id===d.id)conn.add(l.source.id);});
+    node.style('opacity',n=>conn.has(n.id)?1:.08).attr('stroke',n=>n.id===d.id?'#fff':'#000');
+    link.style('opacity',l=>(l.source.id===d.id||l.target.id===d.id)?1:.04);
+    document.getElementById('net-sb-title').textContent=d.label;
+    document.getElementById('net-sb-badge').textContent=d.group.toUpperCase();
+    document.getElementById('net-sb-badge').className='badge '+(d.group==='gang'?'confirmed':d.group==='ukraine'?'red':'unconfirmed');
+    document.getElementById('net-sb-content').innerHTML=`
+      <p><b style="color:var(--text)">Direct connections:</b> ${conn.size-1}</p>
+      <p style="margin-top:.4rem"><b style="color:var(--text)">Dataset occurrences:</b> ${d.count}</p>
+      <p style="margin-top:.6rem;font-size:11px;color:var(--text3)">Click background to reset.</p>`;
+    document.getElementById('net-sidebar').classList.add('open');
   });
 
-  // Background Click Reset
-  svg.on('click', (event) => {
-    if (event.target.tagName === 'svg') {
-      node.style('opacity', 1).attr('stroke', '#000');
-      link.style('opacity', 1);
-      closeNetworkSidebar();
+  svg.on('click',ev=>{
+    if(ev.target.tagName==='svg'){
+      node.style('opacity',1).attr('stroke','#000');
+      link.style('opacity',1);
+      closeNetSidebar();
     }
   });
 
-  const labels = g.append('g').selectAll('text').data(nodes.filter(d => d.group !== 'incident')).join('text')
-    .text(d => d.label)
-    .attr('font-size', d => d.group === 'root' ? '14px' : (isMacroMode ? '13px' : '11px'))
-    .attr('fill', 'var(--text-main)')
-    .attr('text-anchor', 'middle')
-    .attr('dy', d => d.size + 16)
-    .style('font-family', 'var(--font-mono)')
-    .style('pointer-events', 'none')
-    .style('text-shadow', '0 2px 4px rgba(0,0,0,0.8)');
+  const labels = g.append('g').selectAll('text').data(nodes.filter(n=>n.group!=='incident')).join('text')
+    .text(d=>d.label)
+    .attr('font-size',d=>d.group==='root'?13:(netMacro?11:10))
+    .attr('fill','var(--text)').attr('text-anchor','middle').attr('dy',d=>d.size+13)
+    .style('font-family','var(--mono)').style('pointer-events','none')
+    .style('text-shadow','0 1px 4px rgba(0,0,0,.9)');
 
-  simulation.on('tick', () => {
-    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
-    node.attr('cx', d => d.x).attr('cy', d => d.y);
-    labels.attr('x', d => d.x).attr('y', d => d.y);
+  sim.on('tick',()=>{
+    link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+    node.attr('cx',d=>d.x).attr('cy',d=>d.y);
+    labels.attr('x',d=>d.x).attr('y',d=>d.y);
   });
 }
 
-function closeNetworkSidebar() {
-  document.getElementById('network-sidebar').classList.remove('active');
-  d3.selectAll('circle').style('opacity', 1).attr('stroke', '#000');
-  d3.selectAll('line').style('opacity', 1);
+function closeNetSidebar() {
+  document.getElementById('net-sidebar').classList.remove('open');
+  d3.selectAll('#net-svg circle').style('opacity',1).attr('stroke','#000');
+  d3.selectAll('#net-svg line').style('opacity',1);
 }
+
+// ═══════════════════════════════════════════════════════
+// CSV EXPORT
+// ═══════════════════════════════════════════════════════
+function exportFiltered() {
+  const data = getFilteredData();
+  if (!data.length) return;
+  const keys = Object.keys(data[0]);
+  const csv = [
+    keys.join(','),
+    ...data.map(r => keys.map(k => {
+      const v = (r[k]||'').replace(/"/g,'""');
+      return v.includes(',') || v.includes('"') || v.includes('\n') ? `"${v}"` : v;
+    }).join(','))
+  ].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='drone_osint_filtered.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════
+// RESIZE
+// ═══════════════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  if (currentTab==='overview') buildTimeline();
+});
 </script>
 </body>
 </html>
